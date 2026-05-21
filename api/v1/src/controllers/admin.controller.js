@@ -44,6 +44,7 @@ export const getAllAdminsList = async (req, res) => {
 export const createNewAdmin = async (req, res) => {
   try {
     const { email, password, full_name, role, rank, jurisdiction_district } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
 
     // Security check: police_admin cannot create super_admin
     if (req.user.role === 'police_admin' && role === 'super_admin') {
@@ -54,7 +55,7 @@ export const createNewAdmin = async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await UserModel.findUserByEmail(email);
+    const existingUser = await UserModel.findUserByEmail(normalizedEmail);
     if (existingUser) {
       return res.status(400).json({
         status: 'error',
@@ -68,7 +69,7 @@ export const createNewAdmin = async (req, res) => {
 
     // Create the new admin with role, rank, and jurisdiction_district
     const newAdmin = await UserModel.createAdminUser(
-      email,
+      normalizedEmail,
       passwordHash,
       full_name,
       role || 'police_admin',
@@ -90,6 +91,12 @@ export const createNewAdmin = async (req, res) => {
     });
   } catch (error) {
     console.error('[createNewAdmin Error]', error);
+    if (error.code === '23505') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'A user with this email already exists.'
+      });
+    }
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -209,6 +216,10 @@ export const updateAdmin = async (req, res) => {
     const adminId = parseInt(req.params.id, 10);
     const loggedInUserId = parseInt(req.user.id, 10);
     const updateData = { ...req.body };
+
+    if (updateData.email) {
+      updateData.email = updateData.email.trim().toLowerCase();
+    }
 
     // Check if target exists
     const targetAdmin = await UserModel.findAdminById(adminId);

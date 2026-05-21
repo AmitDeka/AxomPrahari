@@ -108,7 +108,9 @@ export default function PendingReportsPage() {
         },
       );
       if (res.data?.status === "success") {
-        toast.success(`Report ${actionTargetReport.report_id} approved successfully!`);
+        toast.success(
+          `Report ${actionTargetReport.report_id} approved successfully!`,
+        );
         setLoading(true);
         await fetchReports();
       }
@@ -132,7 +134,9 @@ export default function PendingReportsPage() {
         },
       );
       if (res.data?.status === "success") {
-        toast.success(`Report ${actionTargetReport.report_id} rejected successfully.`);
+        toast.success(
+          `Report ${actionTargetReport.report_id} rejected successfully.`,
+        );
         setLoading(true);
         await fetchReports();
       }
@@ -433,7 +437,7 @@ export default function PendingReportsPage() {
                 </div>
               </div>
 
-              <DialogFooter className="gap-2 sm:gap-0 border-t border-border/40 pt-4 mt-2">
+              <DialogFooter className="gap-2  border-t border-border/40 pt-4 mt-2">
                 <div className="flex w-full items-center justify-between gap-4">
                   <Button
                     variant="outline"
@@ -495,7 +499,7 @@ export default function PendingReportsPage() {
               </li>
             </ul>
           </div>
-          <DialogFooter className="gap-2 sm:gap-0 mt-3">
+          <DialogFooter className="gap-2  mt-3">
             <Button
               variant="outline"
               onClick={() => {
@@ -550,7 +554,7 @@ export default function PendingReportsPage() {
             </p>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0 mt-2">
+          <DialogFooter className="gap-2  mt-2">
             <Button
               variant="outline"
               onClick={() => {

@@ -80,7 +80,12 @@ export const updateProfile = async (req, res) => {
     const citizenId = req.user.id;
     const { full_name, email } = req.body;
 
-    const updatedUser = await UserModel.updateCitizenProfile(citizenId, { full_name, email });
+    const updateData = { full_name };
+    if (email) {
+      updateData.email = email.trim().toLowerCase();
+    }
+
+    const updatedUser = await UserModel.updateCitizenProfile(citizenId, updateData);
     if (!updatedUser) {
       return res.status(404).json({
         status: 'error',

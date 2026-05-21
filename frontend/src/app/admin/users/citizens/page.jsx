@@ -28,7 +28,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { UsersIcon, CheckCircle2Icon, UserXIcon, Trash2Icon, AlertTriangleIcon, AwardIcon } from "lucide-react";
+import {
+  UsersIcon,
+  CheckCircle2Icon,
+  UserXIcon,
+  Trash2Icon,
+  AlertTriangleIcon,
+  AwardIcon,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import api from "@/lib/axios";
 import { toast } from "sonner";
@@ -91,14 +98,20 @@ export default function CitizenTablePage() {
           await fetchCitizens();
         }
       } else if (actionType === "disable") {
-        const res = await api.patch(`/admin/citizens/${targetCitizen.id}/status`, { is_active: false });
+        const res = await api.patch(
+          `/admin/citizens/${targetCitizen.id}/status`,
+          { is_active: false },
+        );
         if (res.data?.status === "success") {
           toast.success("Citizen account suspended.");
           setLoading(true);
           await fetchCitizens();
         }
       } else if (actionType === "enable") {
-        const res = await api.patch(`/admin/citizens/${targetCitizen.id}/status`, { is_active: true });
+        const res = await api.patch(
+          `/admin/citizens/${targetCitizen.id}/status`,
+          { is_active: true },
+        );
         if (res.data?.status === "success") {
           toast.success("Citizen account reactivated successfully.");
           setLoading(true);
@@ -119,7 +132,10 @@ export default function CitizenTablePage() {
       <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/30 bg-background/50 backdrop-blur px-4">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 data-vertical:h-4 data-vertical:self-auto" />
+          <Separator
+            orientation="vertical"
+            className="mr-2 data-vertical:h-4 data-vertical:self-auto"
+          />
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -136,8 +152,13 @@ export default function CitizenTablePage() {
 
       <main className="flex-1 overflow-y-auto p-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Registered Citizen Database</h1>
-          <p className="text-muted-foreground text-sm">Monitor citizen activity, reports counts, reward system, and administrative privileges</p>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+            Registered Citizen Database
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Monitor citizen activity, reports counts, reward system, and
+            administrative privileges
+          </p>
         </div>
 
         <div className="rounded-xl border border-border bg-card shadow-xs overflow-hidden">
@@ -149,24 +170,44 @@ export default function CitizenTablePage() {
                   <TableHead>Full Name</TableHead>
                   <TableHead>Email Address</TableHead>
                   <TableHead>Phone Number</TableHead>
-                  <TableHead className="text-center w-[120px]">Submissions</TableHead>
+                  <TableHead className="text-center w-[120px]">
+                    Submissions
+                  </TableHead>
                   <TableHead className="w-[150px]">Reward Points</TableHead>
                   <TableHead>Joined Date</TableHead>
                   <TableHead className="w-[120px]">Account Status</TableHead>
-                  <TableHead className="text-right w-[150px]">Actions</TableHead>
+                  <TableHead className="text-right w-[150px]">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {Array.from({ length: 5 }).map((_, rIndex) => (
                   <TableRow key={rIndex}>
-                    <TableCell><Skeleton className="h-4 w-16 font-mono" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-32 font-mono" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-28 font-mono" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-10 mx-auto" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-16 font-mono" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-28" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-32 font-mono" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-28 font-mono" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-10 mx-auto" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-16" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-5 w-16 rounded-full" />
+                    </TableCell>
                     <TableCell className="text-right flex items-center justify-end gap-2 h-full py-3">
                       <Skeleton className="size-8 rounded-lg" />
                       <Skeleton className="size-8 rounded-lg" />
@@ -178,7 +219,9 @@ export default function CitizenTablePage() {
           ) : citizens.length === 0 ? (
             <div className="p-12 text-center flex flex-col items-center justify-center space-y-3">
               <UsersIcon className="size-10 text-muted-foreground/60" />
-              <p className="text-sm font-semibold text-muted-foreground">No citizens registered yet</p>
+              <p className="text-sm font-semibold text-muted-foreground">
+                No citizens registered yet
+              </p>
             </div>
           ) : (
             <Table>
@@ -188,32 +231,58 @@ export default function CitizenTablePage() {
                   <TableHead>Full Name</TableHead>
                   <TableHead>Email Address</TableHead>
                   <TableHead>Phone Number</TableHead>
-                  <TableHead className="text-center w-[120px]">Submissions</TableHead>
+                  <TableHead className="text-center w-[120px]">
+                    Submissions
+                  </TableHead>
                   <TableHead className="w-[150px]">Reward Points</TableHead>
                   <TableHead>Joined Date</TableHead>
                   <TableHead className="w-[120px]">Account Status</TableHead>
-                  <TableHead className="text-right w-[150px]">Actions</TableHead>
+                  <TableHead className="text-right w-[150px]">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {citizens.map((cit) => {
-                  const reportsCount = (cit.reports_stats?.pending || 0) + (cit.reports_stats?.accepted || 0) + (cit.reports_stats?.rejected || 0);
-                  const joinedDate = cit.created_at ? new Date(cit.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
-                  
+                  const reportsCount =
+                    (cit.reports_stats?.pending || 0) +
+                    (cit.reports_stats?.accepted || 0) +
+                    (cit.reports_stats?.rejected || 0);
+                  const joinedDate = cit.created_at
+                    ? new Date(cit.created_at).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "N/A";
+
                   return (
                     <TableRow key={cit.id}>
-                      <TableCell className="font-mono font-semibold">{cit.citizen_id || `CIT-${String(cit.id).padStart(4, '0')}`}</TableCell>
-                      <TableCell className="font-medium">{cit.full_name}</TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{cit.email}</TableCell>
-                      <TableCell className="font-mono text-xs">{cit.phone_number}</TableCell>
-                      <TableCell className="font-bold text-center pl-4">{reportsCount}</TableCell>
+                      <TableCell className="font-mono font-semibold">
+                        {cit.citizen_id ||
+                          `CIT-${String(cit.id).padStart(4, "0")}`}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {cit.full_name}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {cit.email}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {cit.phone_number}
+                      </TableCell>
+                      <TableCell className="font-bold text-center pl-4">
+                        {reportsCount}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
                           <AwardIcon className="size-4" />
                           <span>{cit.reward_points || 0} Pts</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">{joinedDate}</TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
+                        {joinedDate}
+                      </TableCell>
                       <TableCell>
                         {cit.is_active ? (
                           <Badge variant="success">Active</Badge>
@@ -228,8 +297,7 @@ export default function CitizenTablePage() {
                             variant="outline"
                             className="size-8 text-amber-500 hover:text-amber-600 hover:bg-amber-50/50 cursor-pointer"
                             title="Disable Account"
-                            onClick={() => openConfirmation(cit, "disable")}
-                          >
+                            onClick={() => openConfirmation(cit, "disable")}>
                             <UserXIcon className="size-4" />
                           </Button>
                         ) : (
@@ -238,19 +306,17 @@ export default function CitizenTablePage() {
                             variant="outline"
                             className="size-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50 cursor-pointer"
                             title="Enable Account"
-                            onClick={() => openConfirmation(cit, "enable")}
-                          >
+                            onClick={() => openConfirmation(cit, "enable")}>
                             <CheckCircle2Icon className="size-4" />
                           </Button>
                         )}
-                        {currentUser?.role === 'super_admin' && (
+                        {currentUser?.role === "super_admin" && (
                           <Button
                             size="icon"
                             variant="outline"
                             className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
                             title="Delete Account"
-                            onClick={() => openConfirmation(cit, "delete")}
-                          >
+                            onClick={() => openConfirmation(cit, "delete")}>
                             <Trash2Icon className="size-4" />
                           </Button>
                         )}
@@ -274,21 +340,33 @@ export default function CitizenTablePage() {
             <DialogTitle>Confirm Administrative Action</DialogTitle>
             <DialogDescription>
               Are you sure you want to {actionType} the citizen account for{" "}
-              <strong className="text-foreground">{targetCitizen?.full_name}</strong> ({targetCitizen?.citizen_id || targetCitizen?.id})?
+              <strong className="text-foreground">
+                {targetCitizen?.full_name}
+              </strong>{" "}
+              ({targetCitizen?.citizen_id || targetCitizen?.id})?
             </DialogDescription>
           </DialogHeader>
           <div className="text-xs text-muted-foreground border-y border-border/50 py-3 my-1">
             {actionType === "delete" && (
-              <p>Warning: This action is permanent. All historical activity and linked device logs will be unlinked.</p>
+              <p>
+                Warning: This action is permanent. All historical activity and
+                linked device logs will be unlinked.
+              </p>
             )}
             {actionType === "disable" && (
-              <p>The citizen will be temporarily blocked from submitting new reports or logging into the mobile application.</p>
+              <p>
+                The citizen will be temporarily blocked from submitting new
+                reports or logging into the mobile application.
+              </p>
             )}
             {actionType === "enable" && (
-              <p>The citizen account will be restored to active status, allowing them to report incidents again.</p>
+              <p>
+                The citizen account will be restored to active status, allowing
+                them to report incidents again.
+              </p>
             )}
           </div>
-          <DialogFooter className="gap-2 sm:gap-0 mt-2">
+          <DialogFooter className="gap-2  mt-2">
             <Button
               variant="outline"
               onClick={() => {
@@ -296,16 +374,16 @@ export default function CitizenTablePage() {
                 setTargetCitizen(null);
                 setActionType(null);
               }}
-              className="cursor-pointer"
-            >
+              className="cursor-pointer">
               Cancel
             </Button>
             <Button
               variant={actionType === "delete" ? "destructive" : "default"}
               onClick={handleConfirmAction}
-              className="cursor-pointer"
-            >
-              Confirm {actionType && actionType.charAt(0).toUpperCase() + actionType.slice(1)}
+              className="cursor-pointer">
+              Confirm{" "}
+              {actionType &&
+                actionType.charAt(0).toUpperCase() + actionType.slice(1)}
             </Button>
           </DialogFooter>
         </DialogContent>

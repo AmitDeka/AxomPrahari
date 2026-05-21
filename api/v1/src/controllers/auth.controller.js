@@ -127,8 +127,9 @@ export const citizenCompleteProfile = async (req, res) => {
   try {
     const userId = req.user.id; // Extracted from JWT middleware
     const { full_name, email, username } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
     
-    const updatedUser = await UserModel.completeCitizenProfile(userId, full_name, email, username);
+    const updatedUser = await UserModel.completeCitizenProfile(userId, full_name, normalizedEmail, username);
     
     if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
@@ -154,8 +155,9 @@ export const citizenCompleteProfile = async (req, res) => {
 export const policeAdminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
     
-    const admin = await UserModel.findUserByEmail(email);
+    const admin = await UserModel.findUserByEmail(normalizedEmail);
     
     if (!admin || !['police_admin', 'super_admin'].includes(admin.role)) {
       return res.status(401).json({ error: 'Invalid admin credentials' });

@@ -112,10 +112,12 @@ export default function SuperAdminPage() {
   const openDeleteConfirm = (adm) => {
     if (adm.id === currentUser?.id) {
       toast.error("Action Denied: You cannot delete yourself.");
+      setIsConfirmOpen(false);
       return;
     }
     if (currentUser?.role === "police_admin" && adm.role === "super_admin") {
       toast.error("Action Denied: Police Admins cannot delete Super Admins.");
+      setIsConfirmOpen(false);
       return;
     }
     setTargetAdmin(adm);
@@ -125,10 +127,12 @@ export default function SuperAdminPage() {
   const openStatusConfirm = (adm) => {
     if (adm.id === currentUser?.id) {
       toast.error("Action Denied: You cannot disable yourself.");
+      setIsStatusOpen(false);
       return;
     }
     if (currentUser?.role === "police_admin" && adm.role === "super_admin") {
       toast.error("Action Denied: Police Admins cannot disable Super Admins.");
+      setIsStatusOpen(false);
       return;
     }
     setTargetAdmin(adm);
@@ -205,6 +209,7 @@ export default function SuperAdminPage() {
     if (targetAdmin.id === currentUser?.id) {
       toast.error("Action Denied: You cannot disable yourself!");
       setIsStatusOpen(false);
+      setTargetAdmin(null);
       return;
     }
 
@@ -214,6 +219,7 @@ export default function SuperAdminPage() {
     ) {
       toast.error("Action Denied: Police Admins cannot disable Super Admins.");
       setIsStatusOpen(false);
+      setTargetAdmin(null);
       return;
     }
 
@@ -238,6 +244,8 @@ export default function SuperAdminPage() {
           err.response?.data?.message ||
           "Failed to toggle status.",
       );
+      setIsStatusOpen(false);
+      setTargetAdmin(null);
     }
   };
 
@@ -247,6 +255,7 @@ export default function SuperAdminPage() {
     if (targetAdmin.id === currentUser?.id) {
       toast.error("Action Denied: You cannot delete yourself!");
       setIsConfirmOpen(false);
+      setTargetAdmin(null);
       return;
     }
 
@@ -256,6 +265,7 @@ export default function SuperAdminPage() {
     ) {
       toast.error("Action Denied: Police Admins cannot delete Super Admins.");
       setIsConfirmOpen(false);
+      setTargetAdmin(null);
       return;
     }
 
@@ -276,6 +286,8 @@ export default function SuperAdminPage() {
           err.response?.data?.message ||
           "Failed to delete admin.",
       );
+      setIsConfirmOpen(false);
+      setTargetAdmin(null);
     }
   };
 
@@ -563,7 +575,7 @@ export default function SuperAdminPage() {
                 />
               </div>
             </div>
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter className="gap-2 ">
               <Button
                 type="button"
                 variant="outline"
@@ -615,7 +627,7 @@ export default function SuperAdminPage() {
               </p>
             )}
           </div>
-          <DialogFooter className="gap-2 sm:gap-0 mt-2">
+          <DialogFooter className="gap-2  mt-2">
             <Button
               variant="outline"
               onClick={() => setIsStatusOpen(false)}
@@ -648,7 +660,7 @@ export default function SuperAdminPage() {
               ? This will revoke all database authorizations.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0 mt-3">
+          <DialogFooter className="gap-2  mt-3">
             <Button
               variant="outline"
               onClick={() => setIsConfirmOpen(false)}

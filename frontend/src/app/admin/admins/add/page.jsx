@@ -16,6 +16,7 @@ import { ShieldPlusIcon, CheckCircle2Icon } from "lucide-react";
 import { useState, useEffect } from "react";
 import api from "@/lib/axios";
 import ComboboxWithStates from "@/components/ui/combobox-with-states";
+import { toast } from "sonner";
 
 export default function AddPoliceAdminPage() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -27,9 +28,7 @@ export default function AddPoliceAdminPage() {
     role: "police_admin",
     password: "",
   });
-  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     // Get logged-in user profile to check role
@@ -50,8 +49,6 @@ export default function AddPoliceAdminPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setSuccess(false);
-    setError("");
 
     if (
       !formData.name ||
@@ -60,7 +57,7 @@ export default function AddPoliceAdminPage() {
       !formData.district ||
       !formData.password
     ) {
-      setError("Please fill in all fields.");
+      toast.error("Validation Error: Please fill in all fields.");
       setLoading(false);
       return;
     }
@@ -78,7 +75,7 @@ export default function AddPoliceAdminPage() {
       const res = await api.post("/admin/create", payload);
 
       if (res.data?.status === "success") {
-        setSuccess(true);
+        toast.success("Administrator account successfully created and provisioned!");
         // Reset form
         setFormData({
           name: "",
@@ -91,12 +88,10 @@ export default function AddPoliceAdminPage() {
               : "police_admin",
           password: "",
         });
-        // Clear success message after 4 seconds
-        setTimeout(() => setSuccess(false), 4000);
       }
     } catch (err) {
       console.error("Error creating admin account", err);
-      setError(
+      toast.error(
         err.response?.data?.error ||
           err.response?.data?.message ||
           "Failed to create administrator account.",
@@ -139,21 +134,6 @@ export default function AddPoliceAdminPage() {
             coordination
           </p>
         </div>
-
-        {success && (
-          <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 text-sm flex gap-2.5 items-center">
-            <CheckCircle2Icon className="size-5 shrink-0 animate-bounce" />
-            <p className="font-semibold">
-              Officer account successfully created and provisioned!
-            </p>
-          </div>
-        )}
-
-        {error && (
-          <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/5 text-rose-600 dark:text-rose-400 text-sm flex gap-2.5 items-center">
-            <p className="font-semibold">{error}</p>
-          </div>
-        )}
 
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm text-foreground">
           <form onSubmit={handleSubmit} className="space-y-6">

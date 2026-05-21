@@ -120,12 +120,24 @@ export function AppSidebar({ profile, ...props }) {
   };
 
   const filteredNavMain = React.useMemo(() => {
-    return data.navMain.filter((item) => {
-      if (item.title === "Admins") {
-        return user.role === "super_admin";
-      }
-      return true;
-    });
+    return data.navMain
+      .map((item) => {
+        if (item.title === "Admins") {
+          if (user.role === "police_admin") {
+            return {
+              ...item,
+              items: item.items.filter((subItem) => subItem.title !== "Super Admin"),
+            };
+          }
+        }
+        return item;
+      })
+      .filter((item) => {
+        if (item.title === "Admins") {
+          return user.role === "super_admin" || user.role === "police_admin";
+        }
+        return true;
+      });
   }, [user.role]);
 
   return (

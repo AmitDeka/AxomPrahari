@@ -105,6 +105,7 @@ export default function PoliceAdminPage() {
   const openDeleteConfirm = (off) => {
     if (off.id === currentUser?.id) {
       toast.error("Action Denied: You cannot delete yourself.");
+      setIsConfirmOpen(false);
       return;
     }
     setTargetOfficer(off);
@@ -114,6 +115,7 @@ export default function PoliceAdminPage() {
   const openStatusConfirm = (off) => {
     if (off.id === currentUser?.id) {
       toast.error("Action Denied: You cannot disable yourself.");
+      setIsStatusOpen(false);
       return;
     }
     setTargetOfficer(off);
@@ -154,10 +156,14 @@ export default function PoliceAdminPage() {
         }
 
         if (targetOfficer.id === currentUser?.id) {
-          window.location.reload();
+          toast.success("Profile updated successfully. Reloading...");
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
           return;
         }
 
+        toast.success("Officer profile updated successfully.");
         setIsFormOpen(false);
         setTargetOfficer(null);
         setLoading(true);
@@ -180,6 +186,7 @@ export default function PoliceAdminPage() {
     if (targetOfficer.id === currentUser?.id) {
       toast.error("Action Denied: You cannot disable yourself!");
       setIsStatusOpen(false);
+      setTargetOfficer(null);
       return;
     }
 
@@ -189,6 +196,9 @@ export default function PoliceAdminPage() {
       });
 
       if (res.data?.status === "success") {
+        toast.success(
+          `Officer account successfully ${targetOfficer.is_active ? "suspended" : "reactivated"}.`,
+        );
         setIsStatusOpen(false);
         setTargetOfficer(null);
         setLoading(true);
@@ -202,6 +212,8 @@ export default function PoliceAdminPage() {
             err.response?.data?.message ||
             "Failed to toggle status."),
       );
+      setIsStatusOpen(false);
+      setTargetOfficer(null);
     }
   };
 
@@ -211,6 +223,7 @@ export default function PoliceAdminPage() {
     if (targetOfficer.id === currentUser?.id) {
       toast.error("Action Denied: You cannot delete yourself!");
       setIsConfirmOpen(false);
+      setTargetOfficer(null);
       return;
     }
 
@@ -218,6 +231,7 @@ export default function PoliceAdminPage() {
       const res = await api.delete(`/admin/${targetOfficer.id}`);
 
       if (res.data?.status === "success") {
+        toast.success("Officer profile permanently deleted.");
         setIsConfirmOpen(false);
         setTargetOfficer(null);
         setLoading(true);
@@ -231,6 +245,8 @@ export default function PoliceAdminPage() {
             err.response?.data?.message ||
             "Failed to delete officer."),
       );
+      setIsConfirmOpen(false);
+      setTargetOfficer(null);
     }
   };
 
@@ -426,7 +442,7 @@ export default function PoliceAdminPage() {
 
       {/* Edit Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[450px]">
+        <DialogContent className="sm:max-w-112.5">
           <form onSubmit={handleSaveOfficer} className="space-y-4">
             <DialogHeader>
               <DialogTitle>Edit Officer Profile</DialogTitle>
@@ -496,7 +512,7 @@ export default function PoliceAdminPage() {
                 />
               </div>
             </div>
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="outline"
@@ -549,7 +565,7 @@ export default function PoliceAdminPage() {
               </p>
             )}
           </div>
-          <DialogFooter className="gap-2 sm:gap-0 mt-2">
+          <DialogFooter className="gap-2 mt-2">
             <Button
               variant="outline"
               onClick={() => setIsStatusOpen(false)}
@@ -583,7 +599,7 @@ export default function PoliceAdminPage() {
               {targetOfficer?.jurisdiction_district} will be broken.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0 mt-3">
+          <DialogFooter className="gap-2 mt-3">
             <Button
               variant="outline"
               onClick={() => setIsConfirmOpen(false)}

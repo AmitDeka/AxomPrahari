@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname:
+          "axomprahari-storage.ff489ab995d11fb76acfee00d81cfb38.r2.cloudflarestorage.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

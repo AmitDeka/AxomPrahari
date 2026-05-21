@@ -18,10 +18,41 @@ import {
   UsersIcon, 
   MapPinIcon, 
   TrendingUpIcon,
-  TrendingDownIcon
+  TrendingDownIcon,
+  EyeIcon,
+  CarIcon,
+  ClockIcon,
+  MessageSquareIcon,
+  VideoIcon,
+  CameraIcon
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import api from "@/lib/axios";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+
+const isVideoFile = (url) => {
+  if (!url) return false;
+  const cleanUrl = url.split("?")[0];
+  return /\.(mp4|mov|webm|ogg|m4v)$/i.test(cleanUrl);
+};
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -32,13 +63,14 @@ export default function DashboardPage() {
     active_citizens: { count: 0, trend: 0 }
   });
   const [recentReports, setRecentReports] = useState([]);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [dashboardRes, reportsRes] = await Promise.all([
           api.get("/admin/dashboard"),
-          api.get("/admin/reports?status=pending&limit=5")
+          api.get("/admin/reports?status=pending&limit=10")
         ]);
         if (dashboardRes.data?.status === "success") {
           setStats(dashboardRes.data.data.stats || {
@@ -222,10 +254,15 @@ export default function DashboardPage() {
                   <Skeleton className="h-5 w-40" />
                   <Skeleton className="h-4 w-16" />
                 </div>
-                <div className="flex-1 space-y-4 py-4">
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
-                  <Skeleton className="h-12 w-full" />
+                <div className="flex-1 space-y-3 py-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-center justify-between border-b border-border/50 pb-2">
+                      <Skeleton className="h-4 w-8" />
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-8 w-16 rounded-md" />
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="col-span-3 rounded-xl border border-border bg-card p-6 shadow-xs min-h-[350px] flex flex-col justify-between">
@@ -260,23 +297,51 @@ export default function DashboardPage() {
                     <p className="text-xs text-muted-foreground/60">Updates will appear dynamically as citizens submit reports.</p>
                   </div>
                 ) : (
-                  <div className="flex-1 space-y-3 overflow-y-auto">
-                    {recentReports.map((report) => (
-                      <div key={report.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/10 hover:bg-muted/20 transition-colors">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold">{report.vehicle_number || "N/A"}</span>
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-medium capitalize">
+                  <div className="flex-1 overflow-y-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12 text-center">S.No</TableHead>
+                          <TableHead>Violation Name</TableHead>
+                          <TableHead>Vehicle Number</TableHead>
+                          <TableHead className="text-right w-20">Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {recentReports.map((report, idx) => (
+                          <TableRow key={report.id}>
+                            <TableCell className="text-center font-mono text-xs text-muted-foreground">
+                              #{idx + 1}
+                            </TableCell>
+                            <TableCell className="font-semibold text-xs sm:text-sm">
                               {report.offence_name || "Violation"}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground line-clamp-1">{report.location_name || `${report.latitude}, ${report.longitude}`}</p>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(report.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                        </span>
-                      </div>
-                    ))}
+                            </TableCell>
+                            <TableCell>
+                              {report.vehicle_number && report.vehicle_number !== "N/A" ? (
+                                <Badge variant="outline" className="font-mono text-xs uppercase bg-amber-500/5 text-amber-600 dark:text-amber-400 border-amber-500/20 px-2 py-0.5 tracking-wider">
+                                  {report.vehicle_number}
+                                </Badge>
+                              ) : (
+                                <span className="text-xs text-muted-foreground italic font-mono">
+                                  N/A
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 gap-1 text-primary hover:text-primary/95 cursor-pointer"
+                                onClick={() => setSelectedReport(report)}
+                              >
+                                <EyeIcon className="size-3.5" />
+                                <span>View</span>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 )}
               </div>
@@ -296,6 +361,151 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+
+      {/* Incident Details Dialog Modal */}
+      <Dialog
+        open={selectedReport !== null}
+        onOpenChange={(open) => !open && setSelectedReport(null)}>
+        <DialogContent className="sm:max-w-[550px] p-6 max-h-[90vh] overflow-y-auto">
+          {selectedReport && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="warning"
+                    className="text-[10px] tracking-wider uppercase font-semibold">
+                    Pending Review
+                  </Badge>
+                  <span className="font-mono text-xs font-semibold text-muted-foreground">
+                    {selectedReport.report_id}
+                  </span>
+                </div>
+                <DialogTitle className="text-xl font-bold font-serif">
+                  {selectedReport.offence_name}
+                </DialogTitle>
+                <DialogDescription>
+                  Submitted by {selectedReport.citizen_name || "Citizen"} on{" "}
+                  {new Date(selectedReport.created_at).toLocaleString()}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 my-2">
+                {/* Media Preview Container */}
+                <div className="relative rounded-lg overflow-hidden border border-border/80 bg-muted flex items-center justify-center min-h-[220px]">
+                  {isVideoFile(selectedReport.media_url) ? (
+                    <video
+                      src={selectedReport.media_url}
+                      controls
+                      className="w-full h-55 object-contain bg-black"
+                    />
+                  ) : (
+                    <Image
+                      fill
+                      loading="lazy"
+                      src={selectedReport.media_url || "/incident_mockup.png"}
+                      alt="Citizen submission proof"
+                      className="w-full h-55 object-cover"
+                    />
+                  )}
+                  <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded flex items-center gap-1.5 font-semibold">
+                    {isVideoFile(selectedReport.media_url) ? (
+                      <>
+                        <VideoIcon className="size-3" />
+                        <span>Citizen Video Upload</span>
+                      </>
+                    ) : (
+                      <>
+                        <CameraIcon className="size-3" />
+                        <span>Citizen Image Upload</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Structured Metadata Grid */}
+                <div className="grid grid-cols-2 gap-4 text-sm bg-muted/30 p-3 rounded-lg border border-border/50">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                      <CarIcon className="size-3.5" />
+                      <span>Vehicle Number</span>
+                    </div>
+                    {selectedReport.vehicle_number &&
+                    selectedReport.vehicle_number !== "N/A" ? (
+                      <span className="font-mono font-bold text-xs uppercase bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50 px-2 py-0.5 rounded tracking-wider">
+                        {selectedReport.vehicle_number}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic font-mono">
+                        Not Provided (N/A)
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                      <MapPinIcon className="size-3.5" />
+                      <span>GPS Coordinates</span>
+                    </div>
+                    <span className="font-mono text-xs font-semibold text-foreground/80 bg-background px-2 py-0.5 rounded border border-border/40">
+                      {selectedReport.latitude && selectedReport.longitude
+                        ? `${selectedReport.latitude}° N, ${selectedReport.longitude}° E`
+                        : "Coordinates missing"}
+                    </span>
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                      <MapPinIcon className="size-3.5 text-rose-500" />
+                      <span>Location Reference</span>
+                    </div>
+                    <span className="font-medium text-foreground">
+                      {selectedReport.location_name}
+                    </span>
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                      <ClockIcon className="size-3.5" />
+                      <span>Incident Occurrence</span>
+                    </div>
+                    <span className="font-medium text-foreground">
+                      Date:{" "}
+                      {selectedReport.incident_date
+                        ? new Date(
+                            selectedReport.incident_date,
+                          ).toLocaleDateString()
+                        : "N/A"}
+                      , Time: {selectedReport.incident_time || "N/A"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Citizen Message */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                    <MessageSquareIcon className="size-3.5" />
+                    <span>Reporter Message</span>
+                  </div>
+                  <div className="bg-muted/40 border-l-2 border-primary/50 p-3 rounded-r-lg">
+                    <p className="text-xs italic text-foreground/80 leading-relaxed font-sans">
+                      &ldquo;
+                      {selectedReport.message ||
+                        "No additional comments provided."}
+                      &rdquo;
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter className="border-t border-border/40 pt-4 mt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedReport(null)}
+                  className="cursor-pointer w-full sm:w-auto">
+                  Close
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
