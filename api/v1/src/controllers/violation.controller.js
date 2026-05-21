@@ -1,4 +1,5 @@
 import * as ViolationModel from '../models/violation.model.js';
+import { createNotification } from '../models/notification.model.js';
 
 export const getAdminViolations = async (req, res) => {
   try {
@@ -30,6 +31,20 @@ export const getCitizenViolations = async (req, res) => {
 export const addViolation = async (req, res) => {
   try {
     const newViolation = await ViolationModel.createViolation(req.body);
+    
+    // Dispatch notification
+    try {
+      await createNotification({
+        recipientRole: 'all',
+        title: 'New Violation Type Added',
+        message: `A new violation type "${newViolation.offence_name}" (${newViolation.mv_act_code}) was added by ${req.user.full_name || req.user.email}.`,
+        type: 'settings_change',
+        relatedId: newViolation.id
+      });
+    } catch (notifError) {
+      console.error('[Notification Hook Error in addViolation]', notifError);
+    }
+
     res.status(201).json({ status: 'success', data: newViolation });
   } catch (error) {
     console.error('[addViolation Error]', error);
@@ -49,6 +64,20 @@ export const updateViolation = async (req, res) => {
     }
 
     const updated = await ViolationModel.updateViolation(id, req.body);
+
+    // Dispatch notification
+    try {
+      await createNotification({
+        recipientRole: 'all',
+        title: 'Violation Type Updated',
+        message: `Violation type "${updated.offence_name}" (${updated.mv_act_code}) was modified by ${req.user.full_name || req.user.email}.`,
+        type: 'settings_change',
+        relatedId: updated.id
+      });
+    } catch (notifError) {
+      console.error('[Notification Hook Error in updateViolation]', notifError);
+    }
+
     res.status(200).json({ status: 'success', data: updated });
   } catch (error) {
     console.error('[updateViolation Error]', error);
@@ -72,6 +101,20 @@ export const toggleViolation = async (req, res) => {
     if (!updated) {
       return res.status(404).json({ status: 'error', message: 'Violation not found.' });
     }
+
+    // Dispatch notification
+    try {
+      await createNotification({
+        recipientRole: 'all',
+        title: `Violation Type ${is_active ? 'Enabled' : 'Disabled'}`,
+        message: `Violation type "${updated.offence_name}" was ${is_active ? 'enabled' : 'disabled'} by ${req.user.full_name || req.user.email}.`,
+        type: 'settings_change',
+        relatedId: updated.id
+      });
+    } catch (notifError) {
+      console.error('[Notification Hook Error in toggleViolation]', notifError);
+    }
+
     res.status(200).json({ status: 'success', data: updated });
   } catch (error) {
     console.error('[toggleViolation Error]', error);
@@ -82,10 +125,26 @@ export const toggleViolation = async (req, res) => {
 export const deleteViolation = async (req, res) => {
   try {
     const id = req.params.id;
+    // Get info before deleting for notification
+    const existing = await ViolationModel.getViolationById(id);
     const deleted = await ViolationModel.deleteViolation(id);
     if (!deleted) {
       return res.status(404).json({ status: 'error', message: 'Violation not found.' });
     }
+
+    // Dispatch notification
+    try {
+      await createNotification({
+        recipientRole: 'all',
+        title: 'Violation Type Deleted',
+        message: `Violation type "${existing?.offence_name || id}" was deleted by ${req.user.full_name || req.user.email}.`,
+        type: 'settings_change',
+        relatedId: parseInt(id, 10)
+      });
+    } catch (notifError) {
+      console.error('[Notification Hook Error in deleteViolation]', notifError);
+    }
+
     res.status(200).json({ status: 'success', message: 'Violation deleted successfully.' });
   } catch (error) {
     console.error('[deleteViolation Error]', error);

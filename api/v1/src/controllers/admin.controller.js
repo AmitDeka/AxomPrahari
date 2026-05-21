@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import * as UserModel from '../models/user.model.js';
+import { createNotification } from '../models/notification.model.js';
 
 export const getAdminDashboard = async (req, res) => {
   try {
@@ -77,6 +78,19 @@ export const createNewAdmin = async (req, res) => {
       jurisdiction_district
     );
 
+    // Dispatch notification
+    try {
+      await createNotification({
+        recipientRole: 'super_admin',
+        title: 'New Admin Created',
+        message: `Admin ${newAdmin.full_name} (${newAdmin.email}) was created by ${req.user.full_name || req.user.email}.`,
+        type: 'settings_change',
+        relatedId: newAdmin.id
+      });
+    } catch (notifError) {
+      console.error('[Notification Hook Error in createNewAdmin]', notifError);
+    }
+
     res.status(201).json({
       status: 'success',
       message: 'Admin created successfully.',
@@ -140,6 +154,19 @@ export const deleteAdmin = async (req, res) => {
       });
     }
 
+    // Dispatch notification
+    try {
+      await createNotification({
+        recipientRole: 'super_admin',
+        title: 'Admin Account Deleted',
+        message: `Admin account ${targetAdmin.full_name} (${targetAdmin.email}) was deleted by ${req.user.full_name || req.user.email}.`,
+        type: 'settings_change',
+        relatedId: adminId
+      });
+    } catch (notifError) {
+      console.error('[Notification Hook Error in deleteAdmin]', notifError);
+    }
+
     res.status(200).json({
       status: 'success',
       message: 'Admin deleted successfully.'
@@ -195,6 +222,19 @@ export const toggleAdminStatus = async (req, res) => {
         status: 'error',
         message: 'Admin not found.'
       });
+    }
+
+    // Dispatch notification
+    try {
+      await createNotification({
+        recipientRole: 'super_admin',
+        title: `Admin Account ${is_active ? 'Enabled' : 'Disabled'}`,
+        message: `Admin account ${targetAdmin.full_name} (${targetAdmin.email}) was ${is_active ? 'enabled' : 'disabled'} by ${req.user.full_name || req.user.email}.`,
+        type: 'settings_change',
+        relatedId: adminId
+      });
+    } catch (notifError) {
+      console.error('[Notification Hook Error in toggleAdminStatus]', notifError);
     }
 
     res.status(200).json({
@@ -261,6 +301,19 @@ export const updateAdmin = async (req, res) => {
         status: 'error',
         message: 'No valid fields provided to update.'
       });
+    }
+
+    // Dispatch notification
+    try {
+      await createNotification({
+        recipientRole: 'super_admin',
+        title: 'Admin Profile Updated',
+        message: `Admin account ${updatedAdmin.full_name} (${updatedAdmin.email}) was updated by ${req.user.full_name || req.user.email}.`,
+        type: 'settings_change',
+        relatedId: adminId
+      });
+    } catch (notifError) {
+      console.error('[Notification Hook Error in updateAdmin]', notifError);
     }
 
     res.status(200).json({

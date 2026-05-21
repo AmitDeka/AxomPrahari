@@ -64,3 +64,18 @@ CREATE TABLE IF NOT EXISTS violation_reports (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Table to store administrative notifications
+CREATE TABLE IF NOT EXISTS admin_notifications (
+    id SERIAL PRIMARY KEY,
+    recipient_role VARCHAR(50) NOT NULL DEFAULT 'police_admin' CHECK (recipient_role IN ('police_admin', 'super_admin', 'all')),
+    jurisdiction_district VARCHAR(100) NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(50) NOT NULL CHECK (type IN ('new_report', 'settings_change', 'system_alert')),
+    related_id INT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_notifications_read ON admin_notifications(is_read, recipient_role);

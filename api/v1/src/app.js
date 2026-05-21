@@ -9,6 +9,7 @@ import violationAdminRoutes from './routes/violation.admin.routes.js';
 import reportCitizenRoutes from './routes/report.citizen.routes.js';
 import reportAdminRoutes from './routes/report.admin.routes.js';
 import citizenAdminRoutes from './routes/citizen.admin.routes.js';
+import notificationRoutes from './routes/notification.admin.routes.js';
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use('/api/v1/citizen', citizenRoutes);
 app.use('/api/v1/admin/violations', violationAdminRoutes);
 app.use('/api/v1/admin/reports', reportAdminRoutes);
 app.use('/api/v1/admin/citizens', citizenAdminRoutes);
+app.use('/api/v1/admin/notifications', notificationRoutes);
 app.use('/api/v1/admin', adminRoutes);
 // app.use('/api/v1/reports', reportRoutes);
 

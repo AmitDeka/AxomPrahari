@@ -25,9 +25,29 @@ import {
   LogOutIcon,
 } from "lucide-react";
 import api from "@/lib/axios";
+import { useState, useEffect } from "react";
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await api.get("/admin/notifications?limit=1");
+        if (res.data?.status === "success") {
+          setUnreadCount(res.data.data.unreadCount || 0);
+        }
+      } catch (err) {
+        console.error("Error fetching unread count", err);
+      }
+    };
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -60,6 +80,11 @@ export function NavUser({ user }) {
                   {user.rank ? `${user.rank} - ${user.jurisdiction_district}` : user.email}
                 </span>
               </div>
+              {unreadCount > 0 && (
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white mr-1 animate-pulse">
+                  {unreadCount}
+                </span>
+              )}
               <ChevronsUpDownIcon className="ml-auto size-4 opacity-50" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -95,9 +120,18 @@ export function NavUser({ user }) {
                   Account
                 </a>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                <BellIcon className="size-4 mr-2" />
-                Notifications
+              <DropdownMenuItem className="cursor-pointer" asChild>
+                <a href="/admin/notifications" className="flex items-center justify-between w-full">
+                  <div className="flex items-center">
+                    <BellIcon className="size-4 mr-2" />
+                    Notifications
+                  </div>
+                  {unreadCount > 0 && (
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1.5 text-[10px] font-bold text-white">
+                      {unreadCount}
+                    </span>
+                  )}
+                </a>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

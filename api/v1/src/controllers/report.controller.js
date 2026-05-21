@@ -1,5 +1,29 @@
 import * as ReportModel from '../models/report.model.js';
 import * as ViolationModel from '../models/violation.model.js';
+import { createNotification } from '../models/notification.model.js';
+
+const ASSAM_DISTRICTS = [
+  "Kamrup Metropolitan", "Kamrup", "Jorhat", "Dibrugarh", "Sonitpur", "Cachar", "Nagaon",
+  "Sivasagar", "Tinsukia", "Dhubri", "Kokrajhar", "Goalpara", "Bongaigaon", "Barpeta",
+  "Nalbari", "Darrang", "Morigaon", "Golaghat", "Karbi Anglong", "Dima Hasao", "Karimganj",
+  "Hailakandi", "Lakhimpur", "Dhemaji", "Baksa", "Chirang", "Udalguri", "Majuli",
+  "Charaideo", "Hojai", "Biswanath", "South Salmara-Mankachar", "West Karbi Anglong",
+  "Bajali", "Tamulpur"
+];
+
+const getDistrictFromLocation = (locationName) => {
+  if (!locationName) return null;
+  const nameLower = locationName.toLowerCase();
+  for (const district of ASSAM_DISTRICTS) {
+    if (nameLower.includes(district.toLowerCase())) {
+      return district;
+    }
+  }
+  if (nameLower.includes("guwahati")) {
+    return "Kamrup Metropolitan";
+  }
+  return null;
+};
 
 export const submitReport = async (req, res) => {
   try {
@@ -24,6 +48,21 @@ export const submitReport = async (req, res) => {
 
     const newReport = await ReportModel.createReport(req.user.id, req.body);
     
+    // Dispatch administrative notification for the new report
+    try {
+      const district = getDistrictFromLocation(newReport.location_name);
+      await createNotification({
+        recipientRole: 'police_admin',
+        jurisdictionDistrict: district,
+        title: 'New Incident Reported',
+        message: `A new report for vehicle ${newReport.vehicle_number} (${violation.offence_name}) has been filed at ${newReport.location_name}.`,
+        type: 'new_report',
+        relatedId: newReport.id
+      });
+    } catch (notifError) {
+      console.error('[Notification Hook Error in submitReport]', notifError);
+    }
+
     const { getReadableMediaUrl } = await import('../utils/s3.util.js');
     const resolvedReport = {
       ...newReport,
