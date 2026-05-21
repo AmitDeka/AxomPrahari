@@ -95,6 +95,80 @@ export const getAllAdmins = async () => {
   return result.rows;
 };
 
+export const getDashboardStats = async () => {
+  const reports = await db.query(
+    `SELECT 
+       -- Pending reports
+       COALESCE(COUNT(CASE WHEN status = 'pending' THEN 1 END), 0) AS total_pending,
+       COALESCE(COUNT(CASE WHEN status = 'pending' AND created_at >= NOW() - INTERVAL '7 days' THEN 1 END), 0) AS current_pending,
+       COALESCE(COUNT(CASE WHEN status = 'pending' AND created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days' THEN 1 END), 0) AS previous_pending,
+
+       -- Accepted reports
+       COALESCE(COUNT(CASE WHEN status = 'accepted' THEN 1 END), 0) AS total_accepted,
+       COALESCE(COUNT(CASE WHEN status = 'accepted' AND created_at >= NOW() - INTERVAL '7 days' THEN 1 END), 0) AS current_accepted,
+       COALESCE(COUNT(CASE WHEN status = 'accepted' AND created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days' THEN 1 END), 0) AS previous_accepted,
+
+       -- Rejected reports
+       COALESCE(COUNT(CASE WHEN status = 'rejected' THEN 1 END), 0) AS total_rejected,
+       COALESCE(COUNT(CASE WHEN status = 'rejected' AND created_at >= NOW() - INTERVAL '7 days' THEN 1 END), 0) AS current_rejected,
+       COALESCE(COUNT(CASE WHEN status = 'rejected' AND created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days' THEN 1 END), 0) AS previous_rejected
+     FROM violation_reports`
+  );
+
+  const citizens = await db.query(
+    `SELECT
+       COALESCE(COUNT(CASE WHEN role = 'citizen' AND is_active = true THEN 1 END), 0) AS total_citizens,
+       COALESCE(COUNT(CASE WHEN role = 'citizen' AND is_active = true AND created_at >= NOW() - INTERVAL '7 days' THEN 1 END), 0) AS current_citizens,
+       COALESCE(COUNT(CASE WHEN role = 'citizen' AND is_active = true AND created_at >= NOW() - INTERVAL '14 days' AND created_at < NOW() - INTERVAL '7 days' THEN 1 END), 0) AS previous_citizens
+     FROM users`
+  );
+
+  const calculateTrend = (current, previous) => {
+    if (previous === 0) {
+      return current > 0 ? 100.0 : 0.0;
+    }
+    return parseFloat((((current - previous) / previous) * 100).toFixed(1));
+  };
+
+  const r = reports.rows[0];
+  const c = citizens.rows[0];
+
+  const pending_total = parseInt(r.total_pending, 10);
+  const pending_curr = parseInt(r.current_pending, 10);
+  const pending_prev = parseInt(r.previous_pending, 10);
+
+  const accepted_total = parseInt(r.total_accepted, 10);
+  const accepted_curr = parseInt(r.current_accepted, 10);
+  const accepted_prev = parseInt(r.previous_accepted, 10);
+
+  const rejected_total = parseInt(r.total_rejected, 10);
+  const rejected_curr = parseInt(r.current_rejected, 10);
+  const rejected_prev = parseInt(r.previous_rejected, 10);
+
+  const citizens_total = parseInt(c.total_citizens, 10);
+  const citizens_curr = parseInt(c.current_citizens, 10);
+  const citizens_prev = parseInt(c.previous_citizens, 10);
+
+  return {
+    pending: {
+      count: pending_total,
+      trend: calculateTrend(pending_curr, pending_prev)
+    },
+    accepted: {
+      count: accepted_total,
+      trend: calculateTrend(accepted_curr, accepted_prev)
+    },
+    rejected: {
+      count: rejected_total,
+      trend: calculateTrend(rejected_curr, rejected_prev)
+    },
+    active_citizens: {
+      count: citizens_total,
+      trend: calculateTrend(citizens_curr, citizens_prev)
+    }
+  };
+};
+
 export const getAdminPasswordChangedAt = async (id) => {
   const result = await db.query('SELECT password_changed_at FROM users WHERE id = $1', [id]);
   return result.rows[0];
@@ -226,6 +300,7 @@ export const getCitizensListWithStats = async (limit = 10, offset = 0) => {
       u.email, 
       u.is_active,
       u.reward_points,
+      u.created_at,
       COALESCE(COUNT(CASE WHEN r.status = 'pending' THEN 1 END), 0) AS pending_count,
       COALESCE(COUNT(CASE WHEN r.status = 'accepted' THEN 1 END), 0) AS accepted_count,
       COALESCE(COUNT(CASE WHEN r.status = 'rejected' THEN 1 END), 0) AS rejected_count

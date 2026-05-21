@@ -28,28 +28,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { 
+import {
   BookOpenIcon, 
   PlusIcon, 
   EditIcon, 
   Trash2Icon, 
   ToggleLeftIcon, 
   ToggleRightIcon, 
-  AlertTriangleIcon,
   IndianRupeeIcon,
-  AwardIcon 
+  AwardIcon,
+  AlertTriangleIcon
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import api from "@/lib/axios";
+import { toast } from "sonner";
 
 export default function ViolationsPage() {
   const [loading, setLoading] = useState(true);
-  const [violations, setViolations] = useState([
-    { id: "VIO-001", title: "Traffic Light Violation", description: "Running a red light or disobeying traffic police directions", fineAmount: 1000, rewardPoints: 50, status: "Active" },
-    { id: "VIO-002", title: "Illegal Parking", description: "Parking in no-parking zones, blocking flow of traffic", fineAmount: 500, rewardPoints: 20, status: "Active" },
-    { id: "VIO-003", title: "Public Nuisance", description: "Littering, public disturbance, or creating health hazards", fineAmount: 1500, rewardPoints: 75, status: "Active" },
-    { id: "VIO-004", title: "Noise Pollution", description: "Using loud speakers or high-decibel horns during quiet hours", fineAmount: 2000, rewardPoints: 100, status: "Inactive" },
-    { id: "VIO-005", title: "Waste Dumping", description: "Improper disposal of commercial or household trash in open areas", fineAmount: 3000, rewardPoints: 150, status: "Active" },
-  ]);
+  const [violations, setViolations] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Dialog states
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -66,9 +63,34 @@ export default function ViolationsPage() {
   const [fineAmount, setFineAmount] = useState("");
   const [rewardPoints, setRewardPoints] = useState("");
 
+  const fetchViolations = async () => {
+    try {
+      const res = await api.get("/admin/violations");
+      if (res.data?.status === "success") {
+        setViolations(res.data.data || []);
+      }
+    } catch (err) {
+      console.error("Error loading violations", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(timer);
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get("/admin/dashboard");
+        if (res.data?.status === "success") {
+          setCurrentUser(res.data.data);
+        }
+      } catch (err) {
+        console.error("Error loading admin profile", err);
+      }
+    };
+    setTimeout(() => {
+      fetchProfile();
+      fetchViolations();
+    }, 0);
   }, []);
 
   const openCreateDialog = () => {
@@ -84,10 +106,10 @@ export default function ViolationsPage() {
   const openEditDialog = (vio) => {
     setFormMode("edit");
     setTargetViolation(vio);
-    setTitle(vio.title);
-    setDescription(vio.description);
-    setFineAmount(vio.fineAmount.toString());
-    setRewardPoints((vio.rewardPoints || 0).toString());
+    setTitle(vio.offence_name || "");
+    setDescription(vio.mv_act_code || "");
+    setFineAmount((vio.fine_amount || 0).toString());
+    setRewardPoints((vio.reward_points || 0).toString());
     setIsFormOpen(true);
   };
 
@@ -101,58 +123,74 @@ export default function ViolationsPage() {
     setIsStatusConfirmOpen(true);
   };
 
-  const handleSaveViolation = (e) => {
+  const handleSaveViolation = async (e) => {
     e.preventDefault();
     if (!title || !fineAmount || !rewardPoints) return;
 
-    if (formMode === "create") {
-      const newVio = {
-        id: `VIO-0${violations.length + 1}`,
-        title,
-        description,
-        fineAmount: parseFloat(fineAmount) || 0,
-        rewardPoints: parseInt(rewardPoints) || 0,
-        status: "Active"
-      };
-      setViolations([...violations, newVio]);
-    } else {
-      setViolations(
-        violations.map((v) =>
-          v.id === targetViolation.id
-            ? { 
-                ...v, 
-                title, 
-                description, 
-                fineAmount: parseFloat(fineAmount) || 0,
-                rewardPoints: parseInt(rewardPoints) || 0 
-              }
-            : v
-        )
-      );
+    const payload = {
+      offence_name: title,
+      mv_act_code: description,
+      fine_amount: parseFloat(fineAmount) || 0,
+      reward_points: parseInt(rewardPoints, 10) || 0
+    };
+
+    try {
+      if (formMode === "create") {
+        const res = await api.post("/admin/violations", payload);
+        if (res.data?.status === "success") {
+          toast.success("Violation definition created successfully.");
+          setLoading(true);
+          await fetchViolations();
+        }
+      } else {
+        const res = await api.put(`/admin/violations/${targetViolation.id}`, payload);
+        if (res.data?.status === "success") {
+          toast.success("Violation definition updated successfully.");
+          setLoading(true);
+          await fetchViolations();
+        }
+      }
+      setIsFormOpen(false);
+      setTargetViolation(null);
+    } catch (err) {
+      console.error("Error saving violation", err);
+      toast.error(err.response?.data?.message || "Error saving violation definition");
     }
-    
-    setIsFormOpen(false);
-    setTargetViolation(null);
   };
 
-  const handleConfirmStatusToggle = () => {
+  const handleConfirmStatusToggle = async () => {
     if (!statusTargetViolation) return;
-    setViolations(
-      violations.map((v) =>
-        v.id === statusTargetViolation.id
-          ? { ...v, status: v.status === "Active" ? "Inactive" : "Active" }
-          : v
-      )
-    );
-    setIsStatusConfirmOpen(false);
-    setStatusTargetViolation(null);
+    try {
+      const newStatus = !statusTargetViolation.is_active;
+      const res = await api.patch(`/admin/violations/${statusTargetViolation.id}/status`, { is_active: newStatus });
+      if (res.data?.status === "success") {
+        toast.success(`Violation status updated: ${newStatus ? "Activated" : "Deactivated"}`);
+        setLoading(true);
+        await fetchViolations();
+      }
+      setIsStatusConfirmOpen(false);
+      setStatusTargetViolation(null);
+    } catch (err) {
+      console.error("Error toggling status", err);
+      toast.error(err.response?.data?.message || "Error toggling status");
+    }
   };
 
-  const handleDeleteViolation = () => {
+  const handleDeleteViolation = async () => {
     if (!targetViolation) return;
-    setViolations(violations.filter((v) => v.id !== targetViolation.id));
-    setIsConfirmOpen(false);
-    setTargetViolation(null);
+    try {
+      const res = await api.delete(`/admin/violations/${targetViolation.id}`);
+      if (res.data?.status === "success") {
+        toast.success("Violation definition deleted successfully.");
+        setLoading(true);
+        await fetchViolations();
+      }
+      setIsConfirmOpen(false);
+      setTargetViolation(null);
+    } catch (err) {
+      console.error("Error deleting violation", err);
+      toast.error(err.response?.data?.message || "Error deleting violation");
+    }
   };
 
   return (
@@ -242,27 +280,27 @@ export default function ViolationsPage() {
               <TableBody>
                 {violations.map((vio) => (
                   <TableRow key={vio.id}>
-                    <TableCell className="font-mono font-semibold">{vio.id}</TableCell>
+                    <TableCell className="font-mono font-semibold">VIO-{String(vio.id).padStart(3, '0')}</TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-bold text-sm text-foreground">{vio.title}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1 max-w-[400px]">{vio.description}</div>
+                        <div className="font-bold text-sm text-foreground">{vio.offence_name}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1 max-w-[400px]">{vio.mv_act_code}</div>
                       </div>
                     </TableCell>
                     <TableCell className="font-semibold text-sm">
                       <div className="flex items-center gap-0.5">
                         <IndianRupeeIcon className="size-3.5 text-muted-foreground" />
-                        <span>{vio.fineAmount.toLocaleString("en-IN")}</span>
+                        <span>{parseFloat(vio.fine_amount).toLocaleString("en-IN")}</span>
                       </div>
                     </TableCell>
                     <TableCell className="font-semibold text-sm">
                       <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                         <AwardIcon className="size-4" />
-                        <span>{vio.rewardPoints} Pts</span>
+                        <span>{vio.reward_points} Pts</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      {vio.status === "Active" ? (
+                      {vio.is_active ? (
                         <Badge variant="success">Active</Badge>
                       ) : (
                         <Badge variant="outline">Inactive</Badge>
@@ -282,28 +320,30 @@ export default function ViolationsPage() {
                         size="icon"
                         variant="outline"
                         className={`size-8 cursor-pointer ${
-                          vio.status === "Active" 
+                          vio.is_active 
                             ? "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50" 
                             : "text-muted-foreground hover:bg-muted/50"
                         }`}
-                        title={vio.status === "Active" ? "Set Inactive" : "Set Active"}
+                        title={vio.is_active ? "Set Inactive" : "Set Active"}
                         onClick={() => triggerStatusToggleFlow(vio)}
                       >
-                        {vio.status === "Active" ? (
+                        {vio.is_active ? (
                           <ToggleRightIcon className="size-5" />
                         ) : (
                           <ToggleLeftIcon className="size-5" />
                         )}
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
-                        title="Delete Definition"
-                        onClick={() => openDeleteConfirm(vio)}
-                      >
-                        <Trash2Icon className="size-4" />
-                      </Button>
+                      {currentUser?.role === 'super_admin' && (
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
+                          title="Delete Definition"
+                          onClick={() => openDeleteConfirm(vio)}
+                        >
+                          <Trash2Icon className="size-4" />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -332,7 +372,7 @@ export default function ViolationsPage() {
                   placeholder="e.g. Speeding, Red Light Violation"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="space-y-1">
@@ -342,7 +382,7 @@ export default function ViolationsPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary resize-none"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary resize-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -356,7 +396,7 @@ export default function ViolationsPage() {
                       placeholder="500"
                       value={fineAmount}
                       onChange={(e) => setFineAmount(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -370,7 +410,7 @@ export default function ViolationsPage() {
                       placeholder="50"
                       value={rewardPoints}
                       onChange={(e) => setRewardPoints(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -398,7 +438,7 @@ export default function ViolationsPage() {
             <DialogTitle>Delete Violation Definition?</DialogTitle>
             <DialogDescription>
               Are you sure you want to permanently delete the definition for{" "}
-              <strong className="text-foreground">{targetViolation?.title}</strong>? This action is irreversible.
+              <strong className="text-foreground">{targetViolation?.offence_name}</strong>? This action is irreversible.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0 mt-3">
@@ -421,12 +461,12 @@ export default function ViolationsPage() {
             </div>
             <DialogTitle>Change Violation Type Status?</DialogTitle>
             <DialogDescription>
-              Are you sure you want to {statusTargetViolation?.status === "Active" ? "deactivate" : "activate"} the violation type{" "}
-              <strong className="text-foreground">{statusTargetViolation?.title}</strong>?
+              Are you sure you want to {statusTargetViolation?.is_active ? "deactivate" : "activate"} the violation type{" "}
+              <strong className="text-foreground">{statusTargetViolation?.offence_name}</strong>?
             </DialogDescription>
           </DialogHeader>
           <div className="text-xs text-muted-foreground border-y border-border/50 py-3 my-1">
-            {statusTargetViolation?.status === "Active" ? (
+            {statusTargetViolation?.is_active ? (
               <p>Citizens will no longer be able to select this violation type when submitting new incident reports.</p>
             ) : (
               <p>This violation type will be restored, allowing citizens to select it and submit reports again.</p>

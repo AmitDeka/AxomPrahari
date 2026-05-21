@@ -50,13 +50,13 @@ export function NavUser({ user }) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg bg-zinc-800 text-zinc-200">
+                <AvatarFallback className="rounded-lg bg-muted text-muted-foreground">
                   {user.name ? user.name.substring(0, 2).toUpperCase() : "AD"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium text-zinc-200">{user.name}</span>
-                <span className="truncate text-xs text-zinc-400">
+                <span className="truncate font-medium text-foreground">{user.name}</span>
+                <span className="truncate text-xs text-muted-foreground">
                   {user.rank ? `${user.rank} - ${user.jurisdiction_district}` : user.email}
                 </span>
               </div>
@@ -64,7 +64,7 @@ export function NavUser({ user }) {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-zinc-950 border-zinc-800 text-zinc-200"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}>
@@ -72,36 +72,37 @@ export function NavUser({ user }) {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg bg-zinc-800 text-zinc-200">
+                  <AvatarFallback className="rounded-lg bg-muted text-muted-foreground">
                     {user.name ? user.name.substring(0, 2).toUpperCase() : "AD"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium text-zinc-200">{user.name}</span>
-                  <span className="truncate text-xs text-zinc-400">{user.email}</span>
+                  <span className="truncate font-medium text-foreground">{user.name}</span>
+                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
                   {user.rank && (
-                    <span className="truncate text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mt-0.5">
+                    <span className="truncate text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-0.5">
                       {user.rank} ({user.jurisdiction_district})
                     </span>
                   )}
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-zinc-800" />
+            <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer hover:bg-zinc-800 focus:bg-zinc-800 text-zinc-300">
+              <DropdownMenuItem className="cursor-pointer">
                 <BadgeCheckIcon className="size-4 mr-2" />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer hover:bg-zinc-800 focus:bg-zinc-800 text-zinc-300">
+              <DropdownMenuItem className="cursor-pointer">
                 <BellIcon className="size-4 mr-2" />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator className="bg-zinc-800" />
+            <DropdownMenuSeparator />
             <DropdownMenuItem 
               onClick={handleLogout}
-              className="cursor-pointer text-red-400 hover:bg-red-950/30 focus:bg-red-950/30 focus:text-red-400">
+              variant="destructive"
+              className="cursor-pointer">
               <LogOutIcon className="size-4 mr-2" />
               Log out
             </DropdownMenuItem>

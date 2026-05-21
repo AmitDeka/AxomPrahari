@@ -1,6 +1,7 @@
 import { PT_Serif, Lato } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 const ptSerif = PT_Serif({
   variable: "--font-pt-serif",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <TooltipProvider>{children}</TooltipProvider>
+        <Toaster />
       </body>
     </html>
   );

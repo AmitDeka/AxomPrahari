@@ -13,9 +13,14 @@ export const getAdminDashboard = async (req, res) => {
       });
     }
 
+    const stats = await UserModel.getDashboardStats();
+
     res.status(200).json({
       status: 'success',
-      data: adminProfile
+      data: {
+        ...adminProfile,
+        stats
+      }
     });
   } catch (error) {
     console.error('[getAdminDashboard Error]', error);

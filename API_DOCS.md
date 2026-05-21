@@ -40,11 +40,13 @@ This document outlines all currently available API endpoints in the Node.js back
 | HTTP Method | Endpoint Path | Privilege / Role | Description |
 | :--- | :--- | :--- | :--- |
 | **GET** | `/api/v1/admin/dashboard` | Police Admin Only | Retrieves the profile details of the currently logged-in admin. |
-| **GET** | `/api/v1/admin/list` | Super Admin Only | Retrieves a list of all administrators in the system. |
-| **POST** | `/api/v1/admin/create` | Super Admin Only | Creates a new Police Admin account. |
-| **PUT** | `/api/v1/admin/:id` | Super Admin Only | Updates an admin's profile (including changing passwords). |
-| **PATCH** | `/api/v1/admin/:id/status` | Super Admin Only | Toggles an admin's active status (suspend/activate). |
-| **DELETE** | `/api/v1/admin/:id` | Super Admin Only | Permanently deletes a Police Admin account. |
+| **GET** | `/api/v1/admin/list` | Police Admin Only | Retrieves a list of all administrators in the system. |
+| **POST** | `/api/v1/admin/create` | Police Admin Only | Creates a new administrator account (either Police Admin or Super Admin*). |
+| **PUT** | `/api/v1/admin/:id` | Police Admin Only | Updates an administrator's profile details (including password*). |
+| **PATCH** | `/api/v1/admin/:id/status` | Police Admin Only | Toggles an administrator's active status (suspend/activate*). |
+| **DELETE** | `/api/v1/admin/:id` | Police Admin Only | Permanently deletes an administrator account*. |
+
+*\*Subject to strict Access Control Boundaries (see Section 10).*
 
 ## 6. Violation Reports & Heatmap Endpoints (Admin)
 | HTTP Method | Endpoint Path | Privilege / Role | Description |
@@ -71,4 +73,27 @@ This document outlines all currently available API endpoints in the Node.js back
 To facilitate user-friendly communications and lookups, the system automatically generates unique custom identifiers:
 * **Citizen ID (`citizen_id`):** Format `APC-[6-character Alphanumeric]` (e.g. `APC-8K9A2M`). Generated automatically during initial citizen verification.
 * **Report ID (`report_id`):** Format `REP-[YYMMDD]-[6-character Random Hex]` (e.g. `REP-260520-E4B28C`). Generated automatically upon violation report submission.
+
+## 9. Admin Fields & Schema Validation
+When creating or updating administrators via `/api/v1/admin/create` or `/api/v1/admin/:id`, the request bodies are validated using `zod`. The key properties include:
+* **`rank`**: String (min 2 characters). Represents the officer's designation or rank (e.g., "DSP", "Inspector", "SI").
+* **`jurisdiction_district`**: Enum. Must be one of the 35 districts of Assam:
+  * *Bajali, Baksa, Barpeta, Biswanath, Bongaigaon, Cachar, Charaideo, Chirang, Darrang, Dhemaji, Dhubri, Dibrugarh, Dima Hasao, Goalpara, Golaghat, Hailakandi, Hojai, Jorhat, Kamrup, Kamrup Metropolitan, Karbi Anglong, Karimganj, Kokrajhar, Lakhimpur, Majuli, Morigaon, Nagaon, Nalbari, Sivasagar, Sonitpur, South Salmara-Mankachar, Tinsukia, Udalguri, West Karbi Anglong, Tamulpur.*
+* **`role`**: Enum (`police_admin` or `super_admin`).
+* **`email`**: Valid email format string (must be unique).
+* **`password`**: Must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number.
+
+## 10. Admin Access Control Boundaries & Security Constraints
+To enforce security boundaries between administrative roles, the backend verifies the following rules on every operation:
+1. **Self-Operation Prevention**:
+   * No administrator (regardless of whether they are a `police_admin` or `super_admin`) is allowed to **disable** or **delete** their own account.
+   * Any attempt to do so will return a `403 Forbidden` response: `{ "status": "error", "message": "You cannot delete yourself." }` or `{ "status": "error", "message": "You cannot disable yourself." }`.
+2. **Role Boundaries**:
+   * A `police_admin` can manage other `police_admin` accounts but has **no authority** over `super_admin` accounts.
+   * Any attempt by a `police_admin` to edit, disable, or delete a `super_admin` account will return a `403 Forbidden` response: `{ "status": "error", "message": "Police Admins cannot [modify/disable/delete] Super Admins." }`.
+   * A `police_admin` cannot create a `super_admin` or promote any account to `super_admin`. Any such attempt returns a `403 Forbidden` response.
+   * A `super_admin` possesses full rights to manage both `police_admin` and other `super_admin` accounts.
+3. **Session Invalidation on Password Change**:
+   * If an administrator updates their own password, the backend updates their `password_changed_at` timestamp.
+   * The token verification middleware compares the issue time (`iat`) of the JWT against `password_changed_at`. If the token was issued prior to the password update, it immediately evaluates as expired, returning a `401 Unauthorized` response to the client. This triggers an automatic logout and redirects the user to the login screen.
 

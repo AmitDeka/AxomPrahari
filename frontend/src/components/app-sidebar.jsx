@@ -119,6 +119,15 @@ export function AppSidebar({ profile, ...props }) {
     jurisdiction_district: profile?.jurisdiction_district
   };
 
+  const filteredNavMain = React.useMemo(() => {
+    return data.navMain.filter((item) => {
+      if (item.title === "Admins") {
+        return user.role === "super_admin";
+      }
+      return true;
+    });
+  }, [user.role]);
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -141,7 +150,7 @@ export function AppSidebar({ profile, ...props }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={filteredNavMain} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

@@ -117,6 +117,7 @@ export const getAllCitizensAdmin = async (req, res) => {
       email: maskEmail(c.email),
       is_active: c.is_active,
       reward_points: c.reward_points,
+      created_at: c.created_at,
       reports_stats: {
         pending: parseInt(c.pending_count, 10),
         accepted: parseInt(c.accepted_count, 10),

@@ -37,73 +37,43 @@ import {
   UserIcon, 
   MessageSquareIcon,
   ShieldCheckIcon,
-  CameraIcon
+  CameraIcon,
+  VideoIcon
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import api from "@/lib/axios";
+
+const isVideoFile = (url) => {
+  if (!url) return false;
+  const cleanUrl = url.split('?')[0];
+  return /\.(mp4|mov|webm|ogg|m4v)$/i.test(cleanUrl);
+};
 
 export default function SuccessReportsPage() {
   const [loading, setLoading] = useState(true);
-  const [reports] = useState([
-    { 
-      id: "REP-9819", 
-      category: "Encroachment", 
-      location: "Maligaon Gate, Guwahati", 
-      reporter: "Deepak Baruah", 
-      date: "2026-05-17 01:20 PM", 
-      status: "accepted", 
-      actionedBy: "Inspector R. Barua",
-      vehicleNumber: "N/A",
-      gpsCoordinates: "26.1524° N, 91.6882° E",
-      citizenMessage: "Temporary vegetable stalls have expanded completely onto the pedestrian pathway near the flyover foot.",
-      mediaUrl: "/incident_mockup.png"
-    },
-    { 
-      id: "REP-9814", 
-      category: "Theft Report", 
-      location: "AT Road, Jorhat", 
-      reporter: "Nayanmoni Das", 
-      date: "2026-05-16 11:30 AM", 
-      status: "accepted", 
-      actionedBy: "Inspector R. Barua",
-      vehicleNumber: "AS-03-J-4512",
-      gpsCoordinates: "26.7570° N, 94.2120° E",
-      citizenMessage: "Report of stolen motorcycle parked near the commercial complex. CCTV footage shows suspect driving south.",
-      mediaUrl: "/incident_mockup.png"
-    },
-    { 
-      id: "REP-9811", 
-      category: "Road Obstruction", 
-      location: "Gayan Gaon, Tezpur", 
-      reporter: "Partha Pratim", 
-      date: "2026-05-16 08:15 AM", 
-      status: "accepted", 
-      actionedBy: "S.I. T. Gogoi",
-      vehicleNumber: "AS-12-E-1002",
-      gpsCoordinates: "26.6312° N, 92.7990° E",
-      citizenMessage: "A local logistics company has dumped large wooden crates blocking half of the bypass entry road.",
-      mediaUrl: "/incident_mockup.png"
-    },
-    { 
-      id: "REP-9805", 
-      category: "Gambling Activity", 
-      location: "Sonai Road, Silchar", 
-      reporter: "Rajib Laskar", 
-      date: "2026-05-15 10:45 PM", 
-      status: "accepted", 
-      actionedBy: "S.I. S. Deb",
-      vehicleNumber: "N/A",
-      gpsCoordinates: "24.8164° N, 92.7915° E",
-      citizenMessage: "Group of individuals gathering for illegal gambling behind the abandoned warehouse building.",
-      mediaUrl: "/incident_mockup.png"
-    },
-  ]);
+  const [reports, setReports] = useState([]);
 
   // Dialog State
   const [selectedReport, setSelectedReport] = useState(null);
 
+  const fetchReports = async (showLoading = true) => {
+    try {
+      if (showLoading) setLoading(true);
+      const res = await api.get("/admin/reports?status=accepted");
+      if (res.data?.status === "success") {
+        setReports(res.data.data.reports || []);
+      }
+    } catch (err) {
+      console.error("Error loading success reports", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(timer);
+    setTimeout(() => {
+      fetchReports(false);
+    }, 0);
   }, []);
 
   return (
@@ -137,7 +107,7 @@ export default function SuccessReportsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[120px]">Report ID</TableHead>
+                  <TableHead className="w-[150px]">Report ID</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Reporter</TableHead>
@@ -173,7 +143,7 @@ export default function SuccessReportsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[120px]">Report ID</TableHead>
+                  <TableHead className="w-[150px]">Report ID</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Reporter</TableHead>
@@ -186,12 +156,14 @@ export default function SuccessReportsPage() {
               <TableBody>
                 {reports.map((report) => (
                   <TableRow key={report.id}>
-                    <TableCell className="font-mono font-semibold">{report.id}</TableCell>
-                    <TableCell className="font-medium">{report.category}</TableCell>
-                    <TableCell>{report.location}</TableCell>
-                    <TableCell>{report.reporter}</TableCell>
-                    <TableCell className="font-semibold text-xs text-foreground/80">{report.actionedBy}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{report.date}</TableCell>
+                    <TableCell className="font-mono font-semibold">{report.report_id}</TableCell>
+                    <TableCell className="font-medium">{report.offence_name}</TableCell>
+                    <TableCell className="truncate max-w-[200px]">{report.location_name}</TableCell>
+                    <TableCell>{report.citizen_name || "Citizen"}</TableCell>
+                    <TableCell className="font-semibold text-xs text-foreground/80">Verified Admin</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">
+                      {new Date(report.updated_at).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="success">Accepted</Badge>
                     </TableCell>
@@ -222,25 +194,42 @@ export default function SuccessReportsPage() {
               <DialogHeader>
                 <div className="flex items-center gap-2">
                   <Badge variant="success" className="text-[10px] tracking-wider uppercase font-semibold">Accepted & Actioned</Badge>
-                  <span className="font-mono text-xs font-semibold text-muted-foreground">{selectedReport.id}</span>
+                  <span className="font-mono text-xs font-semibold text-muted-foreground">{selectedReport.report_id}</span>
                 </div>
-                <DialogTitle className="text-xl font-bold font-serif">{selectedReport.category}</DialogTitle>
+                <DialogTitle className="text-xl font-bold font-serif">{selectedReport.offence_name}</DialogTitle>
                 <DialogDescription>
-                  Submitted by {selectedReport.reporter} • Approved by {selectedReport.actionedBy}
+                  Submitted by {selectedReport.citizen_name || "Citizen"} • Approved by Verified Admin
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 my-2">
                 {/* Media Preview Container */}
-                <div className="relative rounded-lg overflow-hidden border border-border/80 bg-muted">
-                  <img
-                    src={selectedReport.mediaUrl}
-                    alt="Citizen submission proof"
-                    className="w-full h-[220px] object-cover"
-                  />
+                <div className="relative rounded-lg overflow-hidden border border-border/80 bg-muted flex items-center justify-center min-h-[220px]">
+                  {isVideoFile(selectedReport.media_url) ? (
+                    <video
+                      src={selectedReport.media_url}
+                      controls
+                      className="w-full h-[220px] object-contain bg-black"
+                    />
+                  ) : (
+                    <img
+                      src={selectedReport.media_url || "/incident_mockup.png"}
+                      alt="Citizen submission proof"
+                      className="w-full h-[220px] object-cover"
+                    />
+                  )}
                   <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded flex items-center gap-1.5 font-semibold">
-                    <CameraIcon className="size-3" />
-                    <span>Citizen Upload</span>
+                    {isVideoFile(selectedReport.media_url) ? (
+                      <>
+                        <VideoIcon className="size-3" />
+                        <span>Citizen Video Upload</span>
+                      </>
+                    ) : (
+                      <>
+                        <CameraIcon className="size-3" />
+                        <span>Citizen Image Upload</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -251,12 +240,12 @@ export default function SuccessReportsPage() {
                       <CarIcon className="size-3.5" />
                       <span>Vehicle Number</span>
                     </div>
-                    {selectedReport.vehicleNumber && selectedReport.vehicleNumber !== "N/A" ? (
+                    {selectedReport.vehicle_number && selectedReport.vehicle_number !== "N/A" ? (
                       <span className="font-mono font-bold text-xs uppercase bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50 px-2 py-0.5 rounded tracking-wider">
-                        {selectedReport.vehicleNumber}
+                        {selectedReport.vehicle_number}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground italic font-mono">Not Applicable (N/A)</span>
+                      <span className="text-xs text-muted-foreground italic font-mono">Not Provided (N/A)</span>
                     )}
                   </div>
                   <div className="space-y-1">
@@ -265,7 +254,7 @@ export default function SuccessReportsPage() {
                       <span>GPS Coordinates</span>
                     </div>
                     <span className="font-mono text-xs font-semibold text-foreground/80 bg-background px-2 py-0.5 rounded border border-border/40">
-                      {selectedReport.gpsCoordinates}
+                      {selectedReport.latitude && selectedReport.longitude ? `${selectedReport.latitude}° N, ${selectedReport.longitude}° E` : "Coordinates missing"}
                     </span>
                   </div>
                   <div className="col-span-2 space-y-1">
@@ -273,7 +262,7 @@ export default function SuccessReportsPage() {
                       <MapPinIcon className="size-3.5 text-emerald-500" />
                       <span>Location Reference</span>
                     </div>
-                    <span className="font-medium text-foreground">{selectedReport.location}</span>
+                    <span className="font-medium text-foreground">{selectedReport.location_name}</span>
                   </div>
                   <div className="col-span-2 space-y-1">
                     <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
@@ -281,9 +270,20 @@ export default function SuccessReportsPage() {
                       <span>Validation Signature</span>
                     </div>
                     <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 px-2 py-1 rounded flex items-center gap-1.5">
-                      Verified and authorized for dispatch by {selectedReport.actionedBy}
+                      Verified and authorized for dispatch by Verified Admin
                     </span>
                   </div>
+                  {selectedReport.admin_message && (
+                    <div className="col-span-2 space-y-1">
+                      <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                        <MessageSquareIcon className="size-3.5 text-emerald-500" />
+                        <span>Admin Message / Instruction</span>
+                      </div>
+                      <span className="text-xs font-medium text-foreground bg-background px-2 py-1 rounded border border-border/40 block">
+                        {selectedReport.admin_message}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Citizen Message */}
@@ -294,7 +294,7 @@ export default function SuccessReportsPage() {
                   </div>
                   <div className="bg-muted/40 border-l-2 border-primary/50 p-3 rounded-r-lg">
                     <p className="text-xs italic text-foreground/80 leading-relaxed font-sans">
-                      "{selectedReport.citizenMessage}"
+                      &ldquo;{selectedReport.message || "No additional comments provided."}&rdquo;
                     </p>
                   </div>
                 </div>
@@ -316,3 +316,4 @@ export default function SuccessReportsPage() {
     </>
   );
 }
+

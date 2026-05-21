@@ -30,25 +30,47 @@ import {
 } from "@/components/ui/dialog";
 import { UsersIcon, CheckCircle2Icon, UserXIcon, Trash2Icon, AlertTriangleIcon, AwardIcon } from "lucide-react";
 import { useState, useEffect } from "react";
+import api from "@/lib/axios";
+import { toast } from "sonner";
 
 export default function CitizenTablePage() {
   const [loading, setLoading] = useState(true);
-  const [citizens, setCitizens] = useState([
-    { id: "CIT-0012", name: "Preeti Saikia", email: "preeti.saikia@gmail.com", phone: "+91 94350 12345", rewardPoints: 250, reportsCount: 5, status: "Active", joined: "2026-02-10" },
-    { id: "CIT-0043", name: "Joydeep Sen", email: "joydeep.sen@outlook.com", phone: "+91 98640 54321", rewardPoints: 600, reportsCount: 12, status: "Active", joined: "2026-03-15" },
-    { id: "CIT-0089", name: "Ratul Phukan", email: "ratul.phukan@yahoo.co.in", phone: "+91 99540 98765", rewardPoints: 150, reportsCount: 3, status: "Active", joined: "2026-04-20" },
-    { id: "CIT-0105", name: "Sumit Banik", email: "sumit.banik@rediffmail.com", phone: "+91 88760 11223", rewardPoints: 400, reportsCount: 8, status: "Active", joined: "2026-05-01" },
-    { id: "CIT-0122", name: "Ankur Deka", email: "ankur.deka@gmail.com", phone: "+91 70020 99887", rewardPoints: 50, reportsCount: 1, status: "Disabled", joined: "2026-05-18" },
-  ]);
+  const [citizens, setCitizens] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Modal State
   const [dialogOpen, setDialogOpen] = useState(false);
   const [targetCitizen, setTargetCitizen] = useState(null);
   const [actionType, setActionType] = useState(null); // 'disable' | 'delete' | 'enable'
 
+  const fetchCitizens = async () => {
+    try {
+      const res = await api.get("/admin/citizens");
+      if (res.data?.status === "success") {
+        setCitizens(res.data.data.citizens || []);
+      }
+    } catch (err) {
+      console.error("Error loading citizens", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(timer);
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get("/admin/dashboard");
+        if (res.data?.status === "success") {
+          setCurrentUser(res.data.data);
+        }
+      } catch (err) {
+        console.error("Error loading admin profile", err);
+      }
+    };
+    setTimeout(() => {
+      fetchProfile();
+      fetchCitizens();
+    }, 0);
   }, []);
 
   const openConfirmation = (citizen, type) => {
@@ -57,28 +79,39 @@ export default function CitizenTablePage() {
     setDialogOpen(true);
   };
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = async () => {
     if (!targetCitizen || !actionType) return;
 
-    if (actionType === "delete") {
-      setCitizens(citizens.filter((c) => c.id !== targetCitizen.id));
-    } else if (actionType === "disable") {
-      setCitizens(
-        citizens.map((c) =>
-          c.id === targetCitizen.id ? { ...c, status: "Disabled" } : c
-        )
-      );
-    } else if (actionType === "enable") {
-      setCitizens(
-        citizens.map((c) =>
-          c.id === targetCitizen.id ? { ...c, status: "Active" } : c
-        )
-      );
+    try {
+      if (actionType === "delete") {
+        const res = await api.delete(`/admin/citizens/${targetCitizen.id}`);
+        if (res.data?.status === "success") {
+          toast.success("Citizen account deleted successfully.");
+          setLoading(true);
+          await fetchCitizens();
+        }
+      } else if (actionType === "disable") {
+        const res = await api.patch(`/admin/citizens/${targetCitizen.id}/status`, { is_active: false });
+        if (res.data?.status === "success") {
+          toast.success("Citizen account suspended.");
+          setLoading(true);
+          await fetchCitizens();
+        }
+      } else if (actionType === "enable") {
+        const res = await api.patch(`/admin/citizens/${targetCitizen.id}/status`, { is_active: true });
+        if (res.data?.status === "success") {
+          toast.success("Citizen account reactivated successfully.");
+          setLoading(true);
+          await fetchCitizens();
+        }
+      }
+      setDialogOpen(false);
+      setTargetCitizen(null);
+      setActionType(null);
+    } catch (err) {
+      console.error("Error running administrative action on citizen", err);
+      toast.error(err.response?.data?.message || "Error running action");
     }
-
-    setDialogOpen(false);
-    setTargetCitizen(null);
-    setActionType(null);
   };
 
   return (
@@ -163,61 +196,68 @@ export default function CitizenTablePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {citizens.map((cit) => (
-                  <TableRow key={cit.id}>
-                    <TableCell className="font-mono font-semibold">{cit.id}</TableCell>
-                    <TableCell className="font-medium">{cit.name}</TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">{cit.email}</TableCell>
-                    <TableCell className="font-mono text-xs">{cit.phone}</TableCell>
-                    <TableCell className="font-bold text-center pl-4">{cit.reportsCount}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                        <AwardIcon className="size-4" />
-                        <span>{cit.rewardPoints} Pts</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{cit.joined}</TableCell>
-                    <TableCell>
-                      {cit.status === "Active" ? (
-                        <Badge variant="success">Active</Badge>
-                      ) : (
-                        <Badge variant="destructive">Disabled</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right flex items-center justify-end gap-2 h-full py-3">
-                      {cit.status === "Active" ? (
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="size-8 text-amber-500 hover:text-amber-600 hover:bg-amber-50/50 cursor-pointer"
-                          title="Disable Account"
-                          onClick={() => openConfirmation(cit, "disable")}
-                        >
-                          <UserXIcon className="size-4" />
-                        </Button>
-                      ) : (
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="size-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50 cursor-pointer"
-                          title="Enable Account"
-                          onClick={() => openConfirmation(cit, "enable")}
-                        >
-                          <CheckCircle2Icon className="size-4" />
-                        </Button>
-                      )}
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
-                        title="Delete Account"
-                        onClick={() => openConfirmation(cit, "delete")}
-                      >
-                        <Trash2Icon className="size-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {citizens.map((cit) => {
+                  const reportsCount = (cit.reports_stats?.pending || 0) + (cit.reports_stats?.accepted || 0) + (cit.reports_stats?.rejected || 0);
+                  const joinedDate = cit.created_at ? new Date(cit.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A";
+                  
+                  return (
+                    <TableRow key={cit.id}>
+                      <TableCell className="font-mono font-semibold">{cit.citizen_id || `CIT-${String(cit.id).padStart(4, '0')}`}</TableCell>
+                      <TableCell className="font-medium">{cit.full_name}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{cit.email}</TableCell>
+                      <TableCell className="font-mono text-xs">{cit.phone_number}</TableCell>
+                      <TableCell className="font-bold text-center pl-4">{reportsCount}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                          <AwardIcon className="size-4" />
+                          <span>{cit.reward_points || 0} Pts</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs">{joinedDate}</TableCell>
+                      <TableCell>
+                        {cit.is_active ? (
+                          <Badge variant="success">Active</Badge>
+                        ) : (
+                          <Badge variant="destructive">Disabled</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right flex items-center justify-end gap-2 h-full py-3">
+                        {cit.is_active ? (
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="size-8 text-amber-500 hover:text-amber-600 hover:bg-amber-50/50 cursor-pointer"
+                            title="Disable Account"
+                            onClick={() => openConfirmation(cit, "disable")}
+                          >
+                            <UserXIcon className="size-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="size-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50 cursor-pointer"
+                            title="Enable Account"
+                            onClick={() => openConfirmation(cit, "enable")}
+                          >
+                            <CheckCircle2Icon className="size-4" />
+                          </Button>
+                        )}
+                        {currentUser?.role === 'super_admin' && (
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
+                            title="Delete Account"
+                            onClick={() => openConfirmation(cit, "delete")}
+                          >
+                            <Trash2Icon className="size-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
@@ -234,7 +274,7 @@ export default function CitizenTablePage() {
             <DialogTitle>Confirm Administrative Action</DialogTitle>
             <DialogDescription>
               Are you sure you want to {actionType} the citizen account for{" "}
-              <strong className="text-foreground">{targetCitizen?.name}</strong> ({targetCitizen?.id})?
+              <strong className="text-foreground">{targetCitizen?.full_name}</strong> ({targetCitizen?.citizen_id || targetCitizen?.id})?
             </DialogDescription>
           </DialogHeader>
           <div className="text-xs text-muted-foreground border-y border-border/50 py-3 my-1">

@@ -17,17 +17,81 @@ import {
   XCircleIcon, 
   UsersIcon, 
   MapPinIcon, 
-  TrendingUpIcon 
+  TrendingUpIcon,
+  TrendingDownIcon
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import api from "@/lib/axios";
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    pending: { count: 0, trend: 0 },
+    accepted: { count: 0, trend: 0 },
+    rejected: { count: 0, trend: 0 },
+    active_citizens: { count: 0, trend: 0 }
+  });
+  const [recentReports, setRecentReports] = useState([]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(timer);
+    const fetchData = async () => {
+      try {
+        const [dashboardRes, reportsRes] = await Promise.all([
+          api.get("/admin/dashboard"),
+          api.get("/admin/reports?status=pending&limit=5")
+        ]);
+        if (dashboardRes.data?.status === "success") {
+          setStats(dashboardRes.data.data.stats || {
+            pending: { count: 0, trend: 0 },
+            accepted: { count: 0, trend: 0 },
+            rejected: { count: 0, trend: 0 },
+            active_citizens: { count: 0, trend: 0 }
+          });
+        }
+        if (reportsRes.data?.status === "success") {
+          setRecentReports(reportsRes.data.data.reports || []);
+        }
+      } catch (err) {
+        console.error("Error loading dashboard data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
+
+  const renderTrend = (trendValue, type) => {
+    if (trendValue === 0) {
+      return (
+        <span className="text-xs text-muted-foreground font-medium">
+          No change
+        </span>
+      );
+    }
+
+    const isPositive = trendValue > 0;
+    const formattedTrend = isPositive ? `+${trendValue}%` : `${trendValue}%`;
+
+    // Dynamic colors & icon direction based on metric type
+    let colorClass = "text-muted-foreground";
+    if (type === "pending") {
+      colorClass = isPositive ? "text-amber-500" : "text-emerald-500";
+    } else if (type === "accepted") {
+      colorClass = isPositive ? "text-emerald-500" : "text-rose-500";
+    } else if (type === "rejected") {
+      colorClass = isPositive ? "text-rose-500" : "text-emerald-500";
+    } else if (type === "active_citizens") {
+      colorClass = isPositive ? "text-blue-500" : "text-rose-500";
+    }
+
+    const TrendIcon = isPositive ? TrendingUpIcon : TrendingDownIcon;
+
+    return (
+      <span className={`text-xs ${colorClass} font-medium flex items-center gap-1`}>
+        <TrendIcon className="size-3" /> {formattedTrend}
+      </span>
+    );
+  };
 
   return (
     <>
@@ -89,10 +153,8 @@ export default function DashboardPage() {
                     Pending Reports
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold">24</span>
-                    <span className="text-xs text-amber-500 font-medium flex items-center gap-1">
-                      <TrendingUpIcon className="size-3" /> +12%
-                    </span>
+                    <span className="text-3xl font-extrabold">{stats.pending.count}</span>
+                    {renderTrend(stats.pending.trend, "pending")}
                   </div>
                 </div>
                 <div className="size-12 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
@@ -107,10 +169,8 @@ export default function DashboardPage() {
                     Accepted Reports
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold">142</span>
-                    <span className="text-xs text-emerald-500 font-medium flex items-center gap-1">
-                      <TrendingUpIcon className="size-3" /> +8%
-                    </span>
+                    <span className="text-3xl font-extrabold">{stats.accepted.count}</span>
+                    {renderTrend(stats.accepted.trend, "accepted")}
                   </div>
                 </div>
                 <div className="size-12 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
@@ -125,8 +185,8 @@ export default function DashboardPage() {
                     Rejected Reports
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold">18</span>
-                    <span className="text-xs text-muted-foreground font-medium">No change</span>
+                    <span className="text-3xl font-extrabold">{stats.rejected.count}</span>
+                    {renderTrend(stats.rejected.trend, "rejected")}
                   </div>
                 </div>
                 <div className="size-12 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500">
@@ -141,10 +201,8 @@ export default function DashboardPage() {
                     Active Citizens
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold">1,248</span>
-                    <span className="text-xs text-blue-500 font-medium flex items-center gap-1">
-                      <TrendingUpIcon className="size-3" /> +24%
-                    </span>
+                    <span className="text-3xl font-extrabold">{stats.active_citizens.count.toLocaleString()}</span>
+                    {renderTrend(stats.active_citizens.trend, "active_citizens")}
                   </div>
                 </div>
                 <div className="size-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
@@ -193,13 +251,34 @@ export default function DashboardPage() {
               <div className="col-span-4 rounded-xl border border-border bg-card p-6 shadow-xs min-h-[350px] flex flex-col justify-between">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-bold">Recent Incident Reports</h2>
-                  <span className="text-xs text-primary underline cursor-pointer hover:text-primary/80">View all</span>
+                  <a href="/admin/reports/pending" className="text-xs text-primary underline hover:text-primary/80">View all</a>
                 </div>
-                <div className="flex-1 flex flex-col justify-center items-center rounded-lg border border-dashed border-border bg-muted/20 p-4">
-                  <FileTextIcon className="size-8 text-muted-foreground/60 mb-2 animate-pulse" />
-                  <p className="text-sm font-medium text-muted-foreground">No recent incidents received in the last hour</p>
-                  <p className="text-xs text-muted-foreground/60">Updates will appear dynamically as citizens submit reports.</p>
-                </div>
+                {recentReports.length === 0 ? (
+                  <div className="flex-1 flex flex-col justify-center items-center rounded-lg border border-dashed border-border bg-muted/20 p-4">
+                    <FileTextIcon className="size-8 text-muted-foreground/60 mb-2 animate-pulse" />
+                    <p className="text-sm font-medium text-muted-foreground">No recent incidents received in the last hour</p>
+                    <p className="text-xs text-muted-foreground/60">Updates will appear dynamically as citizens submit reports.</p>
+                  </div>
+                ) : (
+                  <div className="flex-1 space-y-3 overflow-y-auto">
+                    {recentReports.map((report) => (
+                      <div key={report.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/10 hover:bg-muted/20 transition-colors">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold">{report.vehicle_number || "N/A"}</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-medium capitalize">
+                              {report.offence_name || "Violation"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-1">{report.location_name || `${report.latitude}, ${report.longitude}`}</p>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(report.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="col-span-3 rounded-xl border border-border bg-card p-6 shadow-xs min-h-[350px] flex flex-col justify-between">
