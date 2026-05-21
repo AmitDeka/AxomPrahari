@@ -226,7 +226,7 @@ export const updateAdminProfile = async (id, updateData) => {
 
 export const getUserProfileById = async (id) => {
   const result = await db.query(
-    'SELECT citizen_id, full_name, email, username, role, is_active, reward_points, rank, jurisdiction_district FROM users WHERE id = $1',
+    'SELECT id, citizen_id, full_name, email, username, role, is_active, reward_points, rank, jurisdiction_district FROM users WHERE id = $1',
     [id]
   );
   return result.rows[0];

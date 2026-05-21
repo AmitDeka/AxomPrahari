@@ -89,9 +89,11 @@ export function NavUser({ user }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer">
-                <BadgeCheckIcon className="size-4 mr-2" />
-                Account
+              <DropdownMenuItem className="cursor-pointer" asChild>
+                <a href="/admin/account">
+                  <BadgeCheckIcon className="size-4 mr-2" />
+                  Account
+                </a>
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer">
                 <BellIcon className="size-4 mr-2" />
