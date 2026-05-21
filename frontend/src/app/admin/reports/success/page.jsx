@@ -1,0 +1,318 @@
+"use client";
+
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { 
+  CheckCircle2Icon, 
+  EyeIcon, 
+  MapPinIcon, 
+  CarIcon, 
+  ClockIcon, 
+  UserIcon, 
+  MessageSquareIcon,
+  ShieldCheckIcon,
+  CameraIcon
+} from "lucide-react";
+import { useState, useEffect } from "react";
+
+export default function SuccessReportsPage() {
+  const [loading, setLoading] = useState(true);
+  const [reports] = useState([
+    { 
+      id: "REP-9819", 
+      category: "Encroachment", 
+      location: "Maligaon Gate, Guwahati", 
+      reporter: "Deepak Baruah", 
+      date: "2026-05-17 01:20 PM", 
+      status: "accepted", 
+      actionedBy: "Inspector R. Barua",
+      vehicleNumber: "N/A",
+      gpsCoordinates: "26.1524° N, 91.6882° E",
+      citizenMessage: "Temporary vegetable stalls have expanded completely onto the pedestrian pathway near the flyover foot.",
+      mediaUrl: "/incident_mockup.png"
+    },
+    { 
+      id: "REP-9814", 
+      category: "Theft Report", 
+      location: "AT Road, Jorhat", 
+      reporter: "Nayanmoni Das", 
+      date: "2026-05-16 11:30 AM", 
+      status: "accepted", 
+      actionedBy: "Inspector R. Barua",
+      vehicleNumber: "AS-03-J-4512",
+      gpsCoordinates: "26.7570° N, 94.2120° E",
+      citizenMessage: "Report of stolen motorcycle parked near the commercial complex. CCTV footage shows suspect driving south.",
+      mediaUrl: "/incident_mockup.png"
+    },
+    { 
+      id: "REP-9811", 
+      category: "Road Obstruction", 
+      location: "Gayan Gaon, Tezpur", 
+      reporter: "Partha Pratim", 
+      date: "2026-05-16 08:15 AM", 
+      status: "accepted", 
+      actionedBy: "S.I. T. Gogoi",
+      vehicleNumber: "AS-12-E-1002",
+      gpsCoordinates: "26.6312° N, 92.7990° E",
+      citizenMessage: "A local logistics company has dumped large wooden crates blocking half of the bypass entry road.",
+      mediaUrl: "/incident_mockup.png"
+    },
+    { 
+      id: "REP-9805", 
+      category: "Gambling Activity", 
+      location: "Sonai Road, Silchar", 
+      reporter: "Rajib Laskar", 
+      date: "2026-05-15 10:45 PM", 
+      status: "accepted", 
+      actionedBy: "S.I. S. Deb",
+      vehicleNumber: "N/A",
+      gpsCoordinates: "24.8164° N, 92.7915° E",
+      citizenMessage: "Group of individuals gathering for illegal gambling behind the abandoned warehouse building.",
+      mediaUrl: "/incident_mockup.png"
+    },
+  ]);
+
+  // Dialog State
+  const [selectedReport, setSelectedReport] = useState(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <>
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/30 bg-background/50 backdrop-blur px-4">
+        <div className="flex items-center gap-2">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 data-vertical:h-4 data-vertical:self-auto" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <span className="text-muted-foreground">Reports</span>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>All Success (Accepted)</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      </header>
+
+      <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Accepted Incident Reports</h1>
+          <p className="text-muted-foreground text-sm">Reports validated and approved for action by police administration</p>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card shadow-xs overflow-hidden">
+          {loading ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[120px]">Report ID</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Reporter</TableHead>
+                  <TableHead>Approved By</TableHead>
+                  <TableHead>Date Approved</TableHead>
+                  <TableHead className="w-[100px]">Status</TableHead>
+                  <TableHead className="text-right w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 4 }).map((_, rIndex) => (
+                  <TableRow key={rIndex}>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                    <TableCell className="text-right flex items-center justify-end h-full py-3">
+                      <Skeleton className="size-8 rounded-lg" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : reports.length === 0 ? (
+            <div className="p-12 text-center flex flex-col items-center justify-center space-y-3">
+              <CheckCircle2Icon className="size-10 text-muted-foreground/60" />
+              <p className="text-sm font-semibold text-muted-foreground">No accepted reports found</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[120px]">Report ID</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Reporter</TableHead>
+                  <TableHead>Approved By</TableHead>
+                  <TableHead>Date Approved</TableHead>
+                  <TableHead className="w-[100px]">Status</TableHead>
+                  <TableHead className="text-right w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {reports.map((report) => (
+                  <TableRow key={report.id}>
+                    <TableCell className="font-mono font-semibold">{report.id}</TableCell>
+                    <TableCell className="font-medium">{report.category}</TableCell>
+                    <TableCell>{report.location}</TableCell>
+                    <TableCell>{report.reporter}</TableCell>
+                    <TableCell className="font-semibold text-xs text-foreground/80">{report.actionedBy}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">{report.date}</TableCell>
+                    <TableCell>
+                      <Badge variant="success">Accepted</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button 
+                        size="icon" 
+                        variant="outline" 
+                        className="size-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50/50 cursor-pointer"
+                        title="View Details"
+                        onClick={() => setSelectedReport(report)}
+                      >
+                        <EyeIcon className="size-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      </main>
+
+      {/* Incident Details Dialog Modal */}
+      <Dialog open={selectedReport !== null} onOpenChange={(open) => !open && setSelectedReport(null)}>
+        <DialogContent className="sm:max-w-[550px] p-6 max-h-[90vh] overflow-y-auto">
+          {selectedReport && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-2">
+                  <Badge variant="success" className="text-[10px] tracking-wider uppercase font-semibold">Accepted & Actioned</Badge>
+                  <span className="font-mono text-xs font-semibold text-muted-foreground">{selectedReport.id}</span>
+                </div>
+                <DialogTitle className="text-xl font-bold font-serif">{selectedReport.category}</DialogTitle>
+                <DialogDescription>
+                  Submitted by {selectedReport.reporter} • Approved by {selectedReport.actionedBy}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 my-2">
+                {/* Media Preview Container */}
+                <div className="relative rounded-lg overflow-hidden border border-border/80 bg-muted">
+                  <img
+                    src={selectedReport.mediaUrl}
+                    alt="Citizen submission proof"
+                    className="w-full h-[220px] object-cover"
+                  />
+                  <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded flex items-center gap-1.5 font-semibold">
+                    <CameraIcon className="size-3" />
+                    <span>Citizen Upload</span>
+                  </div>
+                </div>
+
+                {/* Structured Metadata Grid */}
+                <div className="grid grid-cols-2 gap-4 text-sm bg-muted/30 p-3 rounded-lg border border-border/50">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                      <CarIcon className="size-3.5" />
+                      <span>Vehicle Number</span>
+                    </div>
+                    {selectedReport.vehicleNumber && selectedReport.vehicleNumber !== "N/A" ? (
+                      <span className="font-mono font-bold text-xs uppercase bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50 px-2 py-0.5 rounded tracking-wider">
+                        {selectedReport.vehicleNumber}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic font-mono">Not Applicable (N/A)</span>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                      <MapPinIcon className="size-3.5" />
+                      <span>GPS Coordinates</span>
+                    </div>
+                    <span className="font-mono text-xs font-semibold text-foreground/80 bg-background px-2 py-0.5 rounded border border-border/40">
+                      {selectedReport.gpsCoordinates}
+                    </span>
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                      <MapPinIcon className="size-3.5 text-emerald-500" />
+                      <span>Location Reference</span>
+                    </div>
+                    <span className="font-medium text-foreground">{selectedReport.location}</span>
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                      <ShieldCheckIcon className="size-3.5 text-emerald-500" />
+                      <span>Validation Signature</span>
+                    </div>
+                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 px-2 py-1 rounded flex items-center gap-1.5">
+                      Verified and authorized for dispatch by {selectedReport.actionedBy}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Citizen Message */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                    <MessageSquareIcon className="size-3.5" />
+                    <span>Reporter Message</span>
+                  </div>
+                  <div className="bg-muted/40 border-l-2 border-primary/50 p-3 rounded-r-lg">
+                    <p className="text-xs italic text-foreground/80 leading-relaxed font-sans">
+                      "{selectedReport.citizenMessage}"
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter className="border-t border-border/40 pt-4 mt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedReport(null)}
+                  className="cursor-pointer w-full sm:w-auto"
+                >
+                  Close Details
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

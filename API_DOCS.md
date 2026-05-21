@@ -66,3 +66,9 @@ This document outlines all currently available API endpoints in the Node.js back
 * **Authenticated (Any) / Citizen:** Requires a valid JWT, generally from the citizen login flow.
 * **Police Admin Only:** Requires an admin JWT with at least the `police_admin` role (Super Admins inherit this).
 * **Super Admin Only:** Strictly restricted to the `super_admin` role.
+
+## 8. Custom Identification Fields
+To facilitate user-friendly communications and lookups, the system automatically generates unique custom identifiers:
+* **Citizen ID (`citizen_id`):** Format `APC-[6-character Alphanumeric]` (e.g. `APC-8K9A2M`). Generated automatically during initial citizen verification.
+* **Report ID (`report_id`):** Format `REP-[YYMMDD]-[6-character Random Hex]` (e.g. `REP-260520-E4B28C`). Generated automatically upon violation report submission.
+

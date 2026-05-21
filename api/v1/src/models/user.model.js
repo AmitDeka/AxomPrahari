@@ -1,5 +1,27 @@
 import { db } from '../config/db.config.js';
 
+export const generateUniqueCitizenId = async () => {
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let isUnique = false;
+  let citizenId = '';
+  
+  while (!isUnique) {
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    citizenId = `APC-${code}`;
+    
+    // Check if it already exists
+    const result = await db.query('SELECT id FROM users WHERE citizen_id = $1', [citizenId]);
+    if (result.rows.length === 0) {
+      isUnique = true;
+    }
+  }
+  
+  return citizenId;
+};
+
 export const findUserByPhone = async (phone) => {
   const result = await db.query('SELECT * FROM users WHERE phone_number = $1', [phone]);
   return result.rows[0];
@@ -11,10 +33,11 @@ export const findUserByEmail = async (email) => {
 };
 
 export const createIncompleteCitizen = async (phone) => {
+  const citizenId = await generateUniqueCitizenId();
   const result = await db.query(
-    `INSERT INTO users (phone_number, role, profile_status) 
-     VALUES ($1, 'citizen', 'incomplete') RETURNING *`,
-    [phone]
+    `INSERT INTO users (citizen_id, phone_number, role, profile_status) 
+     VALUES ($1, $2, 'citizen', 'incomplete') RETURNING *`,
+    [citizenId, phone]
   );
   return result.rows[0];
 };
@@ -107,7 +130,7 @@ export const updateAdminProfile = async (id, updateData) => {
 
 export const getUserProfileById = async (id) => {
   const result = await db.query(
-    'SELECT full_name, email, username, role, is_active, reward_points FROM users WHERE id = $1',
+    'SELECT citizen_id, full_name, email, username, role, is_active, reward_points FROM users WHERE id = $1',
     [id]
   );
   return result.rows[0];
@@ -147,7 +170,7 @@ export const updateCitizenProfile = async (id, updateData) => {
     UPDATE users 
     SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP
     WHERE id = $${index} AND role = 'citizen' 
-    RETURNING id, full_name, email, username, role, reward_points
+    RETURNING id, citizen_id, full_name, email, username, role, reward_points
   `;
 
   const result = await db.query(query, values);
@@ -174,6 +197,7 @@ export const getCitizensListWithStats = async (limit = 10, offset = 0) => {
   const query = `
     SELECT 
       u.id, 
+      u.citizen_id,
       u.full_name, 
       u.phone_number, 
       u.username, 

@@ -6,6 +6,7 @@
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
+    citizen_id VARCHAR(50) UNIQUE,
     phone_number VARCHAR(15) UNIQUE,
     email VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255),
@@ -45,6 +46,7 @@ CREATE TABLE IF NOT EXISTS violation_master (
 -- Table to store citizen violation reports
 CREATE TABLE IF NOT EXISTS violation_reports (
     id SERIAL PRIMARY KEY,
+    report_id VARCHAR(50) UNIQUE,
     citizen_id INT REFERENCES users(id) ON DELETE CASCADE,
     violation_id INT REFERENCES violation_master(id),
     media_url VARCHAR(500) NOT NULL,

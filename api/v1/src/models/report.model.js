@@ -1,11 +1,41 @@
+import crypto from 'crypto';
 import { db } from '../config/db.config.js';
 
+const getYYMMDD = () => {
+  const date = new Date();
+  const yy = String(date.getFullYear()).slice(-2);
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yy}${mm}${dd}`;
+};
+
+export const generateUniqueReportId = async () => {
+  let isUnique = false;
+  let reportId = '';
+  
+  while (!isUnique) {
+    const dateStr = getYYMMDD();
+    const hexStr = crypto.randomBytes(3).toString('hex').toUpperCase();
+    reportId = `REP-${dateStr}-${hexStr}`;
+    
+    // Check if it already exists
+    const result = await db.query('SELECT id FROM violation_reports WHERE report_id = $1', [reportId]);
+    if (result.rows.length === 0) {
+      isUnique = true;
+    }
+  }
+  
+  return reportId;
+};
+
 export const createReport = async (citizenId, data) => {
+  const reportId = await generateUniqueReportId();
   const result = await db.query(
     `INSERT INTO violation_reports 
-      (citizen_id, violation_id, media_url, location_name, latitude, longitude, vehicle_number, incident_date, incident_time, message, status) 
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending') RETURNING *`,
+      (report_id, citizen_id, violation_id, media_url, location_name, latitude, longitude, vehicle_number, incident_date, incident_time, message, status) 
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending') RETURNING *`,
     [
+      reportId,
       citizenId,
       data.violation_id,
       data.media_url,
@@ -58,7 +88,7 @@ export const getCitizenReports = async (citizenId, statusFilter = null, limit = 
 
 export const getAdminReports = async (statusFilter = null, limit = 20, offset = 0) => {
   let query = `
-    SELECT r.*, v.offence_name, v.mv_act_code, u.full_name as citizen_name, u.phone_number
+    SELECT r.*, v.offence_name, v.mv_act_code, u.full_name as citizen_name, u.phone_number, u.citizen_id as citizen_code
     FROM violation_reports r
     JOIN violation_master v ON r.violation_id = v.id
     JOIN users u ON r.citizen_id = u.id

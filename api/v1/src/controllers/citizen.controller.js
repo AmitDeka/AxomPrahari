@@ -110,6 +110,7 @@ export const getAllCitizensAdmin = async (req, res) => {
     // Mask citizen details before sending
     const maskedCitizens = citizens.map(c => ({
       id: c.id,
+      citizen_id: c.citizen_id,
       full_name: maskName(c.full_name),
       phone_number: maskPhone(c.phone_number),
       username: maskUsername(c.username),
