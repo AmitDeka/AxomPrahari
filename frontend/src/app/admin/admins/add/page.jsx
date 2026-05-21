@@ -17,36 +17,83 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { ShieldPlusIcon, CheckCircle2Icon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "@/lib/axios";
+import { ComboboxWithStates1 } from "@/components/ui/combobox-with-states-1";
 
 export default function AddPoliceAdminPage() {
+  const [currentUser, setCurrentUser] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     district: "Kamrup Metropolitan",
-    rank: "Sub-Inspector (S.I.)",
+    rank: "",
+    role: "police_admin",
     password: "",
   });
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    // Get logged-in user profile to check role
+    api.get("/admin/dashboard")
+      .then((res) => {
+        if (res.data?.status === "success") {
+          setCurrentUser(res.data.data);
+          // If the logged-in user is a police_admin, force role to police_admin
+          if (res.data.data.role === "police_admin") {
+            setFormData(prev => ({ ...prev, role: "police_admin" }));
+          }
+        }
+      })
+      .catch((err) => console.error("Error fetching current user", err));
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
+    setSuccess(false);
+    setError("");
+
+    if (!formData.name || !formData.email || !formData.rank || !formData.district || !formData.password) {
+      setError("Please fill in all fields.");
       setLoading(false);
-      setSuccess(true);
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        district: "Kamrup Metropolitan",
-        rank: "Sub-Inspector (S.I.)",
-        password: "",
-      });
-      // Clear success message after 4 seconds
-      setTimeout(() => setSuccess(false), 4000);
-    }, 800);
+      return;
+    }
+
+    try {
+      const payload = {
+        full_name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        rank: formData.rank,
+        jurisdiction_district: formData.district
+      };
+
+      const res = await api.post("/admin/create", payload);
+
+      if (res.data?.status === "success") {
+        setSuccess(true);
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          district: "Kamrup Metropolitan",
+          rank: "",
+          role: currentUser?.role === "super_admin" ? "police_admin" : "police_admin",
+          password: "",
+        });
+        // Clear success message after 4 seconds
+        setTimeout(() => setSuccess(false), 4000);
+      }
+    } catch (err) {
+      console.error("Error creating admin account", err);
+      setError(err.response?.data?.error || err.response?.data?.message || "Failed to create administrator account.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -82,24 +129,30 @@ export default function AddPoliceAdminPage() {
           </div>
         )}
 
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        {error && (
+          <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/5 text-rose-600 dark:text-rose-400 text-sm flex gap-2.5 items-center">
+            <p className="font-semibold">{error}</p>
+          </div>
+        )}
+
+        <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-6 shadow-sm text-zinc-200">
           <form onSubmit={handleSubmit} className="space-y-6">
             <FieldGroup className="space-y-4">
               <Field>
-                <FieldLabel htmlFor="officer-name">Officer Rank & Full Name</FieldLabel>
+                <FieldLabel htmlFor="officer-name" className="text-zinc-400">Officer Full Name</FieldLabel>
                 <Input
                   id="officer-name"
                   type="text"
                   required
-                  placeholder="e.g. Inspector R. Barua"
+                  placeholder="e.g. Ramesh Baruah"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-background"
+                  className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="officer-email">Email Address (@axomprahari.gov.in)</FieldLabel>
+                <FieldLabel htmlFor="officer-email" className="text-zinc-400">Email Address (@axomprahari.gov.in)</FieldLabel>
                 <Input
                   id="officer-email"
                   type="email"
@@ -107,62 +160,67 @@ export default function AddPoliceAdminPage() {
                   placeholder="e.g. r.barua@axomprahari.gov.in"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="bg-background"
+                  className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
                 />
               </Field>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <Field>
-                  <FieldLabel htmlFor="officer-rank">Officer Designation Rank</FieldLabel>
-                  <select
+                  <FieldLabel htmlFor="officer-rank" className="text-zinc-400">Officer Rank / Designation</FieldLabel>
+                  <Input
                     id="officer-rank"
+                    type="text"
+                    required
+                    placeholder="e.g. Sub-Inspector (S.I.)"
                     value={formData.rank}
                     onChange={(e) => setFormData({ ...formData, rank: e.target.value })}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="Sub-Inspector (S.I.)">Sub-Inspector (S.I.)</option>
-                    <option value="Inspector of Police">Inspector of Police</option>
-                    <option value="DSP / Assistant Commissioner">DSP / Assistant Commissioner</option>
-                    <option value="Superintendent of Police (SP)">Superintendent of Police (SP)</option>
-                  </select>
+                    className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
+                  />
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="officer-district">Jurisdiction District</FieldLabel>
-                  <select
-                    id="officer-district"
+                  <FieldLabel htmlFor="officer-district" className="text-zinc-400">Jurisdiction District</FieldLabel>
+                  <ComboboxWithStates1
                     value={formData.district}
-                    onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="Kamrup Metropolitan">Kamrup Metropolitan</option>
-                    <option value="Jorhat">Jorhat</option>
-                    <option value="Cachar (Silchar)">Cachar (Silchar)</option>
-                    <option value="Sonitpur (Tezpur)">Sonitpur (Tezpur)</option>
-                    <option value="Dibrugarh">Dibrugarh</option>
-                    <option value="Nagaon">Nagaon</option>
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, district: val })}
+                    placeholder="Select Assam district..."
+                  />
                 </Field>
               </div>
 
+              {currentUser?.role === "super_admin" && (
+                <Field>
+                  <FieldLabel htmlFor="officer-role" className="text-zinc-400">Access Level / Role</FieldLabel>
+                  <select
+                    id="officer-role"
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    className="flex h-10 w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="police_admin">Police Administrator</option>
+                    <option value="super_admin">Super Administrator</option>
+                  </select>
+                </Field>
+              )}
+
               <Field>
-                <FieldLabel htmlFor="officer-password">Temporary Access Password</FieldLabel>
+                <FieldLabel htmlFor="officer-password" className="text-zinc-400">Temporary Access Password</FieldLabel>
                 <Input
                   id="officer-password"
                   type="password"
                   required
-                  placeholder="Minimum 8 characters"
+                  placeholder="Minimum 8 characters (1 uppercase, 1 lowercase, 1 number)"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="bg-background"
+                  className="bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-600"
                 />
               </Field>
 
-              <div className="flex gap-3 justify-end pt-4 border-t border-border/50">
+              <div className="flex gap-3 justify-end pt-4 border-t border-zinc-800/50">
                 <Button 
                   type="submit" 
                   disabled={loading}
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-2 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95"
                 >
                   <ShieldPlusIcon className="size-4" />
                   {loading ? "Creating..." : "Save Officer Account"}

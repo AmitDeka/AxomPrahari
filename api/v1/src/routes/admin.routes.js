@@ -16,8 +16,8 @@ router.get(
   getAdminDashboard
 );
 
-// --- STRICTLY SUPER ADMIN ROUTES BELOW ---
-router.use(requireRole(['super_admin']));
+// --- ADMIN CRUD ROUTES BELOW (Accessible by both Super Admin and Police Admin) ---
+router.use(requireRole(['super_admin', 'police_admin']));
 
 // Get all admins
 router.get('/list', getAllAdminsList);

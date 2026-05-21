@@ -38,15 +38,13 @@ import {
   AlertTriangleIcon 
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import api from "@/lib/axios";
+import { ComboboxWithStates1 } from "@/components/ui/combobox-with-states-1";
 
 export default function PoliceAdminPage() {
   const [loading, setLoading] = useState(true);
-  const [officers, setOfficers] = useState([
-    { id: "POL-2901", name: "SP Ramesh Baruah", email: "sp.jorhat@axomprahari.gov.in", location: "Jorhat District", status: "Active" },
-    { id: "POL-3104", name: "DSP Pranjal Phukan", email: "dsp.ops@axomprahari.gov.in", location: "Kamrup Metropolitan", status: "Active" },
-    { id: "POL-0982", name: "Inspector Hitesh Das", email: "hitesh.das@axomprahari.gov.in", location: "Tezpur Subdivision", status: "Active" },
-    { id: "POL-1122", name: "SI Tarun Deb", email: "tarun.deb@axomprahari.gov.in", location: "Silchar Sadar", status: "Active" },
-  ]);
+  const [officers, setOfficers] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Dialog States
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -56,66 +54,156 @@ export default function PoliceAdminPage() {
   const [targetOfficer, setTargetOfficer] = useState(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [location, setLocation] = useState("");
+  const [rank, setRank] = useState("");
+  const [jurisdictionDistrict, setJurisdictionDistrict] = useState("");
   const [password, setPassword] = useState("");
 
-  const districts = ["Kamrup Metropolitan", "Jorhat District", "Dibrugarh District", "Cachar District", "Tezpur Subdivision", "Silchar Sadar"];
+  const fetchOfficers = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/admin/list");
+      if (res.data?.status === "success") {
+        const policeAdmins = res.data.data.filter(a => a.role === "police_admin");
+        setOfficers(policeAdmins);
+      }
+    } catch (err) {
+      console.error("Error fetching officers list", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(timer);
+    // Get logged-in user profile
+    api.get("/admin/dashboard")
+      .then((res) => {
+        if (res.data?.status === "success") {
+          setCurrentUser(res.data.data);
+        }
+      })
+      .catch((err) => console.error("Error fetching current user", err));
+
+    fetchOfficers();
   }, []);
 
   const openEditDialog = (off) => {
     setTargetOfficer(off);
-    setName(off.name);
-    setEmail(off.email);
-    setLocation(off.location);
+    setName(off.full_name || "");
+    setEmail(off.email || "");
+    setRank(off.rank || "");
+    setJurisdictionDistrict(off.jurisdiction_district || "");
     setPassword("");
     setIsFormOpen(true);
   };
 
   const openDeleteConfirm = (off) => {
+    if (off.id === currentUser?.id) {
+      alert("You cannot delete yourself.");
+      return;
+    }
     setTargetOfficer(off);
     setIsConfirmOpen(true);
   };
 
   const openStatusConfirm = (off) => {
+    if (off.id === currentUser?.id) {
+      alert("You cannot disable yourself.");
+      return;
+    }
     setTargetOfficer(off);
     setIsStatusOpen(true);
   };
 
-  const handleSaveOfficer = (e) => {
+  const handleSaveOfficer = async (e) => {
     e.preventDefault();
-    if (!name || !email || !location) return;
+    if (!name || !email || !rank || !jurisdictionDistrict) {
+      alert("Please fill in all required fields.");
+      return;
+    }
 
-    setOfficers(
-      officers.map((o) =>
-        o.id === targetOfficer.id ? { ...o, name, email, location } : o
-      )
-    );
-    setIsFormOpen(false);
-    setTargetOfficer(null);
+    try {
+      const payload = {
+        full_name: name,
+        email,
+        rank,
+        jurisdiction_district: jurisdictionDistrict
+      };
+
+      if (password) {
+        payload.password = password;
+      }
+
+      const res = await api.put(`/admin/${targetOfficer.id}`, payload);
+      
+      if (res.data?.status === "success") {
+        if (targetOfficer.id === currentUser?.id && password) {
+          alert("Your password has been changed. You will be logged out now.");
+          localStorage.removeItem("admin_token");
+          window.location.href = "/login";
+          return;
+        }
+
+        if (targetOfficer.id === currentUser?.id) {
+          window.location.reload();
+          return;
+        }
+
+        setIsFormOpen(false);
+        setTargetOfficer(null);
+        fetchOfficers();
+      }
+    } catch (err) {
+      console.error("Error saving officer", err);
+      alert(err.response?.data?.error || err.response?.data?.message || "Failed to update officer.");
+    }
   };
 
-  const handleToggleStatus = () => {
+  const handleToggleStatus = async () => {
     if (!targetOfficer) return;
-    setOfficers(
-      officers.map((o) =>
-        o.id === targetOfficer.id
-          ? { ...o, status: o.status === "Active" ? "Suspended" : "Active" }
-          : o
-      )
-    );
-    setIsStatusOpen(false);
-    setTargetOfficer(null);
+
+    if (targetOfficer.id === currentUser?.id) {
+      alert("You cannot disable yourself!");
+      setIsStatusOpen(false);
+      return;
+    }
+
+    try {
+      const res = await api.patch(`/admin/${targetOfficer.id}/status`, {
+        is_active: !targetOfficer.is_active
+      });
+
+      if (res.data?.status === "success") {
+        setIsStatusOpen(false);
+        setTargetOfficer(null);
+        fetchOfficers();
+      }
+    } catch (err) {
+      console.error("Error toggling status", err);
+      alert(err.response?.data?.error || err.response?.data?.message || "Failed to toggle status.");
+    }
   };
 
-  const handleDeleteOfficer = () => {
+  const handleDeleteOfficer = async () => {
     if (!targetOfficer) return;
-    setOfficers(officers.filter((o) => o.id !== targetOfficer.id));
-    setIsConfirmOpen(false);
-    setTargetOfficer(null);
+
+    if (targetOfficer.id === currentUser?.id) {
+      alert("You cannot delete yourself!");
+      setIsConfirmOpen(false);
+      return;
+    }
+
+    try {
+      const res = await api.delete(`/admin/${targetOfficer.id}`);
+
+      if (res.data?.status === "success") {
+        setIsConfirmOpen(false);
+        setTargetOfficer(null);
+        fetchOfficers();
+      }
+    } catch (err) {
+      console.error("Error deleting officer", err);
+      alert(err.response?.data?.error || err.response?.data?.message || "Failed to delete officer.");
+    }
   };
 
   return (
@@ -152,6 +240,7 @@ export default function PoliceAdminPage() {
                   <TableHead className="w-[120px]">Officer ID</TableHead>
                   <TableHead>Officer Name</TableHead>
                   <TableHead>Email Address</TableHead>
+                  <TableHead>Rank</TableHead>
                   <TableHead className="w-[180px]">District Jurisdiction</TableHead>
                   <TableHead className="w-[120px]">Status</TableHead>
                   <TableHead className="text-right w-[150px]">Actions</TableHead>
@@ -163,6 +252,7 @@ export default function PoliceAdminPage() {
                     <TableCell><Skeleton className="h-4 w-16 font-mono" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32 font-mono" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
                     <TableCell className="text-right flex items-center justify-end gap-2 h-full py-3">
@@ -186,69 +276,79 @@ export default function PoliceAdminPage() {
                   <TableHead className="w-[120px]">Officer ID</TableHead>
                   <TableHead>Officer Name</TableHead>
                   <TableHead>Email Address</TableHead>
+                  <TableHead>Rank</TableHead>
                   <TableHead className="w-[180px]">District Jurisdiction</TableHead>
                   <TableHead className="w-[120px]">Status</TableHead>
                   <TableHead className="text-right w-[150px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {officers.map((off) => (
-                  <TableRow key={off.id}>
-                    <TableCell className="font-mono font-semibold">{off.id}</TableCell>
-                    <TableCell className="font-medium">{off.name}</TableCell>
-                    <TableCell className="font-mono text-xs">{off.email}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-muted-foreground font-semibold text-xs">
-                        <ShieldIcon className="size-4 text-emerald-500" />
-                        <span className="text-foreground/80">{off.location}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {off.status === "Active" ? (
-                        <Badge variant="success">Active</Badge>
-                      ) : (
-                        <Badge variant="destructive">Suspended</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right flex items-center justify-end gap-2 h-full py-3">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="size-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50/50 cursor-pointer"
-                        title="Edit Officer Profile"
-                        onClick={() => openEditDialog(off)}
-                      >
-                        <EditIcon className="size-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className={`size-8 cursor-pointer ${
-                          off.status === "Active"
-                            ? "text-amber-500 hover:text-amber-600 hover:bg-amber-50/50"
-                            : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50"
-                        }`}
-                        title={off.status === "Active" ? "Suspend Officer" : "Reactivate Officer"}
-                        onClick={() => openStatusConfirm(off)}
-                      >
-                        {off.status === "Active" ? (
-                          <UserXIcon className="size-4" />
+                {officers.map((off) => {
+                  const isSelf = off.id === currentUser?.id;
+                  
+                  return (
+                    <TableRow key={off.id}>
+                      <TableCell className="font-mono font-semibold">ADM-{String(off.id).padStart(4, '0')}</TableCell>
+                      <TableCell className="font-medium">
+                        {off.full_name} {isSelf && <span className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded ml-1 font-semibold uppercase">You</span>}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">{off.email}</TableCell>
+                      <TableCell className="text-xs font-semibold text-zinc-300">{off.rank || "N/A"}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 text-muted-foreground font-semibold text-xs">
+                          <ShieldIcon className="size-4 text-emerald-500" />
+                          <span className="text-foreground/80">{off.jurisdiction_district || "N/A"}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {off.is_active ? (
+                          <Badge variant="success">Active</Badge>
                         ) : (
-                          <UserCheckIcon className="size-4" />
+                          <Badge variant="destructive">Suspended</Badge>
                         )}
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
-                        title="Delete Officer"
-                        onClick={() => openDeleteConfirm(off)}
-                      >
-                        <Trash2Icon className="size-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell className="text-right flex items-center justify-end gap-2 h-full py-3">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="size-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50/50 cursor-pointer"
+                          title="Edit Officer Profile"
+                          onClick={() => openEditDialog(off)}
+                        >
+                          <EditIcon className="size-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          disabled={isSelf}
+                          className={`size-8 cursor-pointer disabled:opacity-30 ${
+                            off.is_active
+                              ? "text-amber-500 hover:text-amber-600 hover:bg-amber-50/50"
+                              : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50"
+                          }`}
+                          title={isSelf ? "You cannot suspend yourself" : off.is_active ? "Suspend Officer" : "Reactivate Officer"}
+                          onClick={() => openStatusConfirm(off)}
+                        >
+                          {off.is_active ? (
+                            <UserXIcon className="size-4" />
+                          ) : (
+                            <UserCheckIcon className="size-4" />
+                          )}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          disabled={isSelf}
+                          className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer disabled:opacity-30"
+                          title={isSelf ? "You cannot delete yourself" : "Delete Officer"}
+                          onClick={() => openDeleteConfirm(off)}
+                        >
+                          <Trash2Icon className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
@@ -257,63 +357,70 @@ export default function PoliceAdminPage() {
 
       {/* Edit Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[450px]">
+        <DialogContent className="sm:max-w-[450px] bg-zinc-950 border-zinc-800 text-zinc-200">
           <form onSubmit={handleSaveOfficer} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Edit Officer Profile</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-zinc-100">Edit Officer Profile</DialogTitle>
+              <DialogDescription className="text-zinc-400">
                 Modify police department personnel information and jurisdiction rules.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">Officer Name</label>
+                <label className="text-xs font-semibold text-zinc-400">Officer Name</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">Email Address</label>
+                <label className="text-xs font-semibold text-zinc-400">Email Address</label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">District Jurisdiction</label>
-                <select
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary font-medium text-foreground"
-                >
-                  {districts.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
+                <label className="text-xs font-semibold text-zinc-400">Officer Rank / Designation</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Superintendent of Police (SP)"
+                  value={rank}
+                  onChange={(e) => setRank(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-primary"
+                />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">Reset Password (Optional)</label>
+                <label className="text-xs font-semibold text-zinc-400">District Jurisdiction</label>
+                <ComboboxWithStates1
+                  value={jurisdictionDistrict}
+                  onChange={(val) => setJurisdictionDistrict(val)}
+                  placeholder="Select Assam district..."
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-400">Reset Password (Optional)</label>
                 <input
                   type="password"
                   placeholder="Enter new password to reset"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="cursor-pointer">
+              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="cursor-pointer border-zinc-800 text-zinc-300 hover:bg-zinc-800">
                 Cancel
               </Button>
-              <Button type="submit" className="cursor-pointer">
+              <Button type="submit" className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95">
                 Save Changes
               </Button>
             </DialogFooter>
@@ -323,36 +430,36 @@ export default function PoliceAdminPage() {
 
       {/* Suspend/Reactivate Confirmation Dialog */}
       <Dialog open={isStatusOpen} onOpenChange={setIsStatusOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] bg-zinc-950 border-zinc-800 text-zinc-200">
           <DialogHeader className="flex flex-col items-center sm:items-start">
-            <div className="flex size-12 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 mb-3">
+            <div className="flex size-12 items-center justify-center rounded-full bg-amber-950/50 text-amber-500 border border-amber-900/30 mb-3">
               <AlertTriangleIcon className="size-6 animate-pulse" />
             </div>
-            <DialogTitle>
-              {targetOfficer?.status === "Active" ? "Suspend Officer Account?" : "Reactivate Officer Account?"}
+            <DialogTitle className="text-zinc-100">
+              {targetOfficer?.is_active ? "Suspend Officer Account?" : "Reactivate Officer Account?"}
             </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to {targetOfficer?.status === "Active" ? "suspend" : "reactivate"} access for{" "}
-              <strong className="text-foreground">{targetOfficer?.name}</strong> ({targetOfficer?.id})?
+            <DialogDescription className="text-zinc-400">
+              Are you sure you want to {targetOfficer?.is_active ? "suspend" : "reactivate"} access for{" "}
+              <strong className="text-zinc-200">{targetOfficer?.full_name}</strong>?
             </DialogDescription>
           </DialogHeader>
-          <div className="text-xs text-muted-foreground border-y border-border/50 py-3 my-1">
-            {targetOfficer?.status === "Active" ? (
-              <p>The officer will lose all system review access. They cannot access reports from their assigned district: {targetOfficer?.location}.</p>
+          <div className="text-xs text-zinc-400 border-y border-zinc-800 py-3 my-1">
+            {targetOfficer?.is_active ? (
+              <p>The officer will lose all system review access. They cannot access reports from their assigned district: {targetOfficer?.jurisdiction_district}.</p>
             ) : (
               <p>The officer account will be restored to active status, recovering their regional dispatch capabilities.</p>
             )}
           </div>
           <DialogFooter className="gap-2 sm:gap-0 mt-2">
-            <Button variant="outline" onClick={() => setIsStatusOpen(false)} className="cursor-pointer">
+            <Button variant="outline" onClick={() => setIsStatusOpen(false)} className="cursor-pointer border-zinc-800 text-zinc-300 hover:bg-zinc-800">
               Cancel
             </Button>
             <Button
-              variant={targetOfficer?.status === "Active" ? "destructive" : "default"}
+              variant={targetOfficer?.is_active ? "destructive" : "default"}
               onClick={handleToggleStatus}
               className="cursor-pointer"
             >
-              Confirm {targetOfficer?.status === "Active" ? "Suspension" : "Activation"}
+              Confirm {targetOfficer?.is_active ? "Suspension" : "Activation"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -360,19 +467,19 @@ export default function PoliceAdminPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] bg-zinc-950 border-zinc-800 text-zinc-200">
           <DialogHeader className="flex flex-col items-center sm:items-start">
-            <div className="flex size-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 mb-3">
+            <div className="flex size-12 items-center justify-center rounded-full bg-red-950/50 text-red-500 border border-red-900/30 mb-3">
               <AlertTriangleIcon className="size-6 animate-pulse" />
             </div>
-            <DialogTitle>Delete Police Officer?</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-zinc-100">Delete Police Officer?</DialogTitle>
+            <DialogDescription className="text-zinc-400">
               Are you sure you want to permanently delete the profile for{" "}
-              <strong className="text-foreground">{targetOfficer?.name}</strong>? All link associations with {targetOfficer?.location} will be broken.
+              <strong className="text-zinc-200">{targetOfficer?.full_name}</strong>? All link associations with {targetOfficer?.jurisdiction_district} will be broken.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0 mt-3">
-            <Button variant="outline" onClick={() => setIsConfirmOpen(false)} className="cursor-pointer">
+            <Button variant="outline" onClick={() => setIsConfirmOpen(false)} className="cursor-pointer border-zinc-800 text-zinc-300 hover:bg-zinc-800">
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteOfficer} className="cursor-pointer">

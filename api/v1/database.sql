@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS users (
     profile_status VARCHAR(50) DEFAULT 'incomplete',
     is_active BOOLEAN DEFAULT TRUE,
     reward_points INT DEFAULT 0,
+    rank VARCHAR(100),
+    jurisdiction_district VARCHAR(100),
     password_changed_at TIMESTAMP WITH TIME ZONE NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

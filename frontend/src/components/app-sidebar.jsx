@@ -109,7 +109,16 @@ const data = {
 };
 
 
-export function AppSidebar({ ...props }) {
+export function AppSidebar({ profile, ...props }) {
+  const user = {
+    name: profile?.full_name || "Admin",
+    email: profile?.email || "",
+    avatar: "",
+    role: profile?.role,
+    rank: profile?.rank,
+    jurisdiction_district: profile?.jurisdiction_district
+  };
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -122,7 +131,9 @@ export function AppSidebar({ ...props }) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-bold text-base text-foreground">Axom Prahari</span>
-                  <span className="truncate text-xs text-muted-foreground font-medium">Police Admin Portal</span>
+                  <span className="truncate text-xs text-muted-foreground font-medium">
+                    {user.role === 'super_admin' ? 'Super Admin Portal' : 'Police Admin Portal'}
+                  </span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -133,7 +144,7 @@ export function AppSidebar({ ...props }) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

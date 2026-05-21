@@ -52,18 +52,18 @@ export const completeCitizenProfile = async (id, fullName, email, username) => {
   return result.rows[0];
 };
 
-export const createAdminUser = async (email, passwordHash, fullName, role) => {
+export const createAdminUser = async (email, passwordHash, fullName, role, rank, jurisdictionDistrict) => {
   const result = await db.query(
-    `INSERT INTO users (email, password_hash, role, full_name, profile_status) 
-     VALUES ($1, $2, $3, $4, 'complete') RETURNING *`,
-    [email, passwordHash, role, fullName]
+    `INSERT INTO users (email, password_hash, role, full_name, rank, jurisdiction_district, profile_status) 
+     VALUES ($1, $2, $3, $4, $5, $6, 'complete') RETURNING *`,
+    [email, passwordHash, role, fullName, rank, jurisdictionDistrict]
   );
   return result.rows[0];
 };
 
 export const findAdminById = async (id) => {
   const result = await db.query(
-    'SELECT id, email, role, full_name, is_active FROM users WHERE id = $1 AND role IN (\'police_admin\', \'super_admin\')',
+    'SELECT id, email, role, full_name, is_active, rank, jurisdiction_district FROM users WHERE id = $1 AND role IN (\'police_admin\', \'super_admin\')',
     [id]
   );
   return result.rows[0];
@@ -71,7 +71,7 @@ export const findAdminById = async (id) => {
 
 export const deleteAdminUser = async (id) => {
   const result = await db.query(
-    'DELETE FROM users WHERE id = $1 AND role = \'police_admin\' RETURNING id',
+    'DELETE FROM users WHERE id = $1 AND role IN (\'police_admin\', \'super_admin\') RETURNING id',
     [id]
   );
   return result.rows[0];
@@ -79,10 +79,20 @@ export const deleteAdminUser = async (id) => {
 
 export const updateAdminStatus = async (id, isActive) => {
   const result = await db.query(
-    'UPDATE users SET is_active = $1 WHERE id = $2 AND role = \'police_admin\' RETURNING id, is_active',
+    'UPDATE users SET is_active = $1 WHERE id = $2 AND role IN (\'police_admin\', \'super_admin\') RETURNING id, is_active',
     [isActive, id]
   );
   return result.rows[0];
+};
+
+export const getAllAdmins = async () => {
+  const result = await db.query(
+    `SELECT id, email, role, full_name, is_active, rank, jurisdiction_district, created_at 
+     FROM users 
+     WHERE role IN ('police_admin', 'super_admin') 
+     ORDER BY id DESC`
+  );
+  return result.rows;
 };
 
 export const getAdminPasswordChangedAt = async (id) => {
@@ -112,6 +122,18 @@ export const updateAdminProfile = async (id, updateData) => {
     values.push(updateData.password_hash);
     fields.push(`password_changed_at = CURRENT_TIMESTAMP`);
   }
+  if (updateData.rank) {
+    fields.push(`rank = $${index++}`);
+    values.push(updateData.rank);
+  }
+  if (updateData.jurisdiction_district) {
+    fields.push(`jurisdiction_district = $${index++}`);
+    values.push(updateData.jurisdiction_district);
+  }
+  if (updateData.role) {
+    fields.push(`role = $${index++}`);
+    values.push(updateData.role);
+  }
 
   if (fields.length === 0) return null;
 
@@ -121,7 +143,7 @@ export const updateAdminProfile = async (id, updateData) => {
     UPDATE users 
     SET ${fields.join(', ')} 
     WHERE id = $${index} AND role IN ('police_admin', 'super_admin') 
-    RETURNING id, full_name, email, username, role
+    RETURNING id, full_name, email, username, role, rank, jurisdiction_district
   `;
 
   const result = await db.query(query, values);
@@ -130,7 +152,7 @@ export const updateAdminProfile = async (id, updateData) => {
 
 export const getUserProfileById = async (id) => {
   const result = await db.query(
-    'SELECT citizen_id, full_name, email, username, role, is_active, reward_points FROM users WHERE id = $1',
+    'SELECT citizen_id, full_name, email, username, role, is_active, reward_points, rank, jurisdiction_district FROM users WHERE id = $1',
     [id]
   );
   return result.rows[0];

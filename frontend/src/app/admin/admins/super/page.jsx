@@ -38,14 +38,13 @@ import {
   AlertTriangleIcon 
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import api from "@/lib/axios";
+import { ComboboxWithStates1 } from "@/components/ui/combobox-with-states-1";
 
 export default function SuperAdminPage() {
   const [loading, setLoading] = useState(true);
-  const [admins, setAdmins] = useState([
-    { id: "SAD-0001", name: "DGP Amitesh Sen", email: "dgp@axomprahari.gov.in", role: "Super Administrator", status: "Active" },
-    { id: "SAD-0002", name: "ADGP Barnali Deka", email: "adgp.ops@axomprahari.gov.in", role: "Super Administrator", status: "Active" },
-    { id: "SAD-0005", name: "Director Tech Gogoi", email: "techdir@axomprahari.gov.in", role: "Technical Supervisor", status: "Active" },
-  ]);
+  const [admins, setAdmins] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Dialog States
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -56,63 +55,188 @@ export default function SuperAdminPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
+  const [rank, setRank] = useState("");
+  const [jurisdictionDistrict, setJurisdictionDistrict] = useState("");
   const [password, setPassword] = useState("");
 
+  const fetchAdmins = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/admin/list");
+      if (res.data?.status === "success") {
+        const superAdmins = res.data.data.filter(a => a.role === "super_admin");
+        setAdmins(superAdmins);
+      }
+    } catch (err) {
+      console.error("Error fetching admins list", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1200);
-    return () => clearTimeout(timer);
+    // Get logged-in user profile
+    api.get("/admin/dashboard")
+      .then((res) => {
+        if (res.data?.status === "success") {
+          setCurrentUser(res.data.data);
+        }
+      })
+      .catch((err) => console.error("Error fetching current user", err));
+
+    fetchAdmins();
   }, []);
 
   const openEditDialog = (adm) => {
+    if (currentUser?.role === "police_admin" && adm.role === "super_admin") {
+      alert("Police Admins cannot modify Super Admins.");
+      return;
+    }
+
     setTargetAdmin(adm);
-    setName(adm.name);
-    setEmail(adm.email);
-    setRole(adm.role);
+    setName(adm.full_name || "");
+    setEmail(adm.email || "");
+    setRole(adm.role || "super_admin");
+    setRank(adm.rank || "");
+    setJurisdictionDistrict(adm.jurisdiction_district || "");
     setPassword("");
     setIsFormOpen(true);
   };
 
   const openDeleteConfirm = (adm) => {
+    if (adm.id === currentUser?.id) {
+      alert("You cannot delete yourself.");
+      return;
+    }
+    if (currentUser?.role === "police_admin" && adm.role === "super_admin") {
+      alert("Police Admins cannot delete Super Admins.");
+      return;
+    }
     setTargetAdmin(adm);
     setIsConfirmOpen(true);
   };
 
   const openStatusConfirm = (adm) => {
+    if (adm.id === currentUser?.id) {
+      alert("You cannot disable yourself.");
+      return;
+    }
+    if (currentUser?.role === "police_admin" && adm.role === "super_admin") {
+      alert("Police Admins cannot disable Super Admins.");
+      return;
+    }
     setTargetAdmin(adm);
     setIsStatusOpen(true);
   };
 
-  const handleSaveAdmin = (e) => {
+  const handleSaveAdmin = async (e) => {
     e.preventDefault();
-    if (!name || !email || !role) return;
+    if (!name || !email || !role || !rank || !jurisdictionDistrict) {
+      alert("Please fill in all required fields.");
+      return;
+    }
 
-    setAdmins(
-      admins.map((a) =>
-        a.id === targetAdmin.id ? { ...a, name, email, role } : a
-      )
-    );
-    setIsFormOpen(false);
-    setTargetAdmin(null);
+    if (currentUser?.role === "police_admin" && targetAdmin.role === "super_admin") {
+      alert("Police Admins cannot modify Super Admins.");
+      return;
+    }
+
+    try {
+      const payload = {
+        full_name: name,
+        email,
+        role,
+        rank,
+        jurisdiction_district: jurisdictionDistrict
+      };
+
+      if (password) {
+        payload.password = password;
+      }
+
+      const res = await api.put(`/admin/${targetAdmin.id}`, payload);
+      
+      if (res.data?.status === "success") {
+        if (targetAdmin.id === currentUser?.id && password) {
+          alert("Your password has been changed. You will be logged out now.");
+          localStorage.removeItem("admin_token");
+          window.location.href = "/login";
+          return;
+        }
+
+        if (targetAdmin.id === currentUser?.id) {
+          window.location.reload();
+          return;
+        }
+
+        setIsFormOpen(false);
+        setTargetAdmin(null);
+        fetchAdmins();
+      }
+    } catch (err) {
+      console.error("Error saving admin", err);
+      alert(err.response?.data?.error || err.response?.data?.message || "Failed to update admin.");
+    }
   };
 
-  const handleToggleStatus = () => {
+  const handleToggleStatus = async () => {
     if (!targetAdmin) return;
-    setAdmins(
-      admins.map((a) =>
-        a.id === targetAdmin.id
-          ? { ...a, status: a.status === "Active" ? "Suspended" : "Active" }
-          : a
-      )
-    );
-    setIsStatusOpen(false);
-    setTargetAdmin(null);
+
+    if (targetAdmin.id === currentUser?.id) {
+      alert("You cannot disable yourself!");
+      setIsStatusOpen(false);
+      return;
+    }
+
+    if (currentUser?.role === "police_admin" && targetAdmin.role === "super_admin") {
+      alert("Police Admins cannot disable Super Admins.");
+      setIsStatusOpen(false);
+      return;
+    }
+
+    try {
+      const res = await api.patch(`/admin/${targetAdmin.id}/status`, {
+        is_active: !targetAdmin.is_active
+      });
+
+      if (res.data?.status === "success") {
+        setIsStatusOpen(false);
+        setTargetAdmin(null);
+        fetchAdmins();
+      }
+    } catch (err) {
+      console.error("Error toggling admin status", err);
+      alert(err.response?.data?.error || err.response?.data?.message || "Failed to toggle status.");
+    }
   };
 
-  const handleDeleteAdmin = () => {
+  const handleDeleteAdmin = async () => {
     if (!targetAdmin) return;
-    setAdmins(admins.filter((a) => a.id !== targetAdmin.id));
-    setIsConfirmOpen(false);
-    setTargetAdmin(null);
+
+    if (targetAdmin.id === currentUser?.id) {
+      alert("You cannot delete yourself!");
+      setIsConfirmOpen(false);
+      return;
+    }
+
+    if (currentUser?.role === "police_admin" && targetAdmin.role === "super_admin") {
+      alert("Police Admins cannot delete Super Admins.");
+      setIsConfirmOpen(false);
+      return;
+    }
+
+    try {
+      const res = await api.delete(`/admin/${targetAdmin.id}`);
+
+      if (res.data?.status === "success") {
+        setIsConfirmOpen(false);
+        setTargetAdmin(null);
+        fetchAdmins();
+      }
+    } catch (err) {
+      console.error("Error deleting admin", err);
+      alert(err.response?.data?.error || err.response?.data?.message || "Failed to delete admin.");
+    }
   };
 
   return (
@@ -149,7 +273,8 @@ export default function SuperAdminPage() {
                   <TableHead className="w-[120px]">Admin ID</TableHead>
                   <TableHead>Full Name</TableHead>
                   <TableHead>Email Address</TableHead>
-                  <TableHead className="w-[180px]">Access Level</TableHead>
+                  <TableHead>Rank</TableHead>
+                  <TableHead>District</TableHead>
                   <TableHead className="w-[120px]">Status</TableHead>
                   <TableHead className="text-right w-[150px]">Actions</TableHead>
                 </TableRow>
@@ -160,7 +285,8 @@ export default function SuperAdminPage() {
                     <TableCell><Skeleton className="h-4 w-16 font-mono" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32 font-mono" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
                     <TableCell className="text-right flex items-center justify-end gap-2 h-full py-3">
                       <Skeleton className="size-8 rounded-lg" />
@@ -183,69 +309,91 @@ export default function SuperAdminPage() {
                   <TableHead className="w-[120px]">Admin ID</TableHead>
                   <TableHead>Full Name</TableHead>
                   <TableHead>Email Address</TableHead>
-                  <TableHead className="w-[180px]">Access Level</TableHead>
+                  <TableHead>Rank</TableHead>
+                  <TableHead>District Jurisdiction</TableHead>
                   <TableHead className="w-[120px]">Status</TableHead>
                   <TableHead className="text-right w-[150px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {admins.map((adm) => (
-                  <TableRow key={adm.id}>
-                    <TableCell className="font-mono font-semibold">{adm.id}</TableCell>
-                    <TableCell className="font-medium">{adm.name}</TableCell>
-                    <TableCell className="font-mono text-xs">{adm.email}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-primary font-semibold text-xs">
-                        <ShieldCheckIcon className="size-4" />
-                        <span>{adm.role}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {adm.status === "Active" ? (
-                        <Badge variant="success">Active</Badge>
-                      ) : (
-                        <Badge variant="destructive">Suspended</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right flex items-center justify-end gap-2 h-full py-3">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="size-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50/50 cursor-pointer"
-                        title="Edit Admin"
-                        onClick={() => openEditDialog(adm)}
-                      >
-                        <EditIcon className="size-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className={`size-8 cursor-pointer ${
-                          adm.status === "Active"
-                            ? "text-amber-500 hover:text-amber-600 hover:bg-amber-50/50"
-                            : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50"
-                        }`}
-                        title={adm.status === "Active" ? "Suspend Account" : "Activate Account"}
-                        onClick={() => openStatusConfirm(adm)}
-                      >
-                        {adm.status === "Active" ? (
-                          <UserXIcon className="size-4" />
+                {admins.map((adm) => {
+                  const isSelf = adm.id === currentUser?.id;
+                  const isPoliceUser = currentUser?.role === "police_admin";
+                  const canAction = !isPoliceUser;
+
+                  return (
+                    <TableRow key={adm.id}>
+                      <TableCell className="font-mono font-semibold">ADM-{String(adm.id).padStart(4, '0')}</TableCell>
+                      <TableCell className="font-medium">
+                        {adm.full_name} {isSelf && <span className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded ml-1 font-semibold uppercase">You</span>}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">{adm.email}</TableCell>
+                      <TableCell className="text-xs font-semibold text-zinc-300">{adm.rank || "N/A"}</TableCell>
+                      <TableCell className="text-xs text-zinc-400">{adm.jurisdiction_district || "All"}</TableCell>
+                      <TableCell>
+                        {adm.is_active ? (
+                          <Badge variant="success">Active</Badge>
                         ) : (
-                          <UserCheckIcon className="size-4" />
+                          <Badge variant="destructive">Suspended</Badge>
                         )}
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
-                        title="Delete Admin"
-                        onClick={() => openDeleteConfirm(adm)}
-                      >
-                        <Trash2Icon className="size-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell className="text-right flex items-center justify-end gap-2 h-full py-3">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          disabled={isPoliceUser}
+                          className="size-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50/50 cursor-pointer disabled:opacity-30"
+                          title={isPoliceUser ? "Police admins cannot edit super admins" : "Edit Admin"}
+                          onClick={() => openEditDialog(adm)}
+                        >
+                          <EditIcon className="size-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          disabled={isSelf || isPoliceUser}
+                          className={`size-8 cursor-pointer disabled:opacity-30 ${
+                            adm.is_active
+                              ? "text-amber-500 hover:text-amber-600 hover:bg-amber-50/50"
+                              : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50"
+                          }`}
+                          title={
+                            isSelf 
+                              ? "You cannot disable yourself" 
+                              : isPoliceUser 
+                              ? "Police admins cannot suspend super admins" 
+                              : adm.is_active 
+                              ? "Suspend Account" 
+                              : "Activate Account"
+                          }
+                          onClick={() => openStatusConfirm(adm)}
+                        >
+                          {adm.is_active ? (
+                            <UserXIcon className="size-4" />
+                          ) : (
+                            <UserCheckIcon className="size-4" />
+                          )}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          disabled={isSelf || isPoliceUser}
+                          className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer disabled:opacity-30"
+                          title={
+                            isSelf 
+                              ? "You cannot delete yourself" 
+                              : isPoliceUser 
+                              ? "Police admins cannot delete super admins" 
+                              : "Delete Admin"
+                          }
+                          onClick={() => openDeleteConfirm(adm)}
+                        >
+                          <Trash2Icon className="size-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
@@ -254,62 +402,81 @@ export default function SuperAdminPage() {
 
       {/* Edit Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[450px]">
+        <DialogContent className="sm:max-w-[450px] bg-zinc-950 border-zinc-800 text-zinc-200">
           <form onSubmit={handleSaveAdmin} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>Edit Administrator Profile</DialogTitle>
-              <DialogDescription>
-                Update access level details and account settings for {targetAdmin?.name}.
+              <DialogTitle className="text-zinc-100">Edit Administrator Profile</DialogTitle>
+              <DialogDescription className="text-zinc-400">
+                Update access level details and account settings for {targetAdmin?.full_name}.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">Full Name</label>
+                <label className="text-xs font-semibold text-zinc-400">Full Name</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">Email Address</label>
+                <label className="text-xs font-semibold text-zinc-400">Email Address</label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">Access Role</label>
+                <label className="text-xs font-semibold text-zinc-400">Rank / Designation</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Director General of Police"
+                  value={rank}
+                  onChange={(e) => setRank(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-400">Jurisdiction District</label>
+                <ComboboxWithStates1
+                  value={jurisdictionDistrict}
+                  onChange={(val) => setJurisdictionDistrict(val)}
+                  placeholder="Select Assam district..."
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-400">Access Role</label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-primary font-medium"
                 >
-                  <option value="Super Administrator">Super Administrator</option>
-                  <option value="Technical Supervisor">Technical Supervisor</option>
+                  <option value="super_admin">Super Administrator</option>
+                  <option value="police_admin">Police Administrator</option>
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">Reset Password (Optional)</label>
+                <label className="text-xs font-semibold text-zinc-400">Reset Password (Optional)</label>
                 <input
                   type="password"
                   placeholder="Enter new password to reset"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="cursor-pointer">
+              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="cursor-pointer border-zinc-800 text-zinc-300 hover:bg-zinc-800">
                 Cancel
               </Button>
-              <Button type="submit" className="cursor-pointer">
+              <Button type="submit" className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95">
                 Save Changes
               </Button>
             </DialogFooter>
@@ -319,36 +486,36 @@ export default function SuperAdminPage() {
 
       {/* Suspend/Reactivate Confirmation Dialog */}
       <Dialog open={isStatusOpen} onOpenChange={setIsStatusOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] bg-zinc-950 border-zinc-800 text-zinc-200">
           <DialogHeader className="flex flex-col items-center sm:items-start">
-            <div className="flex size-12 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 mb-3">
+            <div className="flex size-12 items-center justify-center rounded-full bg-amber-950/50 text-amber-500 border border-amber-900/30 mb-3">
               <AlertTriangleIcon className="size-6 animate-pulse" />
             </div>
-            <DialogTitle>
-              {targetAdmin?.status === "Active" ? "Suspend Account?" : "Reactivate Account?"}
+            <DialogTitle className="text-zinc-100">
+              {targetAdmin?.is_active ? "Suspend Account?" : "Reactivate Account?"}
             </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to {targetAdmin?.status === "Active" ? "suspend" : "reactivate"} access for{" "}
-              <strong className="text-foreground">{targetAdmin?.name}</strong>?
+            <DialogDescription className="text-zinc-400">
+              Are you sure you want to {targetAdmin?.is_active ? "suspend" : "reactivate"} access for{" "}
+              <strong className="text-zinc-200">{targetAdmin?.full_name}</strong>?
             </DialogDescription>
           </DialogHeader>
-          <div className="text-xs text-muted-foreground border-y border-border/50 py-3 my-1">
-            {targetAdmin?.status === "Active" ? (
+          <div className="text-xs text-zinc-400 border-y border-zinc-800 py-3 my-1">
+            {targetAdmin?.is_active ? (
               <p>The admin will immediately lose access to review incident reports, view directories, or manage system configs.</p>
             ) : (
               <p>The admin account will be restored to active status, recovering their administrative dashboard access.</p>
             )}
           </div>
           <DialogFooter className="gap-2 sm:gap-0 mt-2">
-            <Button variant="outline" onClick={() => setIsStatusOpen(false)} className="cursor-pointer">
+            <Button variant="outline" onClick={() => setIsStatusOpen(false)} className="cursor-pointer border-zinc-800 text-zinc-300 hover:bg-zinc-800">
               Cancel
             </Button>
             <Button
-              variant={targetAdmin?.status === "Active" ? "destructive" : "default"}
+              variant={targetAdmin?.is_active ? "destructive" : "default"}
               onClick={handleToggleStatus}
               className="cursor-pointer"
             >
-              Confirm {targetAdmin?.status === "Active" ? "Suspension" : "Activation"}
+              Confirm {targetAdmin?.is_active ? "Suspension" : "Activation"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -356,19 +523,19 @@ export default function SuperAdminPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[400px] bg-zinc-950 border-zinc-800 text-zinc-200">
           <DialogHeader className="flex flex-col items-center sm:items-start">
-            <div className="flex size-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 mb-3">
+            <div className="flex size-12 items-center justify-center rounded-full bg-red-950/50 text-red-500 border border-red-900/30 mb-3">
               <AlertTriangleIcon className="size-6 animate-pulse" />
             </div>
-            <DialogTitle>Delete Super Administrator?</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-zinc-100">Delete Super Administrator?</DialogTitle>
+            <DialogDescription className="text-zinc-400">
               Are you sure you want to permanently delete the profile for{" "}
-              <strong className="text-foreground">{targetAdmin?.name}</strong>? This will revoke all database authorizations.
+              <strong className="text-zinc-200">{targetAdmin?.full_name}</strong>? This will revoke all database authorizations.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0 mt-3">
-            <Button variant="outline" onClick={() => setIsConfirmOpen(false)} className="cursor-pointer">
+            <Button variant="outline" onClick={() => setIsConfirmOpen(false)} className="cursor-pointer border-zinc-800 text-zinc-300 hover:bg-zinc-800">
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteAdmin} className="cursor-pointer">

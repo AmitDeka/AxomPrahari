@@ -38,7 +38,15 @@ export const getAllAdminsList = async (req, res) => {
 
 export const createNewAdmin = async (req, res) => {
   try {
-    const { email, password, full_name } = req.body;
+    const { email, password, full_name, role, rank, jurisdiction_district } = req.body;
+
+    // Security check: police_admin cannot create super_admin
+    if (req.user.role === 'police_admin' && role === 'super_admin') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Police Admins cannot create Super Admins.'
+      });
+    }
 
     // Check if user already exists
     const existingUser = await UserModel.findUserByEmail(email);
@@ -53,17 +61,26 @@ export const createNewAdmin = async (req, res) => {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Create the new police_admin
-    const newAdmin = await UserModel.createAdminUser(email, passwordHash, full_name, 'police_admin');
+    // Create the new admin with role, rank, and jurisdiction_district
+    const newAdmin = await UserModel.createAdminUser(
+      email,
+      passwordHash,
+      full_name,
+      role || 'police_admin',
+      rank,
+      jurisdiction_district
+    );
 
     res.status(201).json({
       status: 'success',
-      message: 'Police Admin created successfully.',
+      message: 'Admin created successfully.',
       data: {
         id: newAdmin.id,
         email: newAdmin.email,
         full_name: newAdmin.full_name,
-        role: newAdmin.role
+        role: newAdmin.role,
+        rank: newAdmin.rank,
+        jurisdiction_district: newAdmin.jurisdiction_district
       }
     });
   } catch (error) {
@@ -74,13 +91,31 @@ export const createNewAdmin = async (req, res) => {
 
 export const deleteAdmin = async (req, res) => {
   try {
-    const adminId = req.params.id;
+    const adminId = parseInt(req.params.id, 10);
+    const loggedInUserId = parseInt(req.user.id, 10);
 
-    // Prevent super_admin from deleting themselves
-    if (adminId == req.user.id) {
+    // Prevent any admin from deleting themselves
+    if (adminId === loggedInUserId) {
       return res.status(403).json({
         status: 'error',
-        message: 'Super Admin cannot delete themselves.'
+        message: 'You cannot delete yourself.'
+      });
+    }
+
+    // Check target user exists
+    const targetAdmin = await UserModel.findAdminById(adminId);
+    if (!targetAdmin) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Admin not found.'
+      });
+    }
+
+    // Security check: police_admin cannot delete super_admin
+    if (req.user.role === 'police_admin' && targetAdmin.role === 'super_admin') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Police Admins cannot delete Super Admins.'
       });
     }
 
@@ -89,13 +124,13 @@ export const deleteAdmin = async (req, res) => {
     if (!deletedAdmin) {
       return res.status(404).json({
         status: 'error',
-        message: 'Police Admin not found or could not be deleted.'
+        message: 'Admin not found or could not be deleted.'
       });
     }
 
     res.status(200).json({
       status: 'success',
-      message: 'Police Admin deleted successfully.'
+      message: 'Admin deleted successfully.'
     });
   } catch (error) {
     console.error('[deleteAdmin Error]', error);
@@ -105,7 +140,8 @@ export const deleteAdmin = async (req, res) => {
 
 export const toggleAdminStatus = async (req, res) => {
   try {
-    const adminId = req.params.id;
+    const adminId = parseInt(req.params.id, 10);
+    const loggedInUserId = parseInt(req.user.id, 10);
     const { is_active } = req.body;
 
     if (typeof is_active !== 'boolean') {
@@ -115,11 +151,28 @@ export const toggleAdminStatus = async (req, res) => {
       });
     }
 
-    // Prevent super_admin from disabling themselves
-    if (adminId == req.user.id) {
+    // Prevent any admin from disabling themselves
+    if (adminId === loggedInUserId) {
       return res.status(403).json({
         status: 'error',
-        message: 'Super Admin cannot disable themselves.'
+        message: 'You cannot disable yourself.'
+      });
+    }
+
+    // Check target user exists
+    const targetAdmin = await UserModel.findAdminById(adminId);
+    if (!targetAdmin) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Admin not found.'
+      });
+    }
+
+    // Security check: police_admin cannot disable super_admin
+    if (req.user.role === 'police_admin' && targetAdmin.role === 'super_admin') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Police Admins cannot disable Super Admins.'
       });
     }
 
@@ -128,13 +181,13 @@ export const toggleAdminStatus = async (req, res) => {
     if (!updatedAdmin) {
       return res.status(404).json({
         status: 'error',
-        message: 'Police Admin not found.'
+        message: 'Admin not found.'
       });
     }
 
     res.status(200).json({
       status: 'success',
-      message: `Police Admin has been ${is_active ? 'enabled' : 'disabled'}.`,
+      message: `Admin has been ${is_active ? 'enabled' : 'disabled'}.`,
       data: {
         id: updatedAdmin.id,
         is_active: updatedAdmin.is_active
@@ -148,16 +201,35 @@ export const toggleAdminStatus = async (req, res) => {
 
 export const updateAdmin = async (req, res) => {
   try {
-    const adminId = req.params.id;
+    const adminId = parseInt(req.params.id, 10);
+    const loggedInUserId = parseInt(req.user.id, 10);
     const updateData = { ...req.body };
 
-    // Check if user exists
-    const admin = await UserModel.findAdminById(adminId);
-    if (!admin) {
+    // Check if target exists
+    const targetAdmin = await UserModel.findAdminById(adminId);
+    if (!targetAdmin) {
       return res.status(404).json({
         status: 'error',
         message: 'Admin not found.'
       });
+    }
+
+    // Security checks if logged-in user is a police_admin
+    if (req.user.role === 'police_admin') {
+      // Cannot modify a super admin
+      if (targetAdmin.role === 'super_admin') {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Police Admins cannot modify Super Admins.'
+        });
+      }
+      // Cannot promote anyone to super admin
+      if (updateData.role === 'super_admin') {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Police Admins cannot promote anyone to Super Admin.'
+        });
+      }
     }
 
     if (updateData.password) {
@@ -183,7 +255,9 @@ export const updateAdmin = async (req, res) => {
         email: updatedAdmin.email,
         full_name: updatedAdmin.full_name,
         username: updatedAdmin.username,
-        role: updatedAdmin.role
+        role: updatedAdmin.role,
+        rank: updatedAdmin.rank,
+        jurisdiction_district: updatedAdmin.jurisdiction_district
       }
     });
   } catch (error) {
