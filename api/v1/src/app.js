@@ -18,8 +18,9 @@ const app = express();
 app.use(helmet());
 
 // 2. Strict CORS Configuration
-// Placeholder array for domains - replace with actual domains in production
-const allowedOrigins = ['https://axomprahari.assam.gov.in', 'http://localhost:3000', 'http://localhost:5173']; 
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+  : ['https://axomprahari.assam.gov.in', 'http://localhost:3000', 'http://localhost:5173']; 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
