@@ -47,6 +47,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.axomprahari.ui.theme.*
 
 data class TrafficReport(
     val id: String,
@@ -72,13 +73,13 @@ fun DrawerMenuItem(
 ) {
     val isDark = isSystemInDarkTheme()
     val containerColor = if (isSelected) {
-        if (isDark) MaterialTheme.colorScheme.primaryContainer else Color(0xFFE2F9F3)
+        MaterialTheme.colorScheme.primaryContainer
     } else {
         Color.Transparent
     }
     
     val contentColor = if (isSelected) {
-        if (isDark) MaterialTheme.colorScheme.onPrimaryContainer else Color(0xFF006A66)
+        MaterialTheme.colorScheme.onPrimaryContainer
     } else {
         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
     }
@@ -228,22 +229,6 @@ fun DashboardScreen(
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                    .padding(horizontal = 8.dp, vertical = 2.dp)
-                            ) {
-                                  Text(
-                                    text = "XAZAG NAGARIK",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 9.sp
-                                    )
-                                  )
-                            }
                         }
                     }
                     
@@ -266,7 +251,7 @@ fun DashboardScreen(
                         ) {
                             Column {
                                 Text(
-                                    text = "VERIFIED CITIZEN ID",
+                                    text = "CITIZEN ID",
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                         fontWeight = FontWeight.Bold,
@@ -282,12 +267,6 @@ fun DashboardScreen(
                                     )
                                 )
                             }
-                            Icon(
-                                imageVector = Icons.Default.Fingerprint,
-                                contentDescription = "Fingerprint",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                modifier = Modifier.size(24.dp)
-                            )
                         }
                     }
 
@@ -387,38 +366,39 @@ fun DashboardScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Footer
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                scope.launch { drawerState.close() }
-                                onLogout()
-                            }
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Button(
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onLogout()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = "Logout",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Logout",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = MaterialTheme.colorScheme.error,
-                                fontWeight = FontWeight.Bold
-                            )
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
                     Text(
-                        text = "v1.0.0",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                        text = "App Version 1.0.0",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            fontWeight = FontWeight.Medium
                         ),
-                        modifier = Modifier.align(Alignment.Start)
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }
             }
@@ -432,7 +412,7 @@ fun DashboardScreen(
                             text = if (showFeedbackPage) "Xazag Axom" else "Axom Prahari",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
+                                color = MaterialTheme.colorScheme.primary
                             )
                         )
                     },
@@ -874,7 +854,7 @@ fun DashboardTab(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         // Stats Card (simplified gradient card)
-        SentinelStatsCard()
+        UserStatsCard()
 
         // Report Offence Card (large white/surface card with red camera icon, NO LIVE badge)
         Card(
@@ -903,7 +883,7 @@ fun DashboardTab(
                         modifier = Modifier
                             .size(92.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFB01A1A)),
+                            .background(MaterialTheme.colorScheme.error),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -964,13 +944,13 @@ fun DashboardTab(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(if (isDark) MaterialTheme.colorScheme.primaryContainer else Color(0xFFE2F9F3)),
+                            .background(MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Points",
-                            tint = if (isDark) MaterialTheme.colorScheme.onPrimaryContainer else Color(0xFF006A66),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1010,13 +990,13 @@ fun DashboardTab(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(if (isDark) MaterialTheme.colorScheme.errorContainer else Color(0xFFFFECE9)),
+                            .background(MaterialTheme.colorScheme.errorContainer),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Assignment,
                             contentDescription = "Pending Reports",
-                            tint = if (isDark) MaterialTheme.colorScheme.onErrorContainer else Color(0xFFDC2626),
+                            tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1255,8 +1235,8 @@ fun ProfileTab(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                Color(0xFF1E293B), // Slate Dark
-                                Color(0xFF0F172A)  // Slate Darker
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                MaterialTheme.colorScheme.surfaceVariant,
                             )
                         )
                     )
@@ -1271,7 +1251,7 @@ fun ProfileTab(
                             Text(
                                 text = "ASSAM TRAFFIC SENTINEL",
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    color = Color(0xFFFFD700), // Gold
+                                    color = MaterialTheme.colorScheme.tertiary,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 1.5.sp
                                 )
@@ -1288,7 +1268,7 @@ fun ProfileTab(
                         Icon(
                             imageVector = Icons.Default.Shield,
                             contentDescription = "Sentinel Logo",
-                            tint = Color(0xFFFFD700),
+                            tint = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.size(28.dp)
                         )
                     }
@@ -1421,29 +1401,29 @@ fun ReportItemCardContent(report: TrafficReport) {
     val isDark = isSystemInDarkTheme()
     val statusColor = if (isDark) {
         when (report.status) {
-            ReportStatus.VERIFIED -> Color(0xFF003724)
-            ReportStatus.UNDER_REVIEW -> Color(0xFF3E2D00)
-            ReportStatus.REJECTED -> Color(0xFF3F0006)
+            ReportStatus.VERIFIED -> MaterialTheme.colorScheme.primaryContainer
+            ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.secondaryContainer
+            ReportStatus.REJECTED -> MaterialTheme.colorScheme.errorContainer
         }
     } else {
         when (report.status) {
-            ReportStatus.VERIFIED -> Color(0xFFE2F9F3)
-            ReportStatus.UNDER_REVIEW -> Color(0xFFFFF7E6)
-            ReportStatus.REJECTED -> Color(0xFFFFECE9)
+            ReportStatus.VERIFIED -> MaterialTheme.colorScheme.primaryContainer
+            ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.secondaryContainer
+            ReportStatus.REJECTED -> MaterialTheme.colorScheme.errorContainer
         }
     }
 
     val statusTextColor = if (isDark) {
         when (report.status) {
-            ReportStatus.VERIFIED -> Color(0xFF5DF2B8)
-            ReportStatus.UNDER_REVIEW -> Color(0xFFFFC043)
-            ReportStatus.REJECTED -> Color(0xFFFF898F)
+            ReportStatus.VERIFIED -> MaterialTheme.colorScheme.onPrimaryContainer
+            ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.onSecondaryContainer
+            ReportStatus.REJECTED -> MaterialTheme.colorScheme.onErrorContainer
         }
     } else {
         when (report.status) {
-            ReportStatus.VERIFIED -> Color(0xFF00875A)
-            ReportStatus.UNDER_REVIEW -> Color(0xFFD97706)
-            ReportStatus.REJECTED -> Color(0xFFDC2626)
+            ReportStatus.VERIFIED -> MaterialTheme.colorScheme.onPrimaryContainer
+            ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.onSecondaryContainer
+            ReportStatus.REJECTED -> MaterialTheme.colorScheme.onErrorContainer
         }
     }
 
@@ -1547,62 +1527,167 @@ fun ReportItemCardContent(report: TrafficReport) {
 }
 
 @Composable
-fun SentinelStatsCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+fun UserStatsCard() {
+    val isDark = isSystemInDarkTheme()
+
+    // Card colours: dark slate in both modes (looks premium on light & dark)
+    val cardBg = if (isDark) Color(0xFF0F1C1B) else Color(0xFF0D1F1E)
+    val accentGreen = MaterialTheme.colorScheme.secondary
+    val subtleWhite = Color.White.copy(alpha = 0.55f)
+    val dividerColor = Color.White.copy(alpha = 0.08f)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
+                )
+            )
+            .padding(horizontal = 22.dp, vertical = 20.dp)
     ) {
+        // Subtle decorative circle top-right
         Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .size(100.dp)
+                .offset(x = 30.dp, y = (-30).dp)
                 .background(
-                    brush = Brush.horizontalGradient(
+                    brush = Brush.radialGradient(
                         colors = listOf(
-                            Color(0xFF00504C), // Deep Teal
-                            Color(0xFF007A75)  // Mid Teal
+                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                            Color.Transparent
+                        )
+                    ),
+                    shape = CircleShape
+                )
+                .align(Alignment.TopEnd)
+        )
+
+        Column {
+            // ── Welcome row ──
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Welcome back,",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = subtleWhite,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.3.sp
                         )
                     )
-                )
-                .padding(24.dp)
-        ) {
-            Column {
-                Text(
-                    text = "Amit Deka",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Amit Deka",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-0.3).sp
+                        )
                     )
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Stats boxes
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    StatBox(label = "Reports", value = "15")
-                    StatBox(label = "Verified", value = "12")
-                    StatBox(label = "Accuracy", value = "92%")
                 }
+
+                // User ID pill
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(Color.White.copy(alpha = 0.07f))
+                        .border(
+                            width = 1.dp,
+                            color = accentGreen.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(50.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "APC-8K9A2M",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = accentGreen,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp,
+                            fontSize = 10.sp
+                        )
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+            HorizontalDivider(color = dividerColor, thickness = 1.dp)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ── Stats row ──
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+                StatPill(
+                    label = "REPORTS",
+                    value = "15",
+                    accentColor = accentGreen,
+                    modifier = Modifier.weight(1f)
+                )
+                // Vertical separator
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(40.dp)
+                        .background(dividerColor)
+                        .align(Alignment.CenterVertically)
+                )
+                StatPill(
+                    label = "VERIFIED",
+                    value = "12",
+                    accentColor = accentGreen,
+                    modifier = Modifier.weight(1f)
+                )
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(40.dp)
+                        .background(dividerColor)
+                        .align(Alignment.CenterVertically)
+                )
+                StatPill(
+                    label = "ACCURACY",
+                    value = "92%",
+                    accentColor = accentGreen,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
 }
 
 @Composable
-fun StatBox(label: String, value: String) {
-    Column {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall.copy(color = Color.White.copy(alpha = 0.6f))
-        )
+fun StatPill(
+    label: String,
+    value: String,
+    accentColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = value,
-            style = MaterialTheme.typography.titleLarge.copy(
+            style = MaterialTheme.typography.titleMedium.copy(
                 color = Color.White,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-0.5).sp
+            )
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = Color.White.copy(alpha = 0.4f),
+                fontWeight = FontWeight.Bold,
+                fontSize = 9.sp,
+                letterSpacing = 0.6.sp
             )
         )
     }
@@ -1725,7 +1810,7 @@ fun ReportOffenceScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0B1210))
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Top Section: Viewfinder Mockup (night street view)
         Box(
@@ -1733,18 +1818,24 @@ fun ReportOffenceScreen(
                 .fillMaxWidth()
                 .weight(1.2f)
                 .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
-                .background(Color(0xFF0F1715))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
+            val roadColor = MaterialTheme.colorScheme.surface
+            val skyTopColor = MaterialTheme.colorScheme.background
+            val skyBottomColor = MaterialTheme.colorScheme.surface
+            val laneLineColor = MaterialTheme.colorScheme.tertiary
+            val glowRedColor = MaterialTheme.colorScheme.error
+            val glowAmberColor = MaterialTheme.colorScheme.tertiary
+            val glowBlueColor = MaterialTheme.colorScheme.primary
+
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height
 
-                val roadColor = Color(0xFF1E2925)
-                
                 // Draw sky/horizon gradient
                 drawRect(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFF0A0F0D), Color(0xFF131D1A)),
+                        colors = listOf(skyTopColor, skyBottomColor),
                         startY = 0f,
                         endY = h
                     )
@@ -1767,7 +1858,7 @@ fun ReportOffenceScreen(
                 }
                 drawPath(
                     path = dashPath,
-                    color = Color(0xFFFACC15).copy(alpha = 0.6f),
+                    color = laneLineColor.copy(alpha = 0.6f),
                     style = Stroke(
                         width = 4f,
                         pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(
@@ -1779,17 +1870,17 @@ fun ReportOffenceScreen(
 
                 // City light glows (night bokeh effect)
                 drawCircle(
-                    color = Color(0xFFEF4444).copy(alpha = 0.25f),
+                    color = glowRedColor.copy(alpha = 0.25f),
                     radius = 45f,
                     center = Offset(w * 0.35f, h * 0.65f)
                 )
                 drawCircle(
-                    color = Color(0xFFFBBF24).copy(alpha = 0.2f),
+                    color = glowAmberColor.copy(alpha = 0.2f),
                     radius = 35f,
                     center = Offset(w * 0.65f, h * 0.62f)
                 )
                 drawCircle(
-                    color = Color(0xFF3B82F6).copy(alpha = 0.15f),
+                    color = glowBlueColor.copy(alpha = 0.15f),
                     radius = 60f,
                     center = Offset(w * 0.8f, h * 0.45f)
                 )
@@ -1865,7 +1956,7 @@ fun ReportOffenceScreen(
                     .padding(16.dp)
                     .clip(RoundedCornerShape(50))
                     .background(Color.Black.copy(alpha = 0.6f))
-                    .border(1.dp, Color(0xFF006A66).copy(alpha = 0.4f), RoundedCornerShape(50))
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), RoundedCornerShape(50))
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1873,7 +1964,7 @@ fun ReportOffenceScreen(
                         modifier = Modifier
                             .size(8.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF10B981))
+                            .background(MaterialTheme.colorScheme.secondary)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -1899,7 +1990,7 @@ fun ReportOffenceScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(if (flashEnabled) Color(0xFFFACC15) else Color.Black.copy(alpha = 0.5f))
+                        .background(if (flashEnabled) MaterialTheme.colorScheme.tertiary else Color.Black.copy(alpha = 0.5f))
                 ) {
                     Icon(
                         imageVector = if (flashEnabled) Icons.Default.FlashOn else Icons.Default.FlashOff,
@@ -1914,7 +2005,7 @@ fun ReportOffenceScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(if (gridEnabled) Color(0xFF006A66) else Color.Black.copy(alpha = 0.5f))
+                        .background(if (gridEnabled) MaterialTheme.colorScheme.primary else Color.Black.copy(alpha = 0.5f))
                 ) {
                     Icon(
                         imageVector = if (gridEnabled) Icons.Default.GridOn else Icons.Default.GridOff,
@@ -1995,9 +2086,9 @@ fun ReportOffenceScreen(
                             .fillMaxWidth()
                             .menuAnchor(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36),
+                            focusedBorderColor = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary,
                             unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                            focusedLabelColor = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
+                            focusedLabelColor = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
                         )
                     )
                     ExposedDropdownMenu(
@@ -2028,7 +2119,7 @@ fun ReportOffenceScreen(
                         Icon(
                             imageVector = Icons.Default.DirectionsCar,
                             contentDescription = "Car Icon",
-                            tint = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
+                            tint = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
                         )
                     },
                     singleLine = true,
@@ -2048,11 +2139,11 @@ fun ReportOffenceScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (isDark) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else Color(0xFFE2F9F3).copy(alpha = 0.5f)
+                        containerColor = if (isDark) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                     ),
                     border = androidx.compose.foundation.BorderStroke(
                         width = 1.dp,
-                        color = if (isDark) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else Color(0xFF006A66).copy(alpha = 0.15f)
+                        color = if (isDark) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                     )
                 ) {
                     Row(
@@ -2065,13 +2156,13 @@ fun ReportOffenceScreen(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
-                                .background(if (isDark) MaterialTheme.colorScheme.primaryContainer else Color(0xFFE2F9F3)),
+                                .background(MaterialTheme.colorScheme.primaryContainer),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
                                 contentDescription = "Location Pin",
-                                tint = if (isDark) MaterialTheme.colorScheme.onPrimaryContainer else Color(0xFF006A66),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -2080,7 +2171,7 @@ fun ReportOffenceScreen(
                             Text(
                                 text = "AUTOMATIC LOCATION LOGGING",
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    color = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF006A66),
+                                    color = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 1.sp
                                 )

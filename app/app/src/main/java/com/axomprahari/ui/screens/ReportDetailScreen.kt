@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.isSystemInDarkTheme
+import com.axomprahari.ui.theme.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,32 +29,16 @@ fun ReportDetailScreen(
     onBack: () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
-    val statusColor = if (isDark) {
-        when (report.status) {
-            ReportStatus.VERIFIED -> Color(0xFF003724)
-            ReportStatus.UNDER_REVIEW -> Color(0xFF3E2D00)
-            ReportStatus.REJECTED -> Color(0xFF3F0006)
-        }
-    } else {
-        when (report.status) {
-            ReportStatus.VERIFIED -> Color(0xFFE2F9F3)
-            ReportStatus.UNDER_REVIEW -> Color(0xFFFFF7E6)
-            ReportStatus.REJECTED -> Color(0xFFFFECE9)
-        }
+    val statusColor = when (report.status) {
+        ReportStatus.VERIFIED -> MaterialTheme.colorScheme.primaryContainer
+        ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.secondaryContainer
+        ReportStatus.REJECTED -> MaterialTheme.colorScheme.errorContainer
     }
 
-    val statusTextColor = if (isDark) {
-        when (report.status) {
-            ReportStatus.VERIFIED -> Color(0xFF5DF2B8)
-            ReportStatus.UNDER_REVIEW -> Color(0xFFFFC043)
-            ReportStatus.REJECTED -> Color(0xFFFF898F)
-        }
-    } else {
-        when (report.status) {
-            ReportStatus.VERIFIED -> Color(0xFF00875A)
-            ReportStatus.UNDER_REVIEW -> Color(0xFFD97706)
-            ReportStatus.REJECTED -> Color(0xFFDC2626)
-        }
+    val statusTextColor = when (report.status) {
+        ReportStatus.VERIFIED -> MaterialTheme.colorScheme.onPrimaryContainer
+        ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.onSecondaryContainer
+        ReportStatus.REJECTED -> MaterialTheme.colorScheme.onErrorContainer
     }
 
     val statusText = when (report.status) {

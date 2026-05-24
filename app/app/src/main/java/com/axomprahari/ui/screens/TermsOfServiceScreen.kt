@@ -25,15 +25,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axomprahari.R
+import com.axomprahari.ui.theme.*
 import androidx.compose.foundation.isSystemInDarkTheme
 
 @Composable
 fun TermsOfServiceScreen(onBack: () -> Unit) {
     val isDark = isSystemInDarkTheme()
-    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
-    val LoginBgTop = if (isDark) MaterialTheme.colorScheme.background else Color(0xFFF2F5F4)
-    val LoginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else Color(0xFFE5ECEB)
-    val InputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFE2E7E5)
+    val LoginDarkGreen = MaterialTheme.colorScheme.primary
+    val LoginBgTop = MaterialTheme.colorScheme.background
+    val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
+    val InputBackground = MaterialTheme.colorScheme.surfaceVariant
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -128,8 +129,8 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = if (isDark) MaterialTheme.colorScheme.errorContainer else Color(0xFFFFECE9)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, if (isDark) MaterialTheme.colorScheme.error.copy(alpha = 0.5f) else Color(0xFFFFDAD6))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -138,14 +139,14 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
                     Icon(
                         imageVector = Icons.Default.Warning,
                         contentDescription = null,
-                        tint = if (isDark) MaterialTheme.colorScheme.onErrorContainer else Color(0xFFDC2626),
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "Warning: Intentional submission of falsified evidence is a punishable offense under state regulations.",
                         style = TextStyle(
-                            color = if (isDark) MaterialTheme.colorScheme.onErrorContainer else Color(0xFFDC2626),
+                            color = MaterialTheme.colorScheme.onErrorContainer,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             lineHeight = 18.sp
@@ -212,8 +213,8 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
                     Button(
                         onClick = { /* Placeholder click */ },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isDark) MaterialTheme.colorScheme.onPrimary else Color(0xFF9DF1EB),
-                            contentColor = if (isDark) MaterialTheme.colorScheme.primary else LoginDarkGreen
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.height(40.dp)
@@ -257,7 +258,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
 @Composable
 fun TermsSectionHeader(number: String, title: String) {
     val isDark = isSystemInDarkTheme()
-    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
+    val LoginDarkGreen = MaterialTheme.colorScheme.primary
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier

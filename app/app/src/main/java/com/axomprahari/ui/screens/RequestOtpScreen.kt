@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.isSystemInDarkTheme
 import com.axomprahari.R
+import com.axomprahari.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -45,10 +46,10 @@ fun RequestOtpScreen(
     onNavigateToTermsOfService: () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
-    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else com.axomprahari.ui.theme.loginDarkGreen
-    val LoginBgTop = if (isDark) MaterialTheme.colorScheme.background else com.axomprahari.ui.theme.loginBgTop
-    val LoginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else com.axomprahari.ui.theme.loginBgBottom
-    val InputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else com.axomprahari.ui.theme.loginInputBackground
+    val LoginDarkGreen = MaterialTheme.colorScheme.primary
+    val LoginBgTop = MaterialTheme.colorScheme.background
+    val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
+    val InputBackground = MaterialTheme.colorScheme.surfaceVariant
 
     var phoneNumber by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
@@ -234,7 +235,7 @@ fun RequestOtpScreen(
                 if (phoneNumber.isNotEmpty() && !isValid) {
                     Text(
                         text = "Please enter a valid 10-digit phone number",
-                        color = Color(0xFFD32F2F),
+                        color = MaterialTheme.colorScheme.error,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(top = 8.dp)
                     )

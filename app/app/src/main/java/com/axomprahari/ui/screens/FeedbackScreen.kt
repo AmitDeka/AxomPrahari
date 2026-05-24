@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.axomprahari.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -191,12 +192,12 @@ fun FeedbackScreen(
     }
 
     val isDark = isSystemInDarkTheme()
-    val bgMainColor = if (isDark) MaterialTheme.colorScheme.background else Color(0xFFF8FAFC)
-    val cardContainerColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFE2E8F0).copy(alpha = 0.5f)
-    val cardAttachedColor = if (isDark) MaterialTheme.colorScheme.primaryContainer else Color(0xFFE2F9F3)
-    val primaryTextAccent = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF006A66)
-    val inactiveTextAccent = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else Color(0xFF0F3E36)
-    val dragDropBorderColor = if (isDark) MaterialTheme.colorScheme.outline.copy(alpha = 0.6f) else Color(0xFFCBD5E1)
+    val bgMainColor = MaterialTheme.colorScheme.background
+    val cardContainerColor = MaterialTheme.colorScheme.surfaceVariant
+    val cardAttachedColor = MaterialTheme.colorScheme.primaryContainer
+    val primaryTextAccent = MaterialTheme.colorScheme.primary
+    val inactiveTextAccent = MaterialTheme.colorScheme.onSurfaceVariant
+    val dragDropBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
 
     Column(
         modifier = Modifier

@@ -218,13 +218,3 @@ val surfaceContainerDarkHighContrast = Color(0xFF2B3231)
 val surfaceContainerHighDarkHighContrast = Color(0xFF363D3C)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF414847)
 
-// Login and Splash custom colors
-val loginDarkGreen = Color(0xFF0F3E36)
-val loginBgTop = Color(0xFFF2F5F4)
-val loginBgBottom = Color(0xFFE5ECEB)
-val loginInputBackground = Color(0xFFE2E7E5)
-val splashBgTop = Color(0xFFF0F2F0)
-val splashBgBottom = Color(0xFFE8F4F2)
-val splashDarkGreen = Color(0xFF1A3C34)
-
-

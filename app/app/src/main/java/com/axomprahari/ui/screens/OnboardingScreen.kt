@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.axomprahari.ui.theme.*
 import kotlinx.coroutines.launch
 
 data class OnboardingSlide(
@@ -41,19 +42,19 @@ fun OnboardingScreen(onFinishOnboarding: () -> Unit) {
             title = "Spot Violations",
             description = "Capture traffic violations instantly. Help keep Assam's roads safe and orderly.",
             icon = Icons.Default.CameraAlt,
-            color = Color(0xFF3B82F6) // Blue
+            color = MaterialTheme.colorScheme.primary // Blue
         ),
         OnboardingSlide(
             title = "Report Securely",
             description = "Submit photos or videos directly to traffic authorities with secure and anonymous reporting options.",
             icon = Icons.Default.Shield,
-            color = Color(0xFF10B981) // Emerald Green
+            color = MaterialTheme.colorScheme.secondary // Emerald Green
         ),
         OnboardingSlide(
             title = "Build Reputation",
             description = "Earn trust points and badges as your reports get verified. Become a guardian of your community.",
             icon = Icons.Default.Star,
-            color = Color(0xFFD4AF37) // Gold
+            color = MaterialTheme.colorScheme.tertiary // Gold
         )
     )
 

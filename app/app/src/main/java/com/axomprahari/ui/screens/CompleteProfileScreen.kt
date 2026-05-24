@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axomprahari.R
+import com.axomprahari.ui.theme.*
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -42,10 +43,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun CompleteProfileScreen(onRegistrationSuccess: (String) -> Unit) {
     val isDark = isSystemInDarkTheme()
-    val loginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else com.axomprahari.ui.theme.loginDarkGreen
-    val loginBgTop = if (isDark) MaterialTheme.colorScheme.background else com.axomprahari.ui.theme.loginBgTop
-    val loginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else com.axomprahari.ui.theme.loginBgBottom
-    val loginInputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else com.axomprahari.ui.theme.loginInputBackground
+    val loginDarkGreen = MaterialTheme.colorScheme.primary
+    val loginBgTop = MaterialTheme.colorScheme.background
+    val loginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
+    val loginInputBackground = MaterialTheme.colorScheme.surfaceVariant
 
     var fullName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -216,7 +217,7 @@ fun CompleteProfileScreen(onRegistrationSuccess: (String) -> Unit) {
             if (!isEmailValid) {
                 Text(
                     text = "Please enter a valid email address",
-                    color = Color(0xFFD32F2F),
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -337,8 +338,8 @@ private fun ProfileInputField(
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
     val isDark = isSystemInDarkTheme()
-    val loginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else com.axomprahari.ui.theme.loginDarkGreen
-    val loginInputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else com.axomprahari.ui.theme.loginInputBackground
+    val loginDarkGreen = MaterialTheme.colorScheme.primary
+    val loginInputBackground = MaterialTheme.colorScheme.surfaceVariant
 
     Column(
         modifier = Modifier

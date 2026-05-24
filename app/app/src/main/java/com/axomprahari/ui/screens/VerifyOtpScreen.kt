@@ -61,10 +61,10 @@ fun VerifyOtpScreen(
     onNavigateToTermsOfService: () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
-    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else com.axomprahari.ui.theme.loginDarkGreen
-    val LoginBgTop = if (isDark) MaterialTheme.colorScheme.background else com.axomprahari.ui.theme.loginBgTop
-    val LoginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else com.axomprahari.ui.theme.loginBgBottom
-    val InputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else com.axomprahari.ui.theme.loginInputBackground
+    val LoginDarkGreen = MaterialTheme.colorScheme.primary
+    val LoginBgTop = MaterialTheme.colorScheme.background
+    val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
+    val InputBackground = MaterialTheme.colorScheme.surfaceVariant
     var code by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var countdown by remember { mutableStateOf(59) }

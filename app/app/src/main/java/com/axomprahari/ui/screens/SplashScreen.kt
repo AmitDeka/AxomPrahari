@@ -31,9 +31,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 @Composable
 fun SplashScreen(onAnimationComplete: () -> Unit) {
     val isDark = isSystemInDarkTheme()
-    val SplashDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else com.axomprahari.ui.theme.splashDarkGreen
-    val SplashBgTop = if (isDark) MaterialTheme.colorScheme.background else com.axomprahari.ui.theme.splashBgTop
-    val SplashBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else com.axomprahari.ui.theme.splashBgBottom
+    val SplashDarkGreen = MaterialTheme.colorScheme.primary
+    val SplashBgTop = MaterialTheme.colorScheme.background
+    val SplashBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
     // Animations
     val logoScale = remember { Animatable(1f) }
     val logoAlpha = remember { Animatable(1f) }

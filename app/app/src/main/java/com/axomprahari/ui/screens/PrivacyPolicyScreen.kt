@@ -26,15 +26,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axomprahari.R
+import com.axomprahari.ui.theme.*
 import androidx.compose.foundation.isSystemInDarkTheme
 
 @Composable
 fun PrivacyPolicyScreen(onBack: () -> Unit) {
     val isDark = isSystemInDarkTheme()
-    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
-    val LoginBgTop = if (isDark) MaterialTheme.colorScheme.background else Color(0xFFF2F5F4)
-    val LoginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else Color(0xFFE5ECEB)
-    val InputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFE2E7E5)
+    val LoginDarkGreen = MaterialTheme.colorScheme.primary
+    val LoginBgTop = MaterialTheme.colorScheme.background
+    val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
+    val InputBackground = MaterialTheme.colorScheme.surfaceVariant
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -159,8 +160,8 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = if (isDark) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else Color(0xFFEAF5F2)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, if (isDark) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else Color(0xFFC7E5DF))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -243,8 +244,8 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
                     Button(
                         onClick = { /* Placeholder click */ },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isDark) MaterialTheme.colorScheme.onPrimary else Color(0xFF9DF1EB),
-                            contentColor = if (isDark) MaterialTheme.colorScheme.primary else LoginDarkGreen
+                             containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.height(40.dp)
@@ -288,7 +289,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
 @Composable
 fun PrivacySectionHeader(number: String, title: String) {
     val isDark = isSystemInDarkTheme()
-    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
+    val LoginDarkGreen = MaterialTheme.colorScheme.primary
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
