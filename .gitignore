@@ -3,3 +3,4 @@ API_DOCS.md
 /api/v1/seedSuperAdmin.js
 /api/v1/inspectDb.js
 /api/v1/verifyAdminCRUD.js
+/api/v1/verifyNotifications.js
