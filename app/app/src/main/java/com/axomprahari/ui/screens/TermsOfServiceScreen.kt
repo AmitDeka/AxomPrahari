@@ -25,14 +25,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axomprahari.R
-
-private val LoginDarkGreen = Color(0xFF0F3E36)
-private val LoginBgTop = Color(0xFFF2F5F4)
-private val LoginBgBottom = Color(0xFFE5ECEB)
-private val InputBackground = Color(0xFFE2E7E5)
+import androidx.compose.foundation.isSystemInDarkTheme
 
 @Composable
 fun TermsOfServiceScreen(onBack: () -> Unit) {
+    val isDark = isSystemInDarkTheme()
+    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
+    val LoginBgTop = if (isDark) MaterialTheme.colorScheme.background else Color(0xFFF2F5F4)
+    val LoginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else Color(0xFFE5ECEB)
+    val InputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFE2E7E5)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -127,8 +128,8 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFECE9)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFDAD6))
+                colors = CardDefaults.cardColors(containerColor = if (isDark) MaterialTheme.colorScheme.errorContainer else Color(0xFFFFECE9)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, if (isDark) MaterialTheme.colorScheme.error.copy(alpha = 0.5f) else Color(0xFFFFDAD6))
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -137,14 +138,14 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
                     Icon(
                         imageVector = Icons.Default.Warning,
                         contentDescription = null,
-                        tint = Color(0xFFDC2626),
+                        tint = if (isDark) MaterialTheme.colorScheme.onErrorContainer else Color(0xFFDC2626),
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "Warning: Intentional submission of falsified evidence is a punishable offense under state regulations.",
                         style = TextStyle(
-                            color = Color(0xFFDC2626),
+                            color = if (isDark) MaterialTheme.colorScheme.onErrorContainer else Color(0xFFDC2626),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             lineHeight = 18.sp
@@ -211,8 +212,8 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
                     Button(
                         onClick = { /* Placeholder click */ },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF9DF1EB),
-                            contentColor = LoginDarkGreen
+                            containerColor = if (isDark) MaterialTheme.colorScheme.onPrimary else Color(0xFF9DF1EB),
+                            contentColor = if (isDark) MaterialTheme.colorScheme.primary else LoginDarkGreen
                         ),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.height(40.dp)
@@ -255,6 +256,8 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
 
 @Composable
 fun TermsSectionHeader(number: String, title: String) {
+    val isDark = isSystemInDarkTheme()
+    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier

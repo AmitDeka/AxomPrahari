@@ -26,14 +26,14 @@ import com.axomprahari.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// Splash-specific colors matching the design, loaded from theme package
-private val SplashDarkGreen = com.axomprahari.ui.theme.splashDarkGreen
-private val SplashBgTop = com.axomprahari.ui.theme.splashBgTop
-private val SplashBgBottom = com.axomprahari.ui.theme.splashBgBottom
-
+import androidx.compose.foundation.isSystemInDarkTheme
 
 @Composable
 fun SplashScreen(onAnimationComplete: () -> Unit) {
+    val isDark = isSystemInDarkTheme()
+    val SplashDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else com.axomprahari.ui.theme.splashDarkGreen
+    val SplashBgTop = if (isDark) MaterialTheme.colorScheme.background else com.axomprahari.ui.theme.splashBgTop
+    val SplashBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else com.axomprahari.ui.theme.splashBgBottom
     // Animations
     val logoScale = remember { Animatable(1f) }
     val logoAlpha = remember { Animatable(1f) }
@@ -69,7 +69,6 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
                 easing = FastOutSlowInEasing
             )
         )
-
         delay(200)
         onAnimationComplete()
     }
@@ -104,7 +103,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
                         ambientColor = Color.Black.copy(alpha = 0.01f),
                         spotColor = Color.Black.copy(alpha = 0.01f)
                     )
-                    .size(100.dp),
+                    .size(160.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -115,7 +114,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
                 )
             }
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // ── App Name ──
             Text(

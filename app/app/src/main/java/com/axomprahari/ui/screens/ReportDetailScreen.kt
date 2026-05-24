@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,16 +27,33 @@ fun ReportDetailScreen(
     report: TrafficReport,
     onBack: () -> Unit
 ) {
-    val statusColor = when (report.status) {
-        ReportStatus.VERIFIED -> Color(0xFFE2F9F3) // Emerald Light
-        ReportStatus.UNDER_REVIEW -> Color(0xFFFFF7E6) // Amber Light
-        ReportStatus.REJECTED -> Color(0xFFFFECE9) // Red/Pink Light
+    val isDark = isSystemInDarkTheme()
+    val statusColor = if (isDark) {
+        when (report.status) {
+            ReportStatus.VERIFIED -> Color(0xFF003724)
+            ReportStatus.UNDER_REVIEW -> Color(0xFF3E2D00)
+            ReportStatus.REJECTED -> Color(0xFF3F0006)
+        }
+    } else {
+        when (report.status) {
+            ReportStatus.VERIFIED -> Color(0xFFE2F9F3)
+            ReportStatus.UNDER_REVIEW -> Color(0xFFFFF7E6)
+            ReportStatus.REJECTED -> Color(0xFFFFECE9)
+        }
     }
 
-    val statusTextColor = when (report.status) {
-        ReportStatus.VERIFIED -> Color(0xFF00875A) // Emerald Dark
-        ReportStatus.UNDER_REVIEW -> Color(0xFFD97706) // Amber Dark
-        ReportStatus.REJECTED -> Color(0xFFDC2626) // Red Dark
+    val statusTextColor = if (isDark) {
+        when (report.status) {
+            ReportStatus.VERIFIED -> Color(0xFF5DF2B8)
+            ReportStatus.UNDER_REVIEW -> Color(0xFFFFC043)
+            ReportStatus.REJECTED -> Color(0xFFFF898F)
+        }
+    } else {
+        when (report.status) {
+            ReportStatus.VERIFIED -> Color(0xFF00875A)
+            ReportStatus.UNDER_REVIEW -> Color(0xFFD97706)
+            ReportStatus.REJECTED -> Color(0xFFDC2626)
+        }
     }
 
     val statusText = when (report.status) {

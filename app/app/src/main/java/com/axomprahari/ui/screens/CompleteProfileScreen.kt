@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
@@ -34,15 +35,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axomprahari.R
-import com.axomprahari.ui.theme.loginBgBottom
-import com.axomprahari.ui.theme.loginBgTop
-import com.axomprahari.ui.theme.loginDarkGreen
-import com.axomprahari.ui.theme.loginInputBackground
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun CompleteProfileScreen(onRegistrationSuccess: (String) -> Unit) {
+    val isDark = isSystemInDarkTheme()
+    val loginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else com.axomprahari.ui.theme.loginDarkGreen
+    val loginBgTop = if (isDark) MaterialTheme.colorScheme.background else com.axomprahari.ui.theme.loginBgTop
+    val loginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else com.axomprahari.ui.theme.loginBgBottom
+    val loginInputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else com.axomprahari.ui.theme.loginInputBackground
+
     var fullName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -332,6 +336,10 @@ private fun ProfileInputField(
     leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
+    val isDark = isSystemInDarkTheme()
+    val loginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else com.axomprahari.ui.theme.loginDarkGreen
+    val loginInputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else com.axomprahari.ui.theme.loginInputBackground
+
     Column(
         modifier = Modifier
             .fillMaxWidth()

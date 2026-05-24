@@ -46,14 +46,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.isSystemInDarkTheme
 import com.axomprahari.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-private val LoginDarkGreen = com.axomprahari.ui.theme.loginDarkGreen
-private val LoginBgTop = com.axomprahari.ui.theme.loginBgTop
-private val LoginBgBottom = com.axomprahari.ui.theme.loginBgBottom
-private val InputBackground = com.axomprahari.ui.theme.loginInputBackground
 
 @Composable
 fun VerifyOtpScreen(
@@ -64,6 +60,11 @@ fun VerifyOtpScreen(
     onNavigateToPrivacyPolicy: () -> Unit,
     onNavigateToTermsOfService: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
+    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else com.axomprahari.ui.theme.loginDarkGreen
+    val LoginBgTop = if (isDark) MaterialTheme.colorScheme.background else com.axomprahari.ui.theme.loginBgTop
+    val LoginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else com.axomprahari.ui.theme.loginBgBottom
+    val InputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else com.axomprahari.ui.theme.loginInputBackground
     var code by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var countdown by remember { mutableStateOf(59) }
@@ -299,7 +300,7 @@ fun VerifyOtpScreen(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
-                    .background(Color.White.copy(alpha = 0.5f))
+                    .background(if (isDark) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.5f))
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {

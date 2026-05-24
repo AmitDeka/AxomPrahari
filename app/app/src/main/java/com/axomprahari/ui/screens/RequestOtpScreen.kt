@@ -32,14 +32,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.isSystemInDarkTheme
 import com.axomprahari.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-private val LoginDarkGreen = com.axomprahari.ui.theme.loginDarkGreen
-private val LoginBgTop = com.axomprahari.ui.theme.loginBgTop
-private val LoginBgBottom = com.axomprahari.ui.theme.loginBgBottom
-private val InputBackground = com.axomprahari.ui.theme.loginInputBackground
 
 @Composable
 fun RequestOtpScreen(
@@ -48,6 +44,12 @@ fun RequestOtpScreen(
     onNavigateToPrivacyPolicy: () -> Unit,
     onNavigateToTermsOfService: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
+    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else com.axomprahari.ui.theme.loginDarkGreen
+    val LoginBgTop = if (isDark) MaterialTheme.colorScheme.background else com.axomprahari.ui.theme.loginBgTop
+    val LoginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else com.axomprahari.ui.theme.loginBgBottom
+    val InputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else com.axomprahari.ui.theme.loginInputBackground
+
     var phoneNumber by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()

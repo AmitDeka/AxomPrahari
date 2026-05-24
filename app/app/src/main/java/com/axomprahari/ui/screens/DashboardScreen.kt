@@ -16,6 +16,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -69,14 +70,15 @@ fun DrawerMenuItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
     val containerColor = if (isSelected) {
-        Color(0xFFE2F9F3) // Light green background matching account selection in mockup
+        if (isDark) MaterialTheme.colorScheme.primaryContainer else Color(0xFFE2F9F3)
     } else {
         Color.Transparent
     }
     
     val contentColor = if (isSelected) {
-        Color(0xFF006A66) // Dark green matching selection
+        if (isDark) MaterialTheme.colorScheme.onPrimaryContainer else Color(0xFF006A66)
     } else {
         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
     }
@@ -114,12 +116,11 @@ fun DashboardScreen(
     onNavigateToFaq: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val isDark = isSystemInDarkTheme()
     val scope = rememberCoroutineScope()
     
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var showFeedbackPage by remember { mutableStateOf(false) }
-    var feedbackRating by remember { mutableStateOf(5) }
-    var feedbackComment by remember { mutableStateOf("") }
 
     // 1. Unified State for Citizen Reports
     var reportsList by remember {
@@ -167,14 +168,7 @@ fun DashboardScreen(
         }
     }
 
-    // Helper to launch camera
-    val onLaunchCamera = {
-        if (hasCameraPermission) {
-            showCamera = true
-        } else {
-            permissionLauncher.launch(Manifest.permission.CAMERA)
-        }
-    }
+
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -223,13 +217,13 @@ fun DashboardScreen(
                                     modifier = Modifier
                                         .size(16.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF80D5CF)),
+                                        .background(MaterialTheme.colorScheme.primary),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = "Verified",
-                                        tint = Color(0xFF003735),
+                                        tint = MaterialTheme.colorScheme.onPrimary,
                                         modifier = Modifier.size(10.dp)
                                     )
                                 }
@@ -238,17 +232,17 @@ fun DashboardScreen(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
-                                    .background(Color(0xFF80D5CF).copy(alpha = 0.2f))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
                                     .padding(horizontal = 8.dp, vertical = 2.dp)
                             ) {
-                                Text(
+                                  Text(
                                     text = "XAZAG NAGARIK",
                                     style = MaterialTheme.typography.labelSmall.copy(
-                                        color = Color(0xFF006A66),
+                                        color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 9.sp
                                     )
-                                )
+                                  )
                             }
                         }
                     }
@@ -438,7 +432,7 @@ fun DashboardScreen(
                             text = if (showFeedbackPage) "Xazag Axom" else "Axom Prahari",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF0F3E36)
+                                color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
                             )
                         )
                     },
@@ -849,7 +843,6 @@ fun DashboardScreen(
                 exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
             ) {
                 FeedbackScreen(
-                    onBack = { showFeedbackPage = false },
                     onSubmit = { category, message ->
                         showFeedbackPage = false
                         Toast.makeText(context, "Feedback submitted successfully!", Toast.LENGTH_SHORT).show()
@@ -870,6 +863,7 @@ fun DashboardTab(
     onReportClick: (TrafficReport) -> Unit,
     onReportSpotClick: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
     val scrollState = rememberScrollState()
     
     Column(
@@ -970,13 +964,13 @@ fun DashboardTab(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFE2F9F3)),
+                            .background(if (isDark) MaterialTheme.colorScheme.primaryContainer else Color(0xFFE2F9F3)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Points",
-                            tint = Color(0xFF006A66),
+                            tint = if (isDark) MaterialTheme.colorScheme.onPrimaryContainer else Color(0xFF006A66),
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1016,13 +1010,13 @@ fun DashboardTab(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFFFECE9)),
+                            .background(if (isDark) MaterialTheme.colorScheme.errorContainer else Color(0xFFFFECE9)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Assignment,
                             contentDescription = "Pending Reports",
-                            tint = Color(0xFFDC2626),
+                            tint = if (isDark) MaterialTheme.colorScheme.onErrorContainer else Color(0xFFDC2626),
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1424,16 +1418,33 @@ fun ProfileTab(
 // Inner helper content to show report items cleanly
 @Composable
 fun ReportItemCardContent(report: TrafficReport) {
-    val statusColor = when (report.status) {
-        ReportStatus.VERIFIED -> Color(0xFFE2F9F3)
-        ReportStatus.UNDER_REVIEW -> Color(0xFFFFF7E6)
-        ReportStatus.REJECTED -> Color(0xFFFFECE9)
+    val isDark = isSystemInDarkTheme()
+    val statusColor = if (isDark) {
+        when (report.status) {
+            ReportStatus.VERIFIED -> Color(0xFF003724)
+            ReportStatus.UNDER_REVIEW -> Color(0xFF3E2D00)
+            ReportStatus.REJECTED -> Color(0xFF3F0006)
+        }
+    } else {
+        when (report.status) {
+            ReportStatus.VERIFIED -> Color(0xFFE2F9F3)
+            ReportStatus.UNDER_REVIEW -> Color(0xFFFFF7E6)
+            ReportStatus.REJECTED -> Color(0xFFFFECE9)
+        }
     }
 
-    val statusTextColor = when (report.status) {
-        ReportStatus.VERIFIED -> Color(0xFF00875A)
-        ReportStatus.UNDER_REVIEW -> Color(0xFFD97706)
-        ReportStatus.REJECTED -> Color(0xFFDC2626)
+    val statusTextColor = if (isDark) {
+        when (report.status) {
+            ReportStatus.VERIFIED -> Color(0xFF5DF2B8)
+            ReportStatus.UNDER_REVIEW -> Color(0xFFFFC043)
+            ReportStatus.REJECTED -> Color(0xFFFF898F)
+        }
+    } else {
+        when (report.status) {
+            ReportStatus.VERIFIED -> Color(0xFF00875A)
+            ReportStatus.UNDER_REVIEW -> Color(0xFFD97706)
+            ReportStatus.REJECTED -> Color(0xFFDC2626)
+        }
     }
 
     val statusText = when (report.status) {
@@ -1695,6 +1706,7 @@ fun ReportOffenceScreen(
     onReportSubmitted: (TrafficReport) -> Unit,
     onCancel: () -> Unit
 ) {
+    val isDark = isSystemInDarkTheme()
     var selectedOffence by remember { mutableStateOf("No Helmet") }
     var vehicleNumber by remember { mutableStateOf("") }
     var isDropdownExpanded by remember { mutableStateOf(false) }
@@ -1983,9 +1995,9 @@ fun ReportOffenceScreen(
                             .fillMaxWidth()
                             .menuAnchor(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF0F3E36),
+                            focusedBorderColor = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36),
                             unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                            focusedLabelColor = Color(0xFF0F3E36)
+                            focusedLabelColor = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
                         )
                     )
                     ExposedDropdownMenu(
@@ -2016,16 +2028,16 @@ fun ReportOffenceScreen(
                         Icon(
                             imageVector = Icons.Default.DirectionsCar,
                             contentDescription = "Car Icon",
-                            tint = Color(0xFF0F3E36)
+                            tint = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
                         )
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF0F3E36),
+                        focusedBorderColor = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36),
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                        focusedLabelColor = Color(0xFF0F3E36)
+                        focusedLabelColor = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
                     )
                 )
 
@@ -2036,11 +2048,11 @@ fun ReportOffenceScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFE2F9F3).copy(alpha = 0.5f)
+                        containerColor = if (isDark) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else Color(0xFFE2F9F3).copy(alpha = 0.5f)
                     ),
                     border = androidx.compose.foundation.BorderStroke(
                         width = 1.dp,
-                        color = Color(0xFF006A66).copy(alpha = 0.15f)
+                        color = if (isDark) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else Color(0xFF006A66).copy(alpha = 0.15f)
                     )
                 ) {
                     Row(
@@ -2053,13 +2065,13 @@ fun ReportOffenceScreen(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFE2F9F3)),
+                                .background(if (isDark) MaterialTheme.colorScheme.primaryContainer else Color(0xFFE2F9F3)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
                                 contentDescription = "Location Pin",
-                                tint = Color(0xFF006A66),
+                                tint = if (isDark) MaterialTheme.colorScheme.onPrimaryContainer else Color(0xFF006A66),
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -2068,7 +2080,7 @@ fun ReportOffenceScreen(
                             Text(
                                 text = "AUTOMATIC LOCATION LOGGING",
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    color = Color(0xFF006A66),
+                                    color = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF006A66),
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 1.sp
                                 )
@@ -2102,10 +2114,10 @@ fun ReportOffenceScreen(
                     },
                     enabled = vehicleNumber.isNotBlank(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF0F3E36),
-                        contentColor = Color.White,
-                        disabledContainerColor = Color(0xFF0F3E36).copy(alpha = 0.5f),
-                        disabledContentColor = Color.White.copy(alpha = 0.5f)
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                     ),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
@@ -2131,335 +2143,6 @@ fun ReportOffenceScreen(
                     }
                 }
             }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FeedbackScreen(
-    onBack: () -> Unit,
-    onSubmit: (String, String) -> Unit
-) {
-    var selectedCategory by remember { mutableStateOf("Suggestion") }
-    var feedbackMessage by remember { mutableStateOf("") }
-    var isDropdownExpanded by remember { mutableStateOf(false) }
-    var selectedPhotoUri by remember { mutableStateOf<android.net.Uri?>(null) }
-
-    val context = LocalContext.current
-
-    val categories = listOf(
-        "Suggestion",
-        "Bug Report",
-        "App Performance",
-        "Offence Verification",
-        "Reward Points Issue",
-        "Other"
-    )
-
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: android.net.Uri? ->
-        if (uri != null) {
-            selectedPhotoUri = uri
-            Toast.makeText(context, "Photo attached successfully", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    val storagePermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-        Manifest.permission.READ_MEDIA_IMAGES
-    } else {
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    }
-
-    var hasStoragePermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(context, storagePermission) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-
-    val storagePermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        hasStoragePermission = isGranted
-        if (isGranted) {
-            imagePickerLauncher.launch("image/*")
-        } else {
-            Toast.makeText(context, "Permission required to access photos", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    val onPickPhoto = {
-        if (hasStoragePermission) {
-            imagePickerLauncher.launch("image/*")
-        } else {
-            storagePermissionLauncher.launch(storagePermission)
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF8FAFC))
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Main Title & Description
-            Text(
-                text = "How can we improve?",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "Your feedback helps us build a safer and smarter Assam. We value every detail you share.",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                    lineHeight = 22.sp
-                )
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // SELECT CATEGORY Section
-            Text(
-                text = "SELECT CATEGORY",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-                    letterSpacing = 0.8.sp
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ExposedDropdownMenuBox(
-                expanded = isDropdownExpanded,
-                onExpandedChange = { isDropdownExpanded = !isDropdownExpanded },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = selectedCategory,
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDropdownExpanded) },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFE2E8F0).copy(alpha = 0.5f),
-                        unfocusedContainerColor = Color(0xFFE2E8F0).copy(alpha = 0.5f),
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                    )
-                )
-                ExposedDropdownMenu(
-                    expanded = isDropdownExpanded,
-                    onDismissRequest = { isDropdownExpanded = false }
-                ) {
-                    categories.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option) },
-                            onClick = {
-                                selectedCategory = option
-                                isDropdownExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // YOUR MESSAGE Section
-            Text(
-                text = "YOUR MESSAGE",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-                    letterSpacing = 0.8.sp
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = feedbackMessage,
-                onValueChange = { feedbackMessage = it },
-                placeholder = {
-                    Text(
-                        text = "Describe your experience or suggest a feature...",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFE2E8F0).copy(alpha = 0.5f),
-                    unfocusedContainerColor = Color(0xFFE2E8F0).copy(alpha = 0.5f),
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent
-                )
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ATTACH CONTEXT (OPTIONAL) Section
-            Text(
-                text = "ATTACH CONTEXT (OPTIONAL)",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-                    letterSpacing = 0.8.sp
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Photo upload box (fully functional with photo Uri state)
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (selectedPhotoUri != null) Color(0xFFE2F9F3) else Color(0xFFE2E8F0).copy(alpha = 0.5f)
-                    ),
-                    modifier = Modifier
-                        .size(96.dp)
-                        .clickable {
-                            if (selectedPhotoUri != null) {
-                                selectedPhotoUri = null
-                                Toast.makeText(context, "Photo removed", Toast.LENGTH_SHORT).show()
-                            } else {
-                                onPickPhoto()
-                            }
-                        }
-                ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        if (selectedPhotoUri != null) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Clear",
-                                tint = Color(0xFF006A66),
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(6.dp)
-                                    .size(16.dp)
-                                    .clickable {
-                                        selectedPhotoUri = null
-                                    }
-                            )
-                        }
-
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = if (selectedPhotoUri != null) Icons.Default.CheckCircle else Icons.Default.AddAPhoto,
-                                contentDescription = "Photo Status",
-                                tint = if (selectedPhotoUri != null) Color(0xFF006A66) else Color(0xFF0F3E36),
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = if (selectedPhotoUri != null) "ATTACHED" else "PHOTO",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (selectedPhotoUri != null) Color(0xFF006A66) else Color(0xFF0F3E36),
-                                    letterSpacing = 0.5.sp
-                                )
-                            )
-                        }
-                    }
-                }
-
-                // Drag & Drop box with dashed border
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(96.dp)
-                        .background(Color(0xFFF1F5F9).copy(alpha = 0.5f), RoundedCornerShape(16.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-                        drawRoundRect(
-                            color = Color(0xFFCBD5E1),
-                            style = Stroke(width = 1.dp.toPx(), pathEffect = pathEffect),
-                            cornerRadius = androidx.compose.ui.geometry.CornerRadius(16.dp.toPx())
-                        )
-                    }
-                    Text(
-                        text = if (selectedPhotoUri != null) {
-                            val pathStr = selectedPhotoUri.toString()
-                            val displaySegment = pathStr.substringAfterLast("/")
-                            "Attached:\n$displaySegment"
-                        } else {
-                            "Drag and drop any relevant screenshots or documents here"
-                        },
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = if (selectedPhotoUri != null) Color(0xFF006A66) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                            textAlign = TextAlign.Center,
-                            fontWeight = if (selectedPhotoUri != null) FontWeight.Bold else FontWeight.Normal
-                        ),
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Submit Button
-            Button(
-                onClick = {
-                    onSubmit(selectedCategory, feedbackMessage)
-                },
-                enabled = feedbackMessage.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0F3E36),
-                    contentColor = Color.White,
-                    disabledContainerColor = Color(0xFF0F3E36).copy(alpha = 0.5f),
-                    disabledContentColor = Color.White.copy(alpha = 0.5f)
-                ),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Send Icon",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Submit Feedback",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

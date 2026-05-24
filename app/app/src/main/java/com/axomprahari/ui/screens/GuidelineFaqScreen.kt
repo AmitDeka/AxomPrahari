@@ -29,14 +29,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-private val LoginDarkGreen = Color(0xFF0F3E36)
-private val LoginBgTop = Color(0xFFF2F5F4)
-private val LoginBgBottom = Color(0xFFE5ECEB)
-private val InputBackground = Color(0xFFE2E7E5)
+import androidx.compose.foundation.isSystemInDarkTheme
 
 @Composable
 fun GuidelineFaqScreen(onBack: () -> Unit) {
+    val isDark = isSystemInDarkTheme()
+    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
+    val LoginBgTop = if (isDark) MaterialTheme.colorScheme.background else Color(0xFFF2F5F4)
+    val LoginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else Color(0xFFE5ECEB)
+    val InputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFE2E7E5)
+
     var expandedIndex by remember { mutableStateOf(-1) }
 
     Box(
@@ -255,8 +257,8 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFECE9)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFDAD6))
+                colors = CardDefaults.cardColors(containerColor = if (isDark) MaterialTheme.colorScheme.errorContainer else Color(0xFFFFECE9)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, if (isDark) MaterialTheme.colorScheme.error.copy(alpha = 0.5f) else Color(0xFFFFDAD6))
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -265,7 +267,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                     Icon(
                         imageVector = Icons.Default.Warning,
                         contentDescription = "Warning",
-                        tint = Color(0xFFDC2626),
+                        tint = if (isDark) MaterialTheme.colorScheme.onErrorContainer else Color(0xFFDC2626),
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
@@ -273,7 +275,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                         Text(
                             text = "Critical Reminder",
                             style = TextStyle(
-                                color = Color(0xFFDC2626),
+                                color = if (isDark) MaterialTheme.colorScheme.onErrorContainer else Color(0xFFDC2626),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -282,7 +284,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                         Text(
                             text = "Always prioritize your safety. Never attempt to take photos while driving.",
                             style = TextStyle(
-                                color = Color(0xFFDC2626).copy(alpha = 0.8f),
+                                color = if (isDark) MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f) else Color(0xFFDC2626).copy(alpha = 0.8f),
                                 fontSize = 12.sp,
                                 lineHeight = 16.sp
                             )
@@ -295,7 +297,11 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
 }
 
 @Composable
-private fun borderStroke(isExpanded: Boolean) = androidx.compose.foundation.BorderStroke(
-    width = 1.dp,
-    color = if (isExpanded) LoginDarkGreen.copy(alpha = 0.15f) else Color.Transparent
-)
+private fun borderStroke(isExpanded: Boolean): androidx.compose.foundation.BorderStroke {
+    val isDark = isSystemInDarkTheme()
+    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
+    return androidx.compose.foundation.BorderStroke(
+        width = 1.dp,
+        color = if (isExpanded) LoginDarkGreen.copy(alpha = 0.15f) else Color.Transparent
+    )
+}

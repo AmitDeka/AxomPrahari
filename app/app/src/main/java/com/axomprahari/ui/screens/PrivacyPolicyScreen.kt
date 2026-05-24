@@ -26,14 +26,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axomprahari.R
-
-private val LoginDarkGreen = Color(0xFF0F3E36)
-private val LoginBgTop = Color(0xFFF2F5F4)
-private val LoginBgBottom = Color(0xFFE5ECEB)
-private val InputBackground = Color(0xFFE2E7E5)
+import androidx.compose.foundation.isSystemInDarkTheme
 
 @Composable
 fun PrivacyPolicyScreen(onBack: () -> Unit) {
+    val isDark = isSystemInDarkTheme()
+    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
+    val LoginBgTop = if (isDark) MaterialTheme.colorScheme.background else Color(0xFFF2F5F4)
+    val LoginBgBottom = if (isDark) MaterialTheme.colorScheme.surfaceContainerLowest else Color(0xFFE5ECEB)
+    val InputBackground = if (isDark) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFE2E7E5)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -114,8 +115,8 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.4f)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White)
+                colors = CardDefaults.cardColors(containerColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.4f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, if (isDark) MaterialTheme.colorScheme.outline.copy(alpha = 0.3f) else Color.White)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -158,8 +159,8 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF5F2)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC7E5DF))
+                colors = CardDefaults.cardColors(containerColor = if (isDark) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else Color(0xFFEAF5F2)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, if (isDark) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else Color(0xFFC7E5DF))
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -242,8 +243,8 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
                     Button(
                         onClick = { /* Placeholder click */ },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF9DF1EB),
-                            contentColor = LoginDarkGreen
+                            containerColor = if (isDark) MaterialTheme.colorScheme.onPrimary else Color(0xFF9DF1EB),
+                            contentColor = if (isDark) MaterialTheme.colorScheme.primary else LoginDarkGreen
                         ),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.height(40.dp)
@@ -286,6 +287,8 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
 
 @Composable
 fun PrivacySectionHeader(number: String, title: String) {
+    val isDark = isSystemInDarkTheme()
+    val LoginDarkGreen = if (isDark) MaterialTheme.colorScheme.primary else Color(0xFF0F3E36)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
