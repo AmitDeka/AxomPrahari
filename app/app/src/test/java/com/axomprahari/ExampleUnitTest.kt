@@ -1,4 +1,4 @@
-package com.codebloc.axomprahari
+package com.axomprahari
 
 import org.junit.Test
 

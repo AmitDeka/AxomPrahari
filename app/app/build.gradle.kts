@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+    kaptTest(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
     // Local Storage (Datastore)

@@ -29,6 +29,7 @@ import com.axomprahari.R
 import com.axomprahari.ui.theme.*
 import androidx.compose.foundation.isSystemInDarkTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacyPolicyScreen(onBack: () -> Unit) {
     val isDark = isSystemInDarkTheme()
@@ -36,59 +37,65 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
     val LoginBgTop = MaterialTheme.colorScheme.background
     val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
     val InputBackground = MaterialTheme.colorScheme.surfaceVariant
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(LoginBgTop, LoginBgBottom)
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Privacy Policy",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Go back",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
-    ) {
-        Column(
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .padding(innerPadding)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(LoginBgTop, LoginBgBottom)
+                    )
+                )
         ) {
-            // ── Back Button ──
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.padding(bottom = 12.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = LoginDarkGreen
+                // ── Header Title & Subtitle ──
+                Text(
+                    text = "OFFICIAL DOCUMENTATION",
+                    style = TextStyle(
+                        color = LoginDarkGreen.copy(alpha = 0.5f),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.5.sp
+                    )
                 )
-            }
 
-            // ── Header Title & Subtitle ──
-            Text(
-                text = "OFFICIAL DOCUMENTATION",
-                style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.5f),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp
-                )
-            )
+                Spacer(modifier = Modifier.height(12.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "Privacy Policy",
-                style = TextStyle(
-                    color = LoginDarkGreen,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            val appName = stringResource(id = R.string.app_name)
+                val appName = stringResource(id = R.string.app_name)
             Text(
                 text = "Welcome to $appName. Your privacy and the integrity of civic data are our highest priorities. Please review our detailed privacy policy guidelines below.",
                 style = TextStyle(
@@ -283,6 +290,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
                     .padding(bottom = 16.dp)
             )
         }
+    }
     }
 }
 

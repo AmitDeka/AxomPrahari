@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.isSystemInDarkTheme
 import com.axomprahari.ui.theme.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuidelineFaqScreen(onBack: () -> Unit) {
     val isDark = isSystemInDarkTheme()
@@ -42,71 +43,52 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
 
     var expandedIndex by remember { mutableStateOf(-1) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(LoginBgTop, LoginBgBottom)
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Guidelines & FAQ",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Go back",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
-    ) {
-        Column(
+        },
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .padding(innerPadding)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(LoginBgTop, LoginBgBottom)
+                    )
+                )
         ) {
-            // ── Back Button ──
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.padding(bottom = 12.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = LoginDarkGreen
-                )
-            }
+                Spacer(modifier = Modifier.height(8.dp))
 
-            // ── Header Title & Subtitle ──
-            Text(
-                text = "HELP CENTER",
-                style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.5f),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.5.sp
-                )
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "Guidelines & FAQ",
-                style = TextStyle(
-                    color = LoginDarkGreen,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Everything you need to know about being an active citizen in Assam's smart traffic monitoring ecosystem.",
-                style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.7f),
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Normal
-                )
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ── Mock Search Bar ──
+                // ── Mock Search Bar ──
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -294,6 +276,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                 }
             }
         }
+    }
     }
 }
 

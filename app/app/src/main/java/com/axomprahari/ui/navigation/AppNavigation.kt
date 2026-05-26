@@ -91,9 +91,36 @@ fun RootNavigationGraph(viewModel: MainViewModel = viewModel()) {
             }
         }
         is MainUiState.Authenticated -> {
+            val reportsList by viewModel.reportsList.collectAsStateWithLifecycle()
             NavHost(navController = navController, startDestination = "dashboard") {
                 composable("dashboard") {
                     DashboardScreen(
+                        navController = navController,
+                        reportsList = reportsList,
+                        onReportSubmitted = { viewModel.addReport(it) },
+                        onLogout = { viewModel.logout() },
+                        onNavigateToFaq = { navController.navigate("guideline_faq") }
+                    )
+                }
+                composable("report") {
+                    ReportScreen(
+                        navController = navController,
+                        reportsList = reportsList,
+                        onLogout = { viewModel.logout() },
+                        onNavigateToFaq = { navController.navigate("guideline_faq") }
+                    )
+                }
+                composable("profile") {
+                    ProfileScreen(
+                        navController = navController,
+                        reportsList = reportsList,
+                        onLogout = { viewModel.logout() },
+                        onNavigateToFaq = { navController.navigate("guideline_faq") }
+                    )
+                }
+                composable("violations") {
+                    ViolationsScreen(
+                        navController = navController,
                         onLogout = { viewModel.logout() },
                         onNavigateToFaq = { navController.navigate("guideline_faq") }
                     )
@@ -102,6 +129,30 @@ fun RootNavigationGraph(viewModel: MainViewModel = viewModel()) {
                     GuidelineFaqScreen(
                         onBack = { navController.popBackStack() }
                     )
+                }
+                composable("privacy_policy") {
+                    PrivacyPolicyScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                composable("terms_of_service") {
+                    TermsOfServiceScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                composable("report_detail/{reportId}") { backStackEntry ->
+                    val reportId = backStackEntry.arguments?.getString("reportId") ?: ""
+                    val report = reportsList.find { it.id == reportId }
+                    if (report != null) {
+                        ReportDetailScreen(
+                            report = report,
+                            onBack = { navController.popBackStack() }
+                        )
+                    } else {
+                        androidx.compose.runtime.LaunchedEffect(Unit) {
+                            navController.popBackStack()
+                        }
+                    }
                 }
             }
         }
