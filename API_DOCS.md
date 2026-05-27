@@ -21,7 +21,7 @@ This document outlines all currently available API endpoints in the Node.js back
 | HTTP Method | Endpoint Path | Privilege / Role | Description |
 | :--- | :--- | :--- | :--- |
 | **GET** | `/api/v1/citizen/dashboard` | Authenticated (Any) | Retrieves the citizen's personalized dashboard data. |
-| **GET** | `/api/v1/citizen/violations` | Authenticated (Any) | Retrieves a list of active violations (hides fine amounts for security). |
+| **GET** | `/api/v1/citizen/violations` | Authenticated (Any) | Retrieves a list of active violations (exposes offence_name, mv_act_code, penalty, description, evidence_requirement, and reward_points; hides fine_amount for security). |
 | **GET** | `/api/v1/citizen/reports/presigned-url` | Authenticated (Any) | Generates a Cloudflare R2 presigned upload URL (spam-limited). |
 | **POST** | `/api/v1/citizen/reports/` | Authenticated (Any) | Submits a new violation report (spam-limited). |
 | **GET** | `/api/v1/citizen/reports/` | Authenticated (Any) | Retrieves a paginated list of their own submitted reports (filterable by status). |
@@ -30,9 +30,9 @@ This document outlines all currently available API endpoints in the Node.js back
 ## 4. Violation Management Endpoints (Admin)
 | HTTP Method | Endpoint Path | Privilege / Role | Description |
 | :--- | :--- | :--- | :--- |
-| **GET** | `/api/v1/admin/violations/` | Police Admin Only | Retrieves all violations (including inactive and fine amounts). |
-| **POST** | `/api/v1/admin/violations/` | Police Admin Only | Creates a new violation in the master list. |
-| **PUT** | `/api/v1/admin/violations/:id` | Police Admin Only | Updates an existing violation. |
+| **GET** | `/api/v1/admin/violations/` | Police Admin Only | Retrieves all violations (including inactive, fine_amount, reward_points, penalty, description, and evidence_requirement). |
+| **POST** | `/api/v1/admin/violations/` | Police Admin Only | Creates a new violation in the master list (requires offence_name, mv_act_code, fine_amount, reward_points, penalty, description, and evidence_requirement). |
+| **PUT** | `/api/v1/admin/violations/:id` | Police Admin Only | Updates an existing violation (supports updating penalty, description, and evidence_requirement). |
 | **PATCH** | `/api/v1/admin/violations/:id/status` | Police Admin Only | Toggles the active/inactive status of a violation. |
 | **DELETE** | `/api/v1/admin/violations/:id` | Super Admin Only | Permanently deletes a violation from the database. |
 

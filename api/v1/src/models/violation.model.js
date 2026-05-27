@@ -2,9 +2,17 @@ import { db } from '../config/db.config.js';
 
 export const createViolation = async (data) => {
   const result = await db.query(
-    `INSERT INTO violation_master (offence_name, mv_act_code, fine_amount, reward_points) 
-     VALUES ($1, $2, $3, $4) RETURNING *`,
-    [data.offence_name, data.mv_act_code, data.fine_amount, data.reward_points || 0]
+    `INSERT INTO violation_master (offence_name, mv_act_code, fine_amount, reward_points, penalty, description, evidence_requirement) 
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [
+      data.offence_name,
+      data.mv_act_code,
+      data.fine_amount,
+      data.reward_points || 0,
+      data.penalty,
+      data.description,
+      data.evidence_requirement
+    ]
   );
   return result.rows[0];
 };
@@ -16,7 +24,7 @@ export const getAllViolations = async (forAdmin = false) => {
   } else {
     // For citizens: Exclude fine_amount and only return active violations
     const result = await db.query(
-      'SELECT id, offence_name, mv_act_code, reward_points FROM violation_master WHERE is_active = TRUE ORDER BY id ASC'
+      'SELECT id, offence_name, mv_act_code, penalty, description, evidence_requirement, reward_points FROM violation_master WHERE is_active = TRUE ORDER BY id ASC'
     );
     return result.rows;
   }
@@ -47,6 +55,18 @@ export const updateViolation = async (id, data) => {
   if (data.reward_points !== undefined) {
     fields.push(`reward_points = $${index++}`);
     values.push(data.reward_points);
+  }
+  if (data.penalty) {
+    fields.push(`penalty = $${index++}`);
+    values.push(data.penalty);
+  }
+  if (data.description) {
+    fields.push(`description = $${index++}`);
+    values.push(data.description);
+  }
+  if (data.evidence_requirement) {
+    fields.push(`evidence_requirement = $${index++}`);
+    values.push(data.evidence_requirement);
   }
 
   if (fields.length === 0) return null;
