@@ -46,4 +46,24 @@ interface ApiService {
         @Header("Authorization") bearerToken: String,
         @Body body: UpdateProfileRequest
     ): Response<UpdateProfileResponse>
+
+    @POST("api/v1/citizen/feedback")
+    suspend fun submitFeedback(
+        @Header("Authorization") bearerToken: String,
+        @Body body: FeedbackRequest
+    ): Response<FeedbackResponse>
+
+    @GET("api/v1/citizen/reports/presigned-url")
+    suspend fun getPresignedUrl(
+        @Header("Authorization") bearerToken: String,
+        @retrofit2.http.Query("fileType") fileType: String,
+        @retrofit2.http.Query("folder") folder: String? = null
+    ): Response<PresignedUrlResponse>
+
+    @PUT
+    suspend fun uploadFileToR2(
+        @retrofit2.http.Url url: String,
+        @Header("Content-Type") contentType: String,
+        @Body file: okhttp3.RequestBody
+    ): Response<Unit>
 }

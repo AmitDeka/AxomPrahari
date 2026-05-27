@@ -3,7 +3,7 @@ import { generateUploadUrl } from '../utils/s3.util.js';
 
 export const getPresignedUrl = async (req, res) => {
   try {
-    const { fileType } = req.query;
+    const { fileType, folder = 'misc' } = req.query;
 
     if (!fileType) {
       return res.status(400).json({
@@ -22,7 +22,9 @@ export const getPresignedUrl = async (req, res) => {
 
     // Determine file extension
     const extension = fileType.split('/')[1] || 'bin';
-    const uniqueFileName = `${crypto.randomUUID()}.${extension}`;
+    // Sanitize folder to prevent path traversal
+    const safeFolder = folder.replace(/[^a-zA-Z0-9-_]/g, '');
+    const uniqueFileName = `${safeFolder}/${crypto.randomUUID()}.${extension}`;
 
     // Generate R2 presigned URL
     const uploadUrl = await generateUploadUrl(uniqueFileName, fileType);

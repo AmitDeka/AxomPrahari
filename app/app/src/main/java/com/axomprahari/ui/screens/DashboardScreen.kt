@@ -66,7 +66,8 @@ fun DashboardScreen(
     reportStats: com.axomprahari.data.remote.dto.ReportStats?,
     onReportSubmitted: (CitizenReportDto) -> Unit,
     onLogout: () -> Unit,
-    onNavigateToFaq: () -> Unit = {}
+    onNavigateToFaq: () -> Unit = {},
+    onFeedbackSubmit: (String, String, String?, (Result<String>) -> Unit) -> Unit
 ) {
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
@@ -212,22 +213,30 @@ fun DashboardScreen(
                             }
                         )
                     }
+
+                    // Feedback Page Overlay (Inside Scaffold)
+                    AnimatedVisibility(
+                        visible = showFeedbackPage,
+                        enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
+                        exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
+                    ) {
+                        FeedbackScreen(
+                            onSubmit = { category, message, imageUri ->
+                                onFeedbackSubmit(category, message, imageUri?.toString()) { result ->
+                                    if (result.isSuccess) {
+                                        showFeedbackPage = false
+                                        Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, result.exceptionOrNull()?.message ?: "Error", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
-            // Feedback Page Fullscreen Overlay
-            AnimatedVisibility(
-                visible = showFeedbackPage,
-                enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
-                exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
-            ) {
-                FeedbackScreen(
-                    onSubmit = { category, message ->
-                        showFeedbackPage = false
-                        Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
-                    }
-                )
-            }
+
         }
     }
 }

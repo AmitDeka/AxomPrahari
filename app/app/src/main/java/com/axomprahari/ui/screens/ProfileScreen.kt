@@ -46,7 +46,8 @@ fun ProfileScreen(
     reportStats: com.axomprahari.data.remote.dto.ReportStats?,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {},
-    onUpdateProfile: (String, String, String, (Result<UserProfile>) -> Unit) -> Unit
+    onUpdateProfile: (String, String, String, (Result<com.axomprahari.data.remote.dto.UserProfile>) -> Unit) -> Unit,
+    onFeedbackSubmit: (String, String, String?, (Result<String>) -> Unit) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -166,16 +167,20 @@ fun ProfileScreen(
                     onUpdateProfile = onUpdateProfile
                 )
 
-                // Feedback Page Fullscreen Overlay
+                // Feedback Page Overlay (Inside Scaffold)
                 AnimatedVisibility(
                     visible = showFeedbackPage,
                     enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
                     exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
                 ) {
                     FeedbackScreen(
-                        onSubmit = { category, message ->
-                            showFeedbackPage = false
-                            Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
+                        onSubmit = { category, message, imageUri ->
+                            onFeedbackSubmit(category, message, imageUri?.toString()) { result ->
+                                if (result.isSuccess) {
+                                    showFeedbackPage = false
+                                    Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         }
                     )
                 }

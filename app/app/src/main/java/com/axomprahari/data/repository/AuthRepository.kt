@@ -5,10 +5,18 @@ import com.axomprahari.data.remote.dto.*
 import com.google.gson.Gson
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.content.Context
+import android.net.Uri
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+
+
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 @Singleton
 class AuthRepository @Inject constructor(
-    private val api: ApiService
+    private val api: ApiService,
+    @ApplicationContext private val context: Context
 ) {
 
     private val gson = Gson()
@@ -100,6 +108,69 @@ class AuthRepository @Inject constructor(
             response.body()?.data ?: throw Exception("Empty response data from server")
         } else {
             throw Exception(parseError(response.errorBody()?.string()))
+        }
+    }
+
+    suspend fun submitFeedback(
+        token: String,
+        citizenId: String,
+        category: String,
+        message: String,
+        imageKey: String?,
+        imageUrl: String?
+    ): Result<String> = runCatching {
+        val response = api.submitFeedback(
+            bearerToken = "Bearer $token",
+            body = FeedbackRequest(
+                citizen_id = citizenId,
+                feedback_category = category,
+                message = message,
+                image_key = imageKey,
+                image_url = imageUrl
+            )
+        )
+        if (response.isSuccessful) {
+            response.body()?.message ?: "Feedback submitted successfully"
+        } else {
+            throw Exception(parseError(response.errorBody()?.string()))
+        }
+    }
+
+    suspend fun uploadMedia(token: String, uriString: String): Result<Pair<String, String>> {
+        return try {
+            val uri = Uri.parse(uriString)
+            val contentResolver = context.contentResolver
+            val mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
+            
+            // 1. Get Presigned URL
+            val presignedResponse = api.getPresignedUrl("Bearer $token", mimeType, "feedback")
+            if (!presignedResponse.isSuccessful || presignedResponse.body()?.data == null) {
+                return Result.failure(Exception(parseError(presignedResponse.errorBody()?.string())))
+            }
+            
+            val presignedData = presignedResponse.body()!!.data!!
+            
+            // 2. Read file bytes
+            val inputStream = contentResolver.openInputStream(uri)
+            val bytes = inputStream?.readBytes()
+            inputStream?.close()
+            
+            if (bytes == null) {
+                return Result.failure(Exception("Could not read file from device"))
+            }
+            
+            // 3. Upload to R2
+            val requestBody = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+            val uploadResponse = api.uploadFileToR2(presignedData.uploadUrl, mimeType, requestBody)
+            
+            if (!uploadResponse.isSuccessful) {
+                return Result.failure(Exception("Failed to upload image to server"))
+            }
+            
+            Result.success(Pair(presignedData.fileKey, presignedData.fileUrl))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
         }
     }
 }

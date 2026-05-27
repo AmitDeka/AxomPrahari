@@ -234,4 +234,45 @@ class MainViewModel @Inject constructor(
     fun addReport(report: com.axomprahari.data.remote.dto.CitizenReportDto) {
         _reportsList.value = listOf(report) + _reportsList.value
     }
+
+    fun submitFeedback(
+        category: String,
+        message: String,
+        imageKey: String? = null,
+        imageUrl: String? = null,
+        onResult: (Result<String>) -> Unit
+    ) {
+        val token = currentToken
+        val profile = _userProfile.value
+        if (token.isNullOrEmpty() || profile == null) {
+            onResult(Result.failure(Exception("Not authenticated or profile missing")))
+            return
+        }
+        viewModelScope.launch {
+            var finalImageKey = imageKey
+            var finalImageUrl = imageUrl
+            
+            // Upload image if it is a local URI
+            if (imageUrl != null && imageUrl.startsWith("content://")) {
+                val uploadResult = authRepository.uploadMedia(token, imageUrl)
+                if (uploadResult.isSuccess) {
+                    finalImageKey = uploadResult.getOrNull()?.first
+                    finalImageUrl = uploadResult.getOrNull()?.second
+                } else {
+                    onResult(Result.failure(uploadResult.exceptionOrNull() ?: Exception("Upload failed")))
+                    return@launch
+                }
+            }
+
+            val result = authRepository.submitFeedback(
+                token = token,
+                citizenId = profile.citizenId,
+                category = category,
+                message = message,
+                imageKey = finalImageKey,
+                imageUrl = finalImageUrl
+            )
+            onResult(result)
+        }
+    }
 }

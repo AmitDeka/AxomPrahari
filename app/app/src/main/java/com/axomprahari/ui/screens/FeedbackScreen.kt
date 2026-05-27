@@ -43,7 +43,7 @@ import com.axomprahari.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedbackScreen(
-    onSubmit: (String, String) -> Unit
+    onSubmit: (String, String, android.net.Uri?) -> Unit
 ) {
     val initialCategory = stringResource(R.string.feedback_category_suggestion)
     var selectedCategory by remember { mutableStateOf(initialCategory) }
@@ -472,7 +472,7 @@ fun FeedbackScreen(
             // Submit Button
             Button(
                 onClick = {
-                    onSubmit(selectedCategory, feedbackMessage)
+                    onSubmit(selectedCategory, feedbackMessage, selectedPhotoUri)
                 },
                 enabled = feedbackMessage.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(

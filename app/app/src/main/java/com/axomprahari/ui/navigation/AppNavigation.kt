@@ -121,7 +121,10 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                         reportStats = reportStats,
                         onReportSubmitted = { viewModel.addReport(it) },
                         onLogout = { viewModel.logout() },
-                        onNavigateToFaq = { navController.navigate("guideline_faq") }
+                        onNavigateToFaq = { navController.navigate("guideline_faq") },
+                        onFeedbackSubmit = { category, message, imageUrl, onResult -> 
+                            viewModel.submitFeedback(category, message, imageUrl = imageUrl, onResult = onResult)
+                        }
                     )
                 }
                 composable("report") {
@@ -131,7 +134,10 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                         userProfile = userProfile,
                         onRefresh = { viewModel.refreshReports() },
                         onLogout = { viewModel.logout() },
-                        onNavigateToFaq = { navController.navigate("guideline_faq") }
+                        onNavigateToFaq = { navController.navigate("guideline_faq") },
+                        onFeedbackSubmit = { category, message, imageUrl, onResult -> 
+                            viewModel.submitFeedback(category, message, imageUrl = imageUrl, onResult = onResult)
+                        }
                     )
                 }
                 composable("profile") {
@@ -145,6 +151,9 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                         onNavigateToFaq = { navController.navigate("guideline_faq") },
                         onUpdateProfile = { name, email, username, onResult ->
                             viewModel.updateProfile(name, email, username, onResult)
+                        },
+                        onFeedbackSubmit = { category, message, imageUrl, onResult -> 
+                            viewModel.submitFeedback(category, message, imageUrl = imageUrl, onResult = onResult)
                         }
                     )
                 }
@@ -156,7 +165,10 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                         violationsList = violationsList,
                         onRefresh = { viewModel.refreshViolations() },
                         onLogout = { viewModel.logout() },
-                        onNavigateToFaq = { navController.navigate("guideline_faq") }
+                        onNavigateToFaq = { navController.navigate("guideline_faq") },
+                        onFeedbackSubmit = { category, message, imageUrl, onResult -> 
+                            viewModel.submitFeedback(category, message, imageUrl = imageUrl, onResult = onResult)
+                        }
                     )
                 }
                 composable("guideline_faq") {

@@ -45,7 +45,8 @@ fun ReportScreen(
     userProfile: com.axomprahari.data.remote.dto.UserProfile?,
     onRefresh: () -> Unit,
     onLogout: () -> Unit,
-    onNavigateToFaq: () -> Unit = {}
+    onNavigateToFaq: () -> Unit = {},
+    onFeedbackSubmit: (String, String, String?, (Result<String>) -> Unit) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -62,100 +63,99 @@ fun ReportScreen(
         onNavigateToFaq = onNavigateToFaq,
         onSendFeedbackClick = { showFeedbackPage = true }
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Scaffold(
-                topBar = {
-                    CenterAlignedTopAppBar(
-                        title = {
-                            Text(
-                                text = if (showFeedbackPage) stringResource(R.string.axom_prahari_title) else stringResource(R.string.all_reports_title),
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = if (showFeedbackPage) stringResource(R.string.axom_prahari_title) else stringResource(R.string.all_reports_title),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
                             )
-                        },
-                        navigationIcon = {
-                            val isFeedback = showFeedbackPage
-                            IconButton(onClick = {
-                                if (isFeedback) {
-                                    showFeedbackPage = false
-                                } else {
-                                    scope.launch { drawerState.open() }
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = if (isFeedback) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.Menu,
-                                    contentDescription = if (isFeedback) "Go back" else "Open navigation drawer",
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
+                        )
+                    },
+                    navigationIcon = {
+                        val isFeedback = showFeedbackPage
+                        IconButton(onClick = {
+                            if (isFeedback) {
+                                showFeedbackPage = false
+                            } else {
+                                scope.launch { drawerState.open() }
+                            }
+                        }) {
+                            Icon(
+                                imageVector = if (isFeedback) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.Menu,
+                                contentDescription = if (isFeedback) "Go back" else "Open navigation drawer",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                )
+            },
+            bottomBar = {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp
+                ) {
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("dashboard") {
+                                popUpTo("dashboard") { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
                             }
                         },
-                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface
+                        icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard") },
+                        label = { Text(stringResource(R.string.dashboard_tab), fontSize = 11.sp) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
                         )
                     )
-                },
-                bottomBar = {
-                    NavigationBar(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        tonalElevation = 8.dp
-                    ) {
-                        NavigationBarItem(
-                            selected = false,
-                            onClick = {
-                                navController.navigate("dashboard") {
-                                    popUpTo("dashboard") { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard") },
-                            label = { Text(stringResource(R.string.dashboard_tab), fontSize = 11.sp) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                            )
+                    NavigationBarItem(
+                        selected = true,
+                        onClick = { /* Already here */ },
+                        icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = "Reports") },
+                        label = { Text(stringResource(R.string.reports_tab), fontSize = 11.sp) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
                         )
-                        NavigationBarItem(
-                            selected = true,
-                            onClick = { /* Already here */ },
-                            icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = "Reports") },
-                            label = { Text(stringResource(R.string.reports_tab), fontSize = 11.sp) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                            )
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            navController.navigate("profile") {
+                                popUpTo("dashboard") { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Profile") },
+                        label = { Text(stringResource(R.string.profile_tab), fontSize = 11.sp) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
                         )
-                        NavigationBarItem(
-                            selected = false,
-                            onClick = {
-                                navController.navigate("profile") {
-                                    popUpTo("dashboard") { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Profile") },
-                            label = { Text(stringResource(R.string.profile_tab), fontSize = 11.sp) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                            )
-                        )
-                    }
-                },
-                containerColor = MaterialTheme.colorScheme.background
-            ) { innerPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                ) {
-                    PullToRefreshBox(
+                    )
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.background
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                PullToRefreshBox(
                     isRefreshing = isRefreshing,
                     onRefresh = {
                         isRefreshing = true
@@ -174,21 +174,26 @@ fun ReportScreen(
                         }
                     )
                 }
-            }
-        }
 
-        // Feedback Page Fullscreen Overlay
-            AnimatedVisibility(
-                visible = showFeedbackPage,
-                enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
-                exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
-            ) {
-                FeedbackScreen(
-                    onSubmit = { category, message ->
-                        showFeedbackPage = false
-                        Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
-                    }
-                )
+                // Feedback Page Overlay
+                AnimatedVisibility(
+                    visible = showFeedbackPage,
+                    enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
+                    exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
+                ) {
+                    FeedbackScreen(
+                        onSubmit = { category, message, imageUri ->
+                            onFeedbackSubmit(category, message, imageUri?.toString()) { result ->
+                                if (result.isSuccess) {
+                                    showFeedbackPage = false
+                                    Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, result.exceptionOrNull()?.message ?: "Error", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    )
+                }
             }
         }
     }
