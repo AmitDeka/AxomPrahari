@@ -6,6 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 
 interface ApiService {
 
@@ -34,4 +35,15 @@ interface ApiService {
     suspend fun getCitizenViolations(
         @Header("Authorization") bearerToken: String
     ): Response<CitizenViolationsResponse>
+
+    @GET("api/v1/citizen/reports")
+    suspend fun getCitizenReports(
+        @Header("Authorization") bearerToken: String
+    ): Response<CitizenReportsResponse>
+
+    @PUT("api/v1/citizen/profile")
+    suspend fun updateProfile(
+        @Header("Authorization") bearerToken: String,
+        @Body body: UpdateProfileRequest
+    ): Response<UpdateProfileResponse>
 }

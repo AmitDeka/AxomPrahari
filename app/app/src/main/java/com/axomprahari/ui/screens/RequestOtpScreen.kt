@@ -77,16 +77,25 @@ fun RequestOtpScreen(
             }
     ) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 32.dp, vertical = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxSize().statusBarsPadding()
         ) {
-            Spacer(modifier = Modifier.height(48.dp))
+            val minHeight = maxHeight
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = minHeight)
+                        .padding(horizontal = 32.dp, vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(48.dp))
 
             // ── App Logo ──
             Box(
@@ -311,7 +320,9 @@ fun RequestOtpScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f).heightIn(min = 48.dp))
+            Spacer(modifier = Modifier.weight(1f))
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             // ── Footer Links ──
             Row(
@@ -377,6 +388,8 @@ fun RequestOtpScreen(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
         }
     }
 }

@@ -11,7 +11,7 @@
 
     <application
         android:name=".MainApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:label="Axom Prahari"
         android:theme="@style/Theme.AxomPrahari"
         android:icon="@mipmap/ic_launcher"

@@ -8,10 +8,12 @@ import com.axomprahari.data.model.ReportStatus
 import com.axomprahari.data.remote.dto.VerifyOtpResponse
 import com.axomprahari.data.remote.dto.UserProfile
 import com.axomprahari.data.remote.dto.ViolationDto
+import com.axomprahari.data.remote.dto.CitizenReportDto
 import com.axomprahari.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import com.google.gson.Gson
 import javax.inject.Inject
 
 sealed interface MainUiState {
@@ -30,6 +32,9 @@ class MainViewModel @Inject constructor(
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     val userProfile: StateFlow<UserProfile?> = _userProfile.asStateFlow()
 
+    private val _reportStats = MutableStateFlow<com.axomprahari.data.remote.dto.ReportStats?>(null)
+    val reportStats: StateFlow<com.axomprahari.data.remote.dto.ReportStats?> = _reportStats.asStateFlow()
+
     private val _violationsList = MutableStateFlow<List<ViolationDto>>(emptyList())
     val violationsList: StateFlow<List<ViolationDto>> = _violationsList.asStateFlow()
 
@@ -37,14 +42,35 @@ class MainViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            try {
+                val cachedUser = preferencesManager.cachedUserProfile.firstOrNull()
+                if (cachedUser != null) _userProfile.value = Gson().fromJson(cachedUser, UserProfile::class.java)
+                
+                val cachedStats = preferencesManager.cachedReportStats.firstOrNull()
+                if (cachedStats != null) _reportStats.value = Gson().fromJson(cachedStats, com.axomprahari.data.remote.dto.ReportStats::class.java)
+                
+                val cachedReports = preferencesManager.cachedReportsList.firstOrNull()
+                if (cachedReports != null) {
+                    val type = object : com.google.gson.reflect.TypeToken<List<CitizenReportDto>>() {}.type
+                    _reportsList.value = Gson().fromJson(cachedReports, type)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        viewModelScope.launch {
             preferencesManager.userToken.collect { token ->
                 currentToken = token
                 if (!token.isNullOrEmpty()) {
                     fetchDashboard(token)
                     fetchViolations(token)
+                    fetchReports(token)
                 } else {
                     _userProfile.value = null
                     _violationsList.value = emptyList()
+                    _reportsList.value = emptyList()
+                    _reportStats.value = null
                 }
             }
         }
@@ -60,8 +86,17 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             authRepository.getCitizenDashboard(token).onSuccess { response ->
                 _userProfile.value = response.data.user
-            }.onFailure {
-                // Fail silently or keep existing
+                _reportStats.value = response.data.reportStats
+                try {
+                    preferencesManager.saveCachedUserProfile(Gson().toJson(response.data.user))
+                    preferencesManager.saveCachedReportStats(Gson().toJson(response.data.reportStats))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }.onFailure { error ->
+                if (error.message?.contains("401") == true) {
+                    logout()
+                }
             }
         }
     }
@@ -76,22 +111,32 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun fetchReports(token: String) {
+        viewModelScope.launch {
+            authRepository.getCitizenReports(token).onSuccess { response ->
+                _reportsList.value = response.data.reports
+                try {
+                    preferencesManager.saveCachedReportsList(Gson().toJson(response.data.reports))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }.onFailure {
+                // Fail silently or keep existing
+            }
+        }
+    }
+
     /** Holds the short-lived JWT for new users who need to complete their profile */
     private val _tempAuthToken = MutableStateFlow<String?>(null)
     val tempAuthToken: StateFlow<String?> = _tempAuthToken.asStateFlow()
 
-    private val _reportsList = MutableStateFlow<List<TrafficReport>>(
-        listOf(
-            TrafficReport("1", "No Helmet", "G.S. Road, Near Christian Basti, Guwahati", "Today, 09:30 AM", 100, ReportStatus.VERIFIED),
-            TrafficReport("2", "Triple Riding", "Jorhat Bypass, Jorhat", "Yesterday, 04:15 PM", 150, ReportStatus.VERIFIED),
-            TrafficReport("3", "Wrong Side Driving", "AT Road, Dibrugarh", "2 days ago, 11:45 AM", 200, ReportStatus.UNDER_REVIEW),
-            TrafficReport("4", "Red Light Jump", "Six Mile Intersection, Guwahati", "3 days ago, 08:10 PM", 0, ReportStatus.REJECTED)
-        )
-    )
-    val reportsList: StateFlow<List<TrafficReport>> = _reportsList.asStateFlow()
+    private val _reportsList = MutableStateFlow<List<CitizenReportDto>>(emptyList())
+    val reportsList: StateFlow<List<CitizenReportDto>> = _reportsList.asStateFlow()
 
-    fun addReport(report: TrafficReport) {
-        _reportsList.value = listOf(report) + _reportsList.value
+    fun refreshReports() {
+        currentToken?.let { token ->
+            fetchReports(token)
+        }
     }
 
     private val _isSplashFinished = MutableStateFlow(false)
@@ -160,4 +205,33 @@ class MainViewModel @Inject constructor(
         email: String,
         username: String
     ): Result<String> = authRepository.completeProfile(token, fullName, email, username)
+
+    fun updateProfile(
+        fullName: String,
+        email: String,
+        username: String,
+        onResult: (Result<UserProfile>) -> Unit
+    ) {
+        val token = currentToken
+        if (token.isNullOrEmpty()) {
+            onResult(Result.failure(Exception("Not authenticated")))
+            return
+        }
+        viewModelScope.launch {
+            authRepository.updateProfile(token, fullName, email, username)
+                .onSuccess { updatedUser ->
+                    _userProfile.value = updatedUser
+                    // Refresh dashboard after profile update to get correct status
+                    fetchDashboard(token)
+                    onResult(Result.success(updatedUser))
+                }
+                .onFailure { error ->
+                    onResult(Result.failure(error))
+                }
+        }
+    }
+
+    fun addReport(report: com.axomprahari.data.remote.dto.CitizenReportDto) {
+        _reportsList.value = listOf(report) + _reportsList.value
+    }
 }

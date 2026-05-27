@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.axomprahari.data.model.TrafficReport
+import com.axomprahari.data.remote.dto.CitizenReportDto
 import com.axomprahari.data.model.ReportStatus
 import com.axomprahari.data.remote.dto.UserProfile
 import com.axomprahari.ui.theme.*
@@ -39,10 +39,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfileScreen(
     navController: NavController,
-    reportsList: List<TrafficReport>,
+    reportsList: List<CitizenReportDto>,
     userProfile: UserProfile?,
+    reportStats: com.axomprahari.data.remote.dto.ReportStats?,
     onLogout: () -> Unit,
-    onNavigateToFaq: () -> Unit = {}
+    onNavigateToFaq: () -> Unit = {},
+    onUpdateProfile: (String, String, String, (Result<UserProfile>) -> Unit) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -153,11 +155,13 @@ fun ProfileScreen(
                 ProfileTab(
                     reportsList = reportsList,
                     userProfile = userProfile,
+                    reportStats = reportStats,
                     onLogout = onLogout,
                     onNavigateToFaq = onNavigateToFaq,
                     onNavigateToPrivacy = { navController.navigate("privacy_policy") },
                     onNavigateToTerms = { navController.navigate("terms_of_service") },
-                    onSendFeedbackClick = { showFeedbackPage = true }
+                    onSendFeedbackClick = { showFeedbackPage = true },
+                    onUpdateProfile = onUpdateProfile
                 )
 
                 // Feedback Page Fullscreen Overlay
@@ -180,13 +184,15 @@ fun ProfileScreen(
 
 @Composable
 fun ProfileTab(
-    reportsList: List<TrafficReport>,
+    reportsList: List<CitizenReportDto>,
     userProfile: UserProfile?,
+    reportStats: com.axomprahari.data.remote.dto.ReportStats?,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit,
     onNavigateToPrivacy: () -> Unit,
     onNavigateToTerms: () -> Unit,
-    onSendFeedbackClick: () -> Unit
+    onSendFeedbackClick: () -> Unit,
+    onUpdateProfile: (String, String, String, (Result<UserProfile>) -> Unit) -> Unit
 ) {
     val context = LocalContext.current
     var fullName by remember { mutableStateOf(userProfile?.fullName ?: "Loading...") }
@@ -220,8 +226,8 @@ fun ProfileTab(
 
     // Stats calculations
     val totalPoints = userProfile?.rewardPoints ?: 0
-    val totalReports = reportsList.size
-    val verifiedCount = reportsList.count { it.status == ReportStatus.VERIFIED }
+    val totalReports = reportStats?.total ?: 0
+    val verifiedCount = reportStats?.accepted ?: 0
 
     val scrollState = rememberScrollState()
 
@@ -233,27 +239,63 @@ fun ProfileTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // 1. Profile Avatar (circular placeholder from side nav but larger)
-        Box(
-            modifier = Modifier
-                .size(110.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile Photo",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.size(64.dp)
-            )
-        }
-
-        // 2. Name & Phone number
+        // 1. Profile Avatar + ID Badge + Name grouped together
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Box(
+                modifier = Modifier
+                    .size(110.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile Photo",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(64.dp)
+                )
+            }
+
+            // Citizen ID Badge — tight gap from avatar
+            userProfile?.citizenId?.let { citizenId ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    border = androidx.compose.foundation.BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Badge,
+                            contentDescription = "Citizen ID",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = citizenId,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                letterSpacing = 1.sp
+                            )
+                        )
+                    }
+                }
+            }
+
+            // Name & Phone — hierarchy gap after badge
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = fullName,
                 style = MaterialTheme.typography.titleLarge.copy(
@@ -261,6 +303,9 @@ fun ProfileTab(
                     color = MaterialTheme.colorScheme.onSurface
                 )
             )
+            
+            Spacer(modifier = Modifier.height(4.dp))
+
             Text(
                 text = phoneNumber,
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -393,9 +438,7 @@ fun ProfileTab(
                 )
             ) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.Start
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     // Name Info
                     AccountInfoRow(icon = Icons.Default.Person, title = "Name", value = fullName)
@@ -535,10 +578,13 @@ fun ProfileTab(
         }
     }
 
+    // Dialog state for profile updating status
+    var isUpdating by remember { mutableStateOf(false) }
+
     // Edit Profile Dialog
     if (showEditDialog) {
         AlertDialog(
-            onDismissRequest = { showEditDialog = false },
+            onDismissRequest = { if (!isUpdating) showEditDialog = false },
             title = {
                 Text(
                     text = "Update Profile",
@@ -567,6 +613,7 @@ fun ProfileTab(
                         onValueChange = { tempName = it },
                         label = { Text("Full Name") },
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Name") },
+                        enabled = !isUpdating,
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -577,6 +624,7 @@ fun ProfileTab(
                         onValueChange = { tempUsername = it },
                         label = { Text("Username") },
                         leadingIcon = { Icon(Icons.Default.Badge, contentDescription = "Username") },
+                        enabled = !isUpdating,
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -587,6 +635,7 @@ fun ProfileTab(
                         onValueChange = { tempEmail = it },
                         label = { Text("Email Address") },
                         leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email") },
+                        enabled = !isUpdating,
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -595,15 +644,36 @@ fun ProfileTab(
             confirmButton = {
                 Button(
                     onClick = {
-                        fullName = tempName
-                        username = tempUsername
-                        email = tempEmail
-                        showEditDialog = false
-                        Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+                        if (tempName.isBlank() || tempUsername.isBlank() || tempEmail.isBlank()) {
+                            Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+                        isUpdating = true
+                        onUpdateProfile(tempName, tempEmail, tempUsername) { result ->
+                            isUpdating = false
+                            result.onSuccess {
+                                fullName = tempName
+                                username = tempUsername
+                                email = tempEmail
+                                showEditDialog = false
+                                Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+                            }.onFailure { error ->
+                                Toast.makeText(context, error.message ?: "Update failed", Toast.LENGTH_LONG).show()
+                            }
+                        }
                     },
+                    enabled = !isUpdating,
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text("Save Changes", fontWeight = FontWeight.Bold)
+                    if (isUpdating) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text("Save Changes", fontWeight = FontWeight.Bold)
+                    }
                 }
             },
             dismissButton = {
@@ -629,7 +699,7 @@ fun AccountInfoRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(

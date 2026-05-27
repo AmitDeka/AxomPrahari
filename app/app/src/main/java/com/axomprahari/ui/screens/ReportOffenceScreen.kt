@@ -36,14 +36,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.axomprahari.data.model.ReportStatus
-import com.axomprahari.data.model.TrafficReport
+import com.axomprahari.data.remote.dto.CitizenReportDto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportOffenceScreen(
-    reportsList: List<TrafficReport>,
-    onReportSubmitted: (TrafficReport) -> Unit,
+    reportsList: List<CitizenReportDto>,
+    onReportSubmitted: (CitizenReportDto) -> Unit,
     onCancel: () -> Unit
 ) {
     val context = LocalContext.current
@@ -466,18 +465,21 @@ fun ReportOffenceScreen(
                         val coordsList = gpsCoordinates.split(",")
                         val lat = if (coordsList.isNotEmpty()) coordsList[0].trim() else "26.1408° N"
                         val lon = if (coordsList.size > 1) coordsList[1].trim() else "91.7378° E"
-                        val report = TrafficReport(
-                            id = (reportsList.size + 1).toString(),
-                            type = selectedOffence,
-                            location = if (locationReference.isNotBlank()) locationReference else "G.S. Road, Guwahati",
-                            timestamp = systemDateTime,
-                            points = 100,
-                            status = ReportStatus.UNDER_REVIEW,
+                        val report = CitizenReportDto(
+                            id = reportsList.size + 1,
+                            reportId = "REP-${reportsList.size + 1}",
+                            offenceName = selectedOffence,
+                            locationName = if (locationReference.isNotBlank()) locationReference else "G.S. Road, Guwahati",
+                            incidentDate = systemDateTime.split(" ").getOrNull(0) ?: "",
+                            incidentTime = systemDateTime.split(" ").getOrNull(1) ?: "",
+                            status = "pending",
+                            mediaUrl = mediaCapturedPath,
+                            vehicleNumber = vehicleNumber,
+                            message = additionalNotes,
+                            adminMessage = null,
                             latitude = lat,
                             longitude = lon,
-                            description = additionalNotes,
-                            mediaPath = mediaCapturedPath,
-                            userLocationName = locationReference.ifBlank { null }
+                            createdAt = systemDateTime
                         )
                         onReportSubmitted(report)
                     },

@@ -63,6 +63,7 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
         } else {
+            if (response.code() == 401) throw Exception("HTTP 401 Unauthorized")
             throw Exception(parseError(response.errorBody()?.string()))
         }
     }
@@ -71,6 +72,32 @@ class AuthRepository @Inject constructor(
         val response = api.getCitizenViolations("Bearer $token")
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
+        } else {
+            throw Exception(parseError(response.errorBody()?.string()))
+        }
+    }
+
+    suspend fun getCitizenReports(token: String): Result<CitizenReportsResponse> = runCatching {
+        val response = api.getCitizenReports("Bearer $token")
+        if (response.isSuccessful) {
+            response.body() ?: throw Exception("Empty response from server")
+        } else {
+            throw Exception(parseError(response.errorBody()?.string()))
+        }
+    }
+
+    suspend fun updateProfile(
+        token: String,
+        fullName: String,
+        email: String,
+        username: String
+    ): Result<UserProfile> = runCatching {
+        val response = api.updateProfile(
+            bearerToken = "Bearer $token",
+            body = UpdateProfileRequest(fullName, email, username)
+        )
+        if (response.isSuccessful) {
+            response.body()?.data ?: throw Exception("Empty response data from server")
         } else {
             throw Exception(parseError(response.errorBody()?.string()))
         }

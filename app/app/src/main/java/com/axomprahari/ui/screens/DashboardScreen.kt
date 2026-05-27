@@ -49,8 +49,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.axomprahari.ui.theme.*
 import androidx.navigation.NavController
-import com.axomprahari.data.model.TrafficReport
-import com.axomprahari.data.model.ReportStatus
+import com.axomprahari.data.remote.dto.CitizenReportDto
 
 
 
@@ -60,9 +59,10 @@ import com.axomprahari.data.model.ReportStatus
 @Composable
 fun DashboardScreen(
     navController: NavController,
-    reportsList: List<TrafficReport>,
+    reportsList: List<CitizenReportDto>,
     userProfile: com.axomprahari.data.remote.dto.UserProfile?,
-    onReportSubmitted: (TrafficReport) -> Unit,
+    reportStats: com.axomprahari.data.remote.dto.ReportStats?,
+    onReportSubmitted: (CitizenReportDto) -> Unit,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {}
 ) {
@@ -200,6 +200,8 @@ fun DashboardScreen(
                     } else {
                         DashboardTab(
                             reportsList = reportsList,
+                            userProfile = userProfile,
+                            reportStats = reportStats,
                             onReportClick = { report ->
                                 navController.navigate("report_detail/${report.id}")
                             },
@@ -233,8 +235,10 @@ fun DashboardScreen(
 // ==========================================
 @Composable
 fun DashboardTab(
-    reportsList: List<TrafficReport>,
-    onReportClick: (TrafficReport) -> Unit,
+    reportsList: List<CitizenReportDto>,
+    userProfile: com.axomprahari.data.remote.dto.UserProfile?,
+    reportStats: com.axomprahari.data.remote.dto.ReportStats?,
+    onReportClick: (CitizenReportDto) -> Unit,
     onReportSpotClick: () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
@@ -248,7 +252,7 @@ fun DashboardTab(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         // Stats Card (simplified gradient card)
-        UserStatsCard()
+        UserStatsCard(userProfile = userProfile, reportStats = reportStats)
 
         // Report Offence Card (large white/surface card with red camera icon, NO LIVE badge)
         Card(
@@ -350,7 +354,7 @@ fun DashboardTab(
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "450",
+                        text = userProfile?.rewardPoints?.toString() ?: "0",
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -396,7 +400,7 @@ fun DashboardTab(
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "2",
+                        text = reportStats?.pending?.toString() ?: "0",
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -485,40 +489,45 @@ fun DashboardTab(
 
 // Inner helper content to show report items cleanly
 @Composable
-fun ReportItemCardContent(report: TrafficReport) {
+fun ReportItemCardContent(report: CitizenReportDto) {
     val isDark = isSystemInDarkTheme()
     val statusColor = if (isDark) {
         when (report.status) {
-            ReportStatus.VERIFIED -> MaterialTheme.colorScheme.primaryContainer
-            ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.secondaryContainer
-            ReportStatus.REJECTED -> MaterialTheme.colorScheme.errorContainer
+            "accepted" -> MaterialTheme.colorScheme.primaryContainer
+            "pending" -> MaterialTheme.colorScheme.secondaryContainer
+            "rejected" -> MaterialTheme.colorScheme.errorContainer
+            else -> MaterialTheme.colorScheme.secondaryContainer
         }
     } else {
         when (report.status) {
-            ReportStatus.VERIFIED -> MaterialTheme.colorScheme.primaryContainer
-            ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.secondaryContainer
-            ReportStatus.REJECTED -> MaterialTheme.colorScheme.errorContainer
+            "accepted" -> MaterialTheme.colorScheme.primaryContainer
+            "pending" -> MaterialTheme.colorScheme.secondaryContainer
+            "rejected" -> MaterialTheme.colorScheme.errorContainer
+            else -> MaterialTheme.colorScheme.secondaryContainer
         }
     }
 
     val statusTextColor = if (isDark) {
         when (report.status) {
-            ReportStatus.VERIFIED -> MaterialTheme.colorScheme.onPrimaryContainer
-            ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.onSecondaryContainer
-            ReportStatus.REJECTED -> MaterialTheme.colorScheme.onErrorContainer
+            "accepted" -> MaterialTheme.colorScheme.onPrimaryContainer
+            "pending" -> MaterialTheme.colorScheme.onSecondaryContainer
+            "rejected" -> MaterialTheme.colorScheme.onErrorContainer
+            else -> MaterialTheme.colorScheme.onSecondaryContainer
         }
     } else {
         when (report.status) {
-            ReportStatus.VERIFIED -> MaterialTheme.colorScheme.onPrimaryContainer
-            ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.onSecondaryContainer
-            ReportStatus.REJECTED -> MaterialTheme.colorScheme.onErrorContainer
+            "accepted" -> MaterialTheme.colorScheme.onPrimaryContainer
+            "pending" -> MaterialTheme.colorScheme.onSecondaryContainer
+            "rejected" -> MaterialTheme.colorScheme.onErrorContainer
+            else -> MaterialTheme.colorScheme.onSecondaryContainer
         }
     }
 
     val statusText = when (report.status) {
-        ReportStatus.VERIFIED -> "Verified"
-        ReportStatus.UNDER_REVIEW -> "Pending"
-        ReportStatus.REJECTED -> "Rejected"
+        "accepted" -> "Verified"
+        "pending" -> "Pending"
+        "rejected" -> "Rejected"
+        else -> "Unknown"
     }
 
     Row(
@@ -532,7 +541,7 @@ fun ReportItemCardContent(report: TrafficReport) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = when (report.type) {
+                imageVector = when (report.offenceName) {
                     "No Helmet" -> Icons.Default.Warning
                     "Triple Riding" -> Icons.Default.Info
                     else -> Icons.Default.Warning
@@ -551,7 +560,7 @@ fun ReportItemCardContent(report: TrafficReport) {
                 verticalAlignment = Alignment.Top
             ) {
                 Text(
-                    text = report.type,
+                    text = report.offenceName ?: "Unknown Offence",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -578,7 +587,7 @@ fun ReportItemCardContent(report: TrafficReport) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = report.location,
+                text = report.locationName ?: "Unknown Location",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 ),
@@ -592,30 +601,22 @@ fun ReportItemCardContent(report: TrafficReport) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = report.timestamp,
+                    text = "${report.incidentDate ?: ""} ${report.incidentTime ?: ""}".trim(),
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                         fontSize = 12.sp
                     )
                 )
-
-                if (report.points > 0) {
-                    Text(
-                        text = "+${report.points} XP",
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
-                        )
-                    )
-                }
             }
         }
     }
 }
 
 @Composable
-fun UserStatsCard() {
+fun UserStatsCard(
+    userProfile: com.axomprahari.data.remote.dto.UserProfile?,
+    reportStats: com.axomprahari.data.remote.dto.ReportStats?
+) {
     val isDark = isSystemInDarkTheme()
 
     // Card colours: dark slate in both modes (looks premium on light & dark)
@@ -669,7 +670,7 @@ fun UserStatsCard() {
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Amit Deka",
+                        text = userProfile?.fullName ?: "Guest",
                         style = MaterialTheme.typography.titleLarge.copy(
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
@@ -691,7 +692,7 @@ fun UserStatsCard() {
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = "APC-8K9A2M",
+                        text = userProfile?.citizenId ?: "APC-XXXXXX",
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = accentGreen,
                             fontWeight = FontWeight.Bold,
@@ -713,7 +714,7 @@ fun UserStatsCard() {
             ) {
                 StatPill(
                     label = "REPORTS",
-                    value = "15",
+                    value = reportStats?.total?.toString() ?: "0",
                     accentColor = accentGreen,
                     modifier = Modifier.weight(1f)
                 )
@@ -727,7 +728,7 @@ fun UserStatsCard() {
                 )
                 StatPill(
                     label = "VERIFIED",
-                    value = "12",
+                    value = reportStats?.accepted?.toString() ?: "0",
                     accentColor = accentGreen,
                     modifier = Modifier.weight(1f)
                 )
@@ -739,9 +740,9 @@ fun UserStatsCard() {
                         .align(Alignment.CenterVertically)
                 )
                 StatPill(
-                    label = "ACCURACY",
-                    value = "92%",
-                    accentColor = accentGreen,
+                    label = "REJECTED",
+                    value = reportStats?.rejected?.toString() ?: "0",
+                    accentColor = MaterialTheme.colorScheme.error,
                     modifier = Modifier.weight(1f)
                 )
             }

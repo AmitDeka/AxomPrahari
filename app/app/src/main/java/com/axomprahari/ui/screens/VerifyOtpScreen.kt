@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -75,6 +76,7 @@ fun VerifyOtpScreen(
     var countdown by remember { mutableStateOf(59) }
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
 
     val maxCodeLength = 6
@@ -109,16 +111,25 @@ fun VerifyOtpScreen(
             }
     ) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxSize().statusBarsPadding()
         ) {
-            Spacer(modifier = Modifier.height(48.dp))
+            val minHeight = maxHeight
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = minHeight)
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(48.dp))
 
             // ── App Logo ──
             Box(
@@ -236,7 +247,10 @@ fun VerifyOtpScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { focusRequester.requestFocus() },
+                    .clickable { 
+                        focusRequester.requestFocus() 
+                        keyboardController?.show()
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 BasicTextField(
@@ -419,6 +433,8 @@ fun VerifyOtpScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.weight(1f))
+
             Spacer(modifier = Modifier.height(12.dp))
 
             // ── Terms & Privacy Footer ──
@@ -464,6 +480,8 @@ fun VerifyOtpScreen(
                 }
             )
             Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
         }
     }
 }

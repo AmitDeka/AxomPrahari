@@ -28,17 +28,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.axomprahari.data.model.TrafficReport
-import com.axomprahari.data.model.ReportStatus
+import com.axomprahari.data.remote.dto.CitizenReportDto
 import com.axomprahari.ui.theme.*
 import kotlinx.coroutines.launch
+
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportScreen(
     navController: NavController,
-    reportsList: List<TrafficReport>,
+    reportsList: List<CitizenReportDto>,
     userProfile: com.axomprahari.data.remote.dto.UserProfile?,
+    onRefresh: () -> Unit,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {}
 ) {
@@ -46,6 +49,7 @@ fun ReportScreen(
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var showFeedbackPage by remember { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
 
     AppDrawer(
         drawerState = drawerState,
@@ -62,7 +66,7 @@ fun ReportScreen(
                     CenterAlignedTopAppBar(
                         title = {
                             Text(
-                                text = if (showFeedbackPage) "Xazag Axom" else "Traffic Reports",
+                                text = if (showFeedbackPage) "Xazag Axom" else "All Reports",
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
@@ -149,6 +153,18 @@ fun ReportScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
+                    PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        isRefreshing = true
+                        scope.launch {
+                            onRefresh()
+                            delay(1200)
+                            isRefreshing = false
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     ReportsTab(
                         reportsList = reportsList,
                         onReportClick = { report ->
@@ -157,8 +173,9 @@ fun ReportScreen(
                     )
                 }
             }
+        }
 
-            // Feedback Page Fullscreen Overlay
+        // Feedback Page Fullscreen Overlay
             AnimatedVisibility(
                 visible = showFeedbackPage,
                 enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
@@ -177,8 +194,8 @@ fun ReportScreen(
 
 @Composable
 fun ReportsTab(
-    reportsList: List<TrafficReport>,
-    onReportClick: (TrafficReport) -> Unit
+    reportsList: List<CitizenReportDto>,
+    onReportClick: (CitizenReportDto) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("All") } // "All", "Verified", "Pending", "Rejected"
@@ -186,14 +203,14 @@ fun ReportsTab(
     val filteredReports = remember(reportsList, searchQuery, selectedFilter) {
         reportsList.filter { report ->
             // Search filter
-            val matchesSearch = report.type.contains(searchQuery, ignoreCase = true) ||
-                    report.location.contains(searchQuery, ignoreCase = true)
+            val matchesSearch = (report.offenceName?.contains(searchQuery, ignoreCase = true) == true) ||
+                    (report.locationName?.contains(searchQuery, ignoreCase = true) == true)
 
             // Status filter
             val matchesFilter = when (selectedFilter) {
-                "Verified" -> report.status == ReportStatus.VERIFIED
-                "Pending" -> report.status == ReportStatus.UNDER_REVIEW
-                "Rejected" -> report.status == ReportStatus.REJECTED
+                "Verified" -> report.status == "accepted"
+                "Pending" -> report.status == "pending"
+                "Rejected" -> report.status == "rejected"
                 else -> true
             }
 
@@ -250,16 +267,32 @@ fun ReportsTab(
 
         // Filtered List
         if (filteredReports.isEmpty()) {
-            Box(
+            Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
+                Icon(
+                    imageVector = Icons.Default.Inbox,
+                    contentDescription = "Empty",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier.size(64.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "No matching reports found.",
+                    text = "No Reports Found",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = if (searchQuery.isNotEmpty()) "Try adjusting your search or filters." else "You haven't submitted any reports yet.",
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
                     )
                 )

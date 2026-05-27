@@ -45,7 +45,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun CompleteProfileScreen(
     onCompleteProfile: suspend (String, String, String) -> Result<String>,
-    onRegistrationSuccess: (String) -> Unit
+    onRegistrationSuccess: (String) -> Unit,
+    onNavigateToGuidelineFaq: () -> Unit,
+    onNavigateToPrivacyPolicy: () -> Unit
 ) {
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
@@ -81,15 +83,24 @@ fun CompleteProfileScreen(
                 focusManager.clearFocus()
             }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .imePadding()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxSize().statusBarsPadding()
         ) {
+            val minHeight = maxHeight
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding()
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = minHeight)
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
             // ── Top Bar ──
             Row(
                 modifier = Modifier
@@ -335,7 +346,77 @@ fun CompleteProfileScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(24.dp))
+
+            Spacer(modifier = Modifier.weight(1f))
+            
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ── Footer Links ──
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "HELP CENTER",
+                    style = TextStyle(
+                        color = loginDarkGreen.copy(alpha = 0.6f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    ),
+                    modifier = Modifier.clickable { onNavigateToGuidelineFaq() }
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Text(
+                    text = "PRIVACY POLICY",
+                    style = TextStyle(
+                        color = loginDarkGreen.copy(alpha = 0.6f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    ),
+                    modifier = Modifier.clickable { onNavigateToPrivacyPolicy() }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ── Secured By Text ──
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(loginDarkGreen.copy(alpha = 0.15f))
+                )
+
+                Text(
+                    text = "SECURED BY KAZIRANGA SMART INFRASTRUCTURE",
+                    style = TextStyle(
+                        color = loginDarkGreen.copy(alpha = 0.4f),
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    ),
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(loginDarkGreen.copy(alpha = 0.15f))
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
         }
     }
 }

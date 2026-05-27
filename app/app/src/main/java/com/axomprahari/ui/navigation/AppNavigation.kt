@@ -82,6 +82,12 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                         },
                         onRegistrationSuccess = { token ->
                             viewModel.login(token)
+                        },
+                        onNavigateToGuidelineFaq = {
+                            navController.navigate("guideline_faq")
+                        },
+                        onNavigateToPrivacyPolicy = {
+                            navController.navigate("privacy_policy")
                         }
                     )
                 }
@@ -105,12 +111,14 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
         is MainUiState.Authenticated -> {
             val reportsList by viewModel.reportsList.collectAsStateWithLifecycle()
             val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
+            val reportStats by viewModel.reportStats.collectAsStateWithLifecycle()
             NavHost(navController = navController, startDestination = "dashboard") {
                 composable("dashboard") {
                     DashboardScreen(
                         navController = navController,
                         reportsList = reportsList,
                         userProfile = userProfile,
+                        reportStats = reportStats,
                         onReportSubmitted = { viewModel.addReport(it) },
                         onLogout = { viewModel.logout() },
                         onNavigateToFaq = { navController.navigate("guideline_faq") }
@@ -121,17 +129,23 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                         navController = navController,
                         reportsList = reportsList,
                         userProfile = userProfile,
+                        onRefresh = { viewModel.refreshReports() },
                         onLogout = { viewModel.logout() },
                         onNavigateToFaq = { navController.navigate("guideline_faq") }
                     )
                 }
                 composable("profile") {
+                    val reportStats by viewModel.reportStats.collectAsStateWithLifecycle()
                     ProfileScreen(
                         navController = navController,
                         reportsList = reportsList,
                         userProfile = userProfile,
+                        reportStats = reportStats,
                         onLogout = { viewModel.logout() },
-                        onNavigateToFaq = { navController.navigate("guideline_faq") }
+                        onNavigateToFaq = { navController.navigate("guideline_faq") },
+                        onUpdateProfile = { name, email, username, onResult ->
+                            viewModel.updateProfile(name, email, username, onResult)
+                        }
                     )
                 }
                 composable("violations") {
@@ -162,7 +176,7 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                 }
                 composable("report_detail/{reportId}") { backStackEntry ->
                     val reportId = backStackEntry.arguments?.getString("reportId") ?: ""
-                    val report = reportsList.find { it.id == reportId }
+                    val report = reportsList.find { it.id.toString() == reportId }
                     if (report != null) {
                         ReportDetailScreen(
                             report = report,

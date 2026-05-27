@@ -19,6 +19,9 @@ class PreferencesManager @Inject constructor(
     companion object {
         val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
         val USER_TOKEN = stringPreferencesKey("user_token")
+        val CACHED_USER_PROFILE = stringPreferencesKey("cached_user_profile")
+        val CACHED_REPORT_STATS = stringPreferencesKey("cached_report_stats")
+        val CACHED_REPORTS_LIST = stringPreferencesKey("cached_reports_list")
     }
 
     val hasCompletedOnboarding: Flow<Boolean> = context.dataStore.data
@@ -30,6 +33,10 @@ class PreferencesManager @Inject constructor(
         .map { preferences ->
             preferences[USER_TOKEN]
         }
+
+    val cachedUserProfile: Flow<String?> = context.dataStore.data.map { it[CACHED_USER_PROFILE] }
+    val cachedReportStats: Flow<String?> = context.dataStore.data.map { it[CACHED_REPORT_STATS] }
+    val cachedReportsList: Flow<String?> = context.dataStore.data.map { it[CACHED_REPORTS_LIST] }
 
     suspend fun setCompletedOnboarding(completed: Boolean) {
         context.dataStore.edit { preferences ->
@@ -45,6 +52,18 @@ class PreferencesManager @Inject constructor(
                 preferences[USER_TOKEN] = token
             }
         }
+    }
+
+    suspend fun saveCachedUserProfile(json: String?) {
+        context.dataStore.edit { if (json == null) it.remove(CACHED_USER_PROFILE) else it[CACHED_USER_PROFILE] = json }
+    }
+
+    suspend fun saveCachedReportStats(json: String?) {
+        context.dataStore.edit { if (json == null) it.remove(CACHED_REPORT_STATS) else it[CACHED_REPORT_STATS] = json }
+    }
+
+    suspend fun saveCachedReportsList(json: String?) {
+        context.dataStore.edit { if (json == null) it.remove(CACHED_REPORTS_LIST) else it[CACHED_REPORTS_LIST] = json }
     }
 
     suspend fun clear() {

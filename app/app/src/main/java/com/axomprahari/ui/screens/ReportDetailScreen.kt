@@ -24,33 +24,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.axomprahari.data.model.TrafficReport
-import com.axomprahari.data.model.ReportStatus
+import com.axomprahari.data.remote.dto.CitizenReportDto
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportDetailScreen(
-    report: TrafficReport,
+    report: CitizenReportDto,
     onBack: () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
     val statusColor = when (report.status) {
-        ReportStatus.VERIFIED -> MaterialTheme.colorScheme.primaryContainer
-        ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.secondaryContainer
-        ReportStatus.REJECTED -> MaterialTheme.colorScheme.errorContainer
+        "accepted" -> MaterialTheme.colorScheme.primaryContainer
+        "pending" -> MaterialTheme.colorScheme.secondaryContainer
+        "rejected" -> MaterialTheme.colorScheme.errorContainer
+        else -> MaterialTheme.colorScheme.secondaryContainer
     }
 
     val statusTextColor = when (report.status) {
-        ReportStatus.VERIFIED -> MaterialTheme.colorScheme.onPrimaryContainer
-        ReportStatus.UNDER_REVIEW -> MaterialTheme.colorScheme.onSecondaryContainer
-        ReportStatus.REJECTED -> MaterialTheme.colorScheme.onErrorContainer
+        "accepted" -> MaterialTheme.colorScheme.onPrimaryContainer
+        "pending" -> MaterialTheme.colorScheme.onSecondaryContainer
+        "rejected" -> MaterialTheme.colorScheme.onErrorContainer
+        else -> MaterialTheme.colorScheme.onSecondaryContainer
     }
 
     val statusText = when (report.status) {
-        ReportStatus.VERIFIED -> "Verified & Approved"
-        ReportStatus.UNDER_REVIEW -> "Under Review"
-        ReportStatus.REJECTED -> "Rejected"
+        "accepted" -> "Verified & Approved"
+        "pending" -> "Under Review"
+        "rejected" -> "Rejected"
+        else -> "Unknown"
     }
 
     val mockReportId = "REP-260523-${report.id.hashCode().coerceAtLeast(0).toString(16).uppercase().take(6).padStart(6, 'B')}"
@@ -96,7 +98,7 @@ fun ReportDetailScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // 1. Attached Media Evidence Card
-            val isVideo = report.mediaPath?.endsWith(".mp4") ?: false
+            val isVideo = report.mediaUrl?.endsWith(".mp4") ?: false
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -152,7 +154,7 @@ fun ReportDetailScreen(
                             )
                         )
                         Text(
-                            text = report.mediaPath ?: "evidence_file.jpg",
+                            text = report.mediaUrl ?: "evidence_file.jpg",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                             )
@@ -210,7 +212,7 @@ fun ReportDetailScreen(
                     DetailRow(
                         icon = Icons.Default.Warning,
                         label = "VIOLATION TYPE",
-                        value = report.type
+                        value = report.offenceName ?: "N/A"
                     )
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.06f))
@@ -228,7 +230,7 @@ fun ReportDetailScreen(
                     DetailRow(
                         icon = Icons.Default.Star,
                         label = "REWARD POINTS",
-                        value = if (report.status == ReportStatus.VERIFIED) "+${report.points} XP Added" else "100 XP (Pending Verification)"
+                        value = if (report.status == "accepted") "+100 XP Added" else "100 XP (Pending Verification)"
                     )
                 }
             }
@@ -248,7 +250,7 @@ fun ReportDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // Location Reference (Landmark)
-                    val userLocation = report.userLocationName ?: "N/A"
+                    val userLocation = report.locationName ?: "N/A"
                     DetailRow(
                         icon = Icons.Default.LocationOn,
                         label = "USER LOCATION REFERENCE",
@@ -266,14 +268,14 @@ fun ReportDetailScreen(
                             DetailRow(
                                 icon = Icons.Default.GpsFixed,
                                 label = "LATITUDE",
-                                value = report.latitude
+                                value = report.latitude ?: "N/A"
                             )
                         }
                         Box(modifier = Modifier.weight(1f)) {
                             DetailRow(
                                 icon = Icons.Default.GpsFixed,
                                 label = "LONGITUDE",
-                                value = report.longitude
+                                value = report.longitude ?: "N/A"
                             )
                         }
                     }
@@ -281,9 +283,8 @@ fun ReportDetailScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.06f))
 
                     // Date & Time separately
-                    val dateTimeParts = report.timestamp.split(" ")
-                    val dateStr = if (dateTimeParts.isNotEmpty()) dateTimeParts[0] else report.timestamp
-                    val timeStr = if (dateTimeParts.size > 1) dateTimeParts.subList(1, dateTimeParts.size).joinToString(" ") else "N/A"
+                    val dateStr = report.incidentDate ?: "N/A"
+                    val timeStr = report.incidentTime ?: "N/A"
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -329,7 +330,7 @@ fun ReportDetailScreen(
                         )
                     )
                     Text(
-                        text = report.description.ifBlank { "No additional text message or description was entered by the user." },
+                        text = report.message?.takeIf { it.isNotBlank() } ?: "No additional text message or description was entered by the user.",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                             lineHeight = 20.sp
