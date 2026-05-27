@@ -1,4 +1,4 @@
-import { db } from '../config/db.config.js';
+import { db } from "../config/db.config.js";
 
 export const createViolation = async (data) => {
   const result = await db.query(
@@ -11,27 +11,32 @@ export const createViolation = async (data) => {
       data.reward_points || 0,
       data.penalty,
       data.description,
-      data.evidence_requirement
-    ]
+      data.evidence_requirement,
+    ],
   );
   return result.rows[0];
 };
 
 export const getAllViolations = async (forAdmin = false) => {
   if (forAdmin) {
-    const result = await db.query('SELECT * FROM violation_master ORDER BY id ASC');
+    const result = await db.query(
+      "SELECT * FROM violation_master ORDER BY id ASC",
+    );
     return result.rows;
   } else {
     // For citizens: Exclude fine_amount and only return active violations
     const result = await db.query(
-      'SELECT id, offence_name, mv_act_code, penalty, description, evidence_requirement, reward_points FROM violation_master WHERE is_active = TRUE ORDER BY id ASC'
+      "SELECT id, offence_name, mv_act_code, penalty, description, evidence_requirement FROM violation_master WHERE is_active = TRUE ORDER BY id ASC",
     );
     return result.rows;
   }
 };
 
 export const getViolationById = async (id) => {
-  const result = await db.query('SELECT * FROM violation_master WHERE id = $1', [id]);
+  const result = await db.query(
+    "SELECT * FROM violation_master WHERE id = $1",
+    [id],
+  );
   return result.rows[0];
 };
 
@@ -72,10 +77,10 @@ export const updateViolation = async (id, data) => {
   if (fields.length === 0) return null;
   fields.push(`updated_at = CURRENT_TIMESTAMP`);
   values.push(id);
-  
+
   const query = `
     UPDATE violation_master 
-    SET ${fields.join(', ')} 
+    SET ${fields.join(", ")} 
     WHERE id = $${index} 
     RETURNING *
   `;
@@ -86,16 +91,16 @@ export const updateViolation = async (id, data) => {
 
 export const toggleViolationStatus = async (id, isActive) => {
   const result = await db.query(
-    'UPDATE violation_master SET is_active = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
-    [isActive, id]
+    "UPDATE violation_master SET is_active = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *",
+    [isActive, id],
   );
   return result.rows[0];
 };
 
 export const deleteViolation = async (id) => {
   const result = await db.query(
-    'DELETE FROM violation_master WHERE id = $1 RETURNING id',
-    [id]
+    "DELETE FROM violation_master WHERE id = $1 RETURNING id",
+    [id],
   );
   return result.rows[0];
 };
