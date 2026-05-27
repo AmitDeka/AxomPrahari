@@ -25,7 +25,7 @@ This document outlines all currently available API endpoints in the Node.js back
 | **GET** | `/api/v1/citizen/reports/presigned-url` | Authenticated (Any) | Generates a Cloudflare R2 presigned upload URL (spam-limited). |
 | **POST** | `/api/v1/citizen/reports/` | Authenticated (Any) | Submits a new violation report (spam-limited). |
 | **GET** | `/api/v1/citizen/reports/` | Authenticated (Any) | Retrieves a paginated list of their own submitted reports (filterable by status). |
-| **PUT** | `/api/v1/citizen/profile` | Authenticated (Any) | Updates the citizen's own name and email address. |
+| **PUT** | `/api/v1/citizen/profile` | Authenticated (Any) | Updates the citizen's own name, email, and username (validates uniqueness, blocks phone number updates). |
 
 ## 4. Violation Management Endpoints (Admin)
 | HTTP Method | Endpoint Path | Privilege / Role | Description |

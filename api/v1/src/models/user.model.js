@@ -32,6 +32,11 @@ export const findUserByEmail = async (email) => {
   return result.rows[0];
 };
 
+export const findUserByUsername = async (username) => {
+  const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
+  return result.rows[0];
+};
+
 export const createIncompleteCitizen = async (phone) => {
   const citizenId = await generateUniqueCitizenId();
   const result = await db.query(
@@ -256,6 +261,10 @@ export const updateCitizenProfile = async (id, updateData) => {
   if (updateData.email) {
     fields.push(`email = $${index++}`);
     values.push(updateData.email);
+  }
+  if (updateData.username) {
+    fields.push(`username = $${index++}`);
+    values.push(updateData.username);
   }
 
   if (fields.length === 0) return null;

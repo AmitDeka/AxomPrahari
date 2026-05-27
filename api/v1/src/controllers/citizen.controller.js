@@ -78,11 +78,35 @@ export const getCitizenDashboard = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const citizenId = req.user.id;
-    const { full_name, email } = req.body;
+    const { full_name, email, username } = req.body;
 
-    const updateData = { full_name };
-    if (email) {
-      updateData.email = email.trim().toLowerCase();
+    const updateData = {};
+    if (full_name !== undefined) {
+      updateData.full_name = full_name;
+    }
+
+    if (email !== undefined) {
+      const emailTrimmed = email.trim().toLowerCase();
+      const existingEmailUser = await UserModel.findUserByEmail(emailTrimmed);
+      if (existingEmailUser && existingEmailUser.id !== citizenId) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Email is already in use.'
+        });
+      }
+      updateData.email = emailTrimmed;
+    }
+
+    if (username !== undefined) {
+      const usernameTrimmed = username.trim();
+      const existingUsernameUser = await UserModel.findUserByUsername(usernameTrimmed);
+      if (existingUsernameUser && existingUsernameUser.id !== citizenId) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Username is already in use.'
+        });
+      }
+      updateData.username = usernameTrimmed;
     }
 
     const updatedUser = await UserModel.updateCitizenProfile(citizenId, updateData);
