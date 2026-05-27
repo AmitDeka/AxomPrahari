@@ -66,4 +66,13 @@ class AuthRepository @Inject constructor(
             throw Exception(parseError(response.errorBody()?.string()))
         }
     }
+
+    suspend fun getCitizenViolations(token: String): Result<CitizenViolationsResponse> = runCatching {
+        val response = api.getCitizenViolations("Bearer $token")
+        if (response.isSuccessful) {
+            response.body() ?: throw Exception("Empty response from server")
+        } else {
+            throw Exception(parseError(response.errorBody()?.string()))
+        }
+    }
 }

@@ -29,4 +29,9 @@ interface ApiService {
     suspend fun getCitizenDashboard(
         @Header("Authorization") bearerToken: String
     ): Response<CitizenDashboardResponse>
+
+    @GET("api/v1/citizen/violations")
+    suspend fun getCitizenViolations(
+        @Header("Authorization") bearerToken: String
+    ): Response<CitizenViolationsResponse>
 }

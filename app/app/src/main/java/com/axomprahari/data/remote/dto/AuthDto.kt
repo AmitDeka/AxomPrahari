@@ -68,3 +68,17 @@ data class CitizenDashboardResponse(
     @SerializedName("status") val status: String,
     @SerializedName("data") val data: CitizenDashboardData
 )
+
+data class ViolationDto(
+    @SerializedName("id") val id: Int,
+    @SerializedName("offence_name") val offenceName: String?,
+    @SerializedName("mv_act_code") val mvActCode: String?,
+    @SerializedName("penalty") val penalty: String?,
+    @SerializedName("description") val description: String?,
+    @SerializedName("evidence_requirement") val evidenceRequirement: String?
+)
+
+data class CitizenViolationsResponse(
+    @SerializedName("status") val status: String,
+    @SerializedName("data") val data: List<ViolationDto>
+)

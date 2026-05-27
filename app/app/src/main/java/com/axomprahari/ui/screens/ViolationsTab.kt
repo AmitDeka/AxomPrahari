@@ -33,58 +33,18 @@ data class TrafficViolationInfo(
 )
 
 @Composable
-fun ViolationsTab() {
-    val violations = remember {
-        listOf(
+fun ViolationsTab(violationsList: List<com.axomprahari.data.remote.dto.ViolationDto>) {
+    val violations = remember(violationsList) {
+        violationsList.map { dto ->
             TrafficViolationInfo(
-                id = "1",
-                type = "No Helmet",
-                section = "Section 177 & 194D, M.V. Act",
-                fine = "₹1,000 + 3 Months License Suspension",
-                description = "Riding a two-wheeler without a Bureau of Indian Standards (BIS) approved protective helmet.",
-                instructions = "Capture a clear photograph showing both the license plate of the vehicle and the rider/pillion passenger without a helmet."
-            ),
-            TrafficViolationInfo(
-                id = "2",
-                type = "Triple Riding",
-                section = "Section 194C, M.V. Act",
-                fine = "₹1,000 + 3 Months License Suspension",
-                description = "Carrying more than one pillion rider on a two-wheeler motorcycle or scooter.",
-                instructions = "Take a photo showing all three individuals on the two-wheeler, ensuring the vehicle registration number is clearly visible."
-            ),
-            TrafficViolationInfo(
-                id = "3",
-                type = "Wrong Side Driving",
-                section = "Section 184 (Dangerous Driving), M.V. Act",
-                fine = "₹5,000 or Imprisonment up to 1 Year",
-                description = "Driving against the designated flow of traffic on a one-way road, divided highway, or intersection.",
-                instructions = "Photograph the vehicle head-on or from behind showing it traveling opposite to other cars or road signs, with the license plate visible."
-            ),
-            TrafficViolationInfo(
-                id = "4",
-                type = "Red Light Jump",
-                section = "Section 184, M.V. Act",
-                fine = "₹1,000 to ₹5,000",
-                description = "Failing to stop at a red signal at traffic intersections.",
-                instructions = "Capture the vehicle crossing the stop line while the traffic signal is clearly red. Registration details must be legible."
-            ),
-            TrafficViolationInfo(
-                id = "5",
-                type = "Using Phone while Driving",
-                section = "Section 184(c), M.V. Act",
-                fine = "₹5,000",
-                description = "Holding or using a mobile phone or handheld communication device while driving/riding a vehicle.",
-                instructions = "Capture the driver holding the phone near their ear or looking down at it, with the vehicle details and surrounding traffic clearly contexted."
-            ),
-            TrafficViolationInfo(
-                id = "6",
-                type = "Dangerous Driving / Zig-Zag",
-                section = "Section 184, M.V. Act",
-                fine = "₹1,000 to ₹5,000",
-                description = "Driving in a manner which is dangerous to the public, including high-speed weaving, sudden lane changes without signaling.",
-                instructions = "Record a short video clip (minimum 5 seconds) showing the reckless driving patterns and ensure the license plate is readable."
+                id = dto.id.toString(),
+                type = dto.offenceName ?: "Unknown Violation",
+                section = dto.mvActCode ?: "M.V. Act",
+                fine = dto.penalty ?: "N/A",
+                description = dto.description ?: "No description provided.",
+                instructions = dto.evidenceRequirement ?: "No instructions provided."
             )
-        )
+        }
     }
 
     var expandedItemId by remember { mutableStateOf<String?>(null) }

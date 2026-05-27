@@ -135,9 +135,11 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                     )
                 }
                 composable("violations") {
+                    val violationsList by viewModel.violationsList.collectAsStateWithLifecycle()
                     ViolationsScreen(
                         navController = navController,
                         userProfile = userProfile,
+                        violationsList = violationsList,
                         onLogout = { viewModel.logout() },
                         onNavigateToFaq = { navController.navigate("guideline_faq") }
                     )

@@ -7,6 +7,7 @@ import com.axomprahari.data.model.TrafficReport
 import com.axomprahari.data.model.ReportStatus
 import com.axomprahari.data.remote.dto.VerifyOtpResponse
 import com.axomprahari.data.remote.dto.UserProfile
+import com.axomprahari.data.remote.dto.ViolationDto
 import com.axomprahari.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -29,13 +30,18 @@ class MainViewModel @Inject constructor(
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     val userProfile: StateFlow<UserProfile?> = _userProfile.asStateFlow()
 
+    private val _violationsList = MutableStateFlow<List<ViolationDto>>(emptyList())
+    val violationsList: StateFlow<List<ViolationDto>> = _violationsList.asStateFlow()
+
     init {
         viewModelScope.launch {
             preferencesManager.userToken.collect { token ->
                 if (!token.isNullOrEmpty()) {
                     fetchDashboard(token)
+                    fetchViolations(token)
                 } else {
                     _userProfile.value = null
+                    _violationsList.value = emptyList()
                 }
             }
         }
@@ -45,6 +51,16 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             authRepository.getCitizenDashboard(token).onSuccess { response ->
                 _userProfile.value = response.data.user
+            }.onFailure {
+                // Fail silently or keep existing
+            }
+        }
+    }
+
+    fun fetchViolations(token: String) {
+        viewModelScope.launch {
+            authRepository.getCitizenViolations(token).onSuccess { response ->
+                _violationsList.value = response.data
             }.onFailure {
                 // Fail silently or keep existing
             }

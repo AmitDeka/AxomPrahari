@@ -28,11 +28,14 @@ import kotlinx.coroutines.launch
 
 import com.axomprahari.data.remote.dto.UserProfile
 
+import com.axomprahari.data.remote.dto.ViolationDto
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViolationsScreen(
     navController: NavController,
     userProfile: UserProfile?,
+    violationsList: List<ViolationDto>,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {}
 ) {
@@ -148,7 +151,7 @@ fun ViolationsScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                ViolationsTab()
+                ViolationsTab(violationsList = violationsList)
 
                 // Feedback Page Fullscreen Overlay
                 AnimatedVisibility(
