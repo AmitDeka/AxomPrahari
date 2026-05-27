@@ -20,6 +20,7 @@ import {
   ShieldIcon,
   ShieldAlertIcon,
   BookOpenIcon,
+  MessageSquareIcon,
 } from "lucide-react";
 
 const data = {
@@ -83,6 +84,17 @@ const data = {
         {
           title: "Citizen Table",
           url: "/admin/users/citizens",
+        },
+      ],
+    },
+    {
+      title: "Feedback",
+      url: "#",
+      icon: <MessageSquareIcon className="size-4" />,
+      items: [
+        {
+          title: "Citizen Feedback",
+          url: "/admin/feedback",
         },
       ],
     },
