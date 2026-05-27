@@ -139,3 +139,24 @@ export const getHeatmapData = async () => {
   );
   return result.rows;
 };
+
+export const getCitizenReportStats = async (citizenId) => {
+  const result = await db.query(
+    `SELECT 
+       COALESCE(COUNT(*), 0) AS total_reports,
+       COALESCE(COUNT(CASE WHEN status = 'pending' THEN 1 END), 0) AS pending_reports,
+       COALESCE(COUNT(CASE WHEN status = 'accepted' THEN 1 END), 0) AS accepted_reports,
+       COALESCE(COUNT(CASE WHEN status = 'rejected' THEN 1 END), 0) AS rejected_reports
+     FROM violation_reports 
+     WHERE citizen_id = $1`,
+    [citizenId]
+  );
+  
+  const row = result.rows[0];
+  return {
+    total: parseInt(row.total_reports, 10),
+    pending: parseInt(row.pending_reports, 10),
+    accepted: parseInt(row.accepted_reports, 10),
+    rejected: parseInt(row.rejected_reports, 10)
+  };
+};

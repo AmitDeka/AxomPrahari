@@ -134,27 +134,80 @@ export default function ViolationsPage() {
 
   const handleSaveViolation = async (e) => {
     e.preventDefault();
-    if (
-      !offenceName ||
-      !mvActCode ||
-      !fineAmount ||
-      !rewardPoints ||
-      !penalty ||
-      !description ||
-      !evidenceRequirement
-    ) {
-      toast.error("Please fill in all required fields.");
+
+    // Trim inputs to prevent whitespace bypass
+    const trimmedOffenceName = offenceName.trim();
+    const trimmedMvActCode = mvActCode.trim();
+    const trimmedPenalty = penalty.trim();
+    const trimmedDescription = description.trim();
+    const trimmedEvidenceRequirement = evidenceRequirement.trim();
+
+    // 1. Client-side validation checks
+    if (!trimmedOffenceName) {
+      toast.error("Violation Title / Category is required.");
+      return;
+    }
+    if (trimmedOffenceName.length < 3) {
+      toast.error("Violation Title must be at least 3 characters.");
+      return;
+    }
+
+    if (!trimmedMvActCode) {
+      toast.error("MV Act Code / Section is required.");
+      return;
+    }
+    if (trimmedMvActCode.length < 2) {
+      toast.error("MV Act Code must be at least 2 characters.");
+      return;
+    }
+
+    if (!trimmedPenalty) {
+      toast.error("Legal Penalty Terms are required.");
+      return;
+    }
+    if (trimmedPenalty.length < 3) {
+      toast.error("Legal Penalty Terms must be at least 3 characters.");
+      return;
+    }
+
+    if (!trimmedDescription) {
+      toast.error("Detailed Description is required.");
+      return;
+    }
+    if (trimmedDescription.length < 5) {
+      toast.error("Detailed Description must be at least 5 characters.");
+      return;
+    }
+
+    if (!trimmedEvidenceRequirement) {
+      toast.error("Evidence Requirement is required.");
+      return;
+    }
+    if (trimmedEvidenceRequirement.length < 5) {
+      toast.error("Evidence Requirement must be at least 5 characters.");
+      return;
+    }
+
+    const parsedFine = parseFloat(fineAmount);
+    if (isNaN(parsedFine) || parsedFine <= 0) {
+      toast.error("Default Fine must be a positive number.");
+      return;
+    }
+
+    const parsedReward = parseInt(rewardPoints, 10);
+    if (isNaN(parsedReward) || parsedReward < 0) {
+      toast.error("Reward Points must be 0 or a positive integer.");
       return;
     }
 
     const payload = {
-      offence_name: offenceName,
-      mv_act_code: mvActCode,
-      fine_amount: parseFloat(fineAmount) || 0,
-      reward_points: parseInt(rewardPoints, 10) || 0,
-      penalty,
-      description,
-      evidence_requirement: evidenceRequirement,
+      offence_name: trimmedOffenceName,
+      mv_act_code: trimmedMvActCode,
+      fine_amount: parsedFine,
+      reward_points: parsedReward,
+      penalty: trimmedPenalty,
+      description: trimmedDescription,
+      evidence_requirement: trimmedEvidenceRequirement,
     };
 
     try {
@@ -180,9 +233,20 @@ export default function ViolationsPage() {
       setTargetViolation(null);
     } catch (err) {
       console.error("Error saving violation", err);
-      toast.error(
-        err.response?.data?.message || "Error saving violation definition",
-      );
+      
+      // Parse detailed validation error messages from backend if available
+      const backendErrors = err.response?.data?.errors;
+      if (Array.isArray(backendErrors) && backendErrors.length > 0) {
+        backendErrors.forEach((validationErr) => {
+          toast.error(validationErr.message);
+        });
+      } else {
+        const errMsg =
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Error saving violation definition";
+        toast.error(errMsg);
+      }
     }
   };
 

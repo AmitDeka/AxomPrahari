@@ -1,4 +1,5 @@
 import * as UserModel from '../models/user.model.js';
+import * as ReportModel from '../models/report.model.js';
 
 // Masking Utilities
 const maskPhone = (phone) => {
@@ -62,11 +63,14 @@ export const getCitizenDashboard = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    const reportStats = await ReportModel.getCitizenReportStats(userId);
+
     res.status(200).json({
       status: 'success',
       data: {
         title: 'Citizen Dashboard',
-        user: userProfile
+        user: userProfile,
+        report_stats: reportStats
       }
     });
   } catch (error) {

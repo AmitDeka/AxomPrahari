@@ -23,7 +23,7 @@ This document outlines all currently available API endpoints in the Node.js back
 
 | HTTP Method | Endpoint Path                           | Privilege / Role    | Description                                                                                                                                            |
 | :---------- | :-------------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **GET**     | `/api/v1/citizen/dashboard`             | Authenticated (Any) | Retrieves the citizen's personalized dashboard data.                                                                                                   |
+| **GET**     | `/api/v1/citizen/dashboard`             | Authenticated (Any) | Retrieves the citizen's profile details and report submission statistics (total, pending, accepted, rejected counts).                                  |
 | **GET**     | `/api/v1/citizen/violations`            | Authenticated (Any) | Retrieves a list of active violations (exposes offence_name, mv_act_code, penalty, description, evidence_requirement; hides fine_amount for security). |
 | **GET**     | `/api/v1/citizen/reports/presigned-url` | Authenticated (Any) | Generates a Cloudflare R2 presigned upload URL (spam-limited).                                                                                         |
 | **POST**    | `/api/v1/citizen/reports/`              | Authenticated (Any) | Submits a new violation report (spam-limited).                                                                                                         |
