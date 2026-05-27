@@ -37,11 +37,17 @@ import androidx.compose.ui.unit.sp
 import com.axomprahari.R
 import com.axomprahari.ui.theme.*
 
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun CompleteProfileScreen(onRegistrationSuccess: (String) -> Unit) {
+fun CompleteProfileScreen(
+    onCompleteProfile: suspend (String, String, String) -> Result<String>,
+    onRegistrationSuccess: (String) -> Unit
+) {
+    val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
     val loginDarkGreen = MaterialTheme.colorScheme.primary
     val loginBgTop = MaterialTheme.colorScheme.background
@@ -79,6 +85,7 @@ fun CompleteProfileScreen(onRegistrationSuccess: (String) -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
+                .imePadding()
                 .verticalScroll(scrollState)
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -272,9 +279,14 @@ fun CompleteProfileScreen(onRegistrationSuccess: (String) -> Unit) {
                     if (isFormValid) {
                         loading = true
                         scope.launch {
-                            delay(1200)
+                            val result = onCompleteProfile(fullName, email, username)
                             loading = false
-                            onRegistrationSuccess("mock-jwt-token-new-user-456")
+                            result.onSuccess { token ->
+                                Toast.makeText(context, "Profile completed successfully!", Toast.LENGTH_SHORT).show()
+                                onRegistrationSuccess(token)
+                            }.onFailure { error ->
+                                Toast.makeText(context, error.message ?: "Failed to complete profile", Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
                 },

@@ -20,12 +20,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import com.axomprahari.data.remote.dto.UserProfile
 
 @Composable
 fun AppDrawer(
     drawerState: DrawerState,
     navController: NavController,
     currentRoute: String,
+    userProfile: UserProfile?,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit,
     onSendFeedbackClick: () -> Unit,
@@ -69,26 +71,28 @@ fun AppDrawer(
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Rahul Sharma",
+                                    text = userProfile?.fullName ?: "Loading...",
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Verified",
-                                        tint = MaterialTheme.colorScheme.onPrimary,
-                                        modifier = Modifier.size(10.dp)
-                                    )
+                                if (userProfile != null) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.primary),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = "Verified",
+                                            tint = MaterialTheme.colorScheme.onPrimary,
+                                            modifier = Modifier.size(10.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -118,7 +122,7 @@ fun AppDrawer(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "450 Reward Points",
+                                text = "${userProfile?.rewardPoints ?: 0} Reward Points",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontWeight = FontWeight.Bold

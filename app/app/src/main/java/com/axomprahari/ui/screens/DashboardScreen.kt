@@ -61,6 +61,7 @@ import com.axomprahari.data.model.ReportStatus
 fun DashboardScreen(
     navController: NavController,
     reportsList: List<TrafficReport>,
+    userProfile: com.axomprahari.data.remote.dto.UserProfile?,
     onReportSubmitted: (TrafficReport) -> Unit,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {}
@@ -80,6 +81,7 @@ fun DashboardScreen(
         drawerState = drawerState,
         navController = navController,
         currentRoute = "dashboard",
+        userProfile = userProfile,
         onLogout = onLogout,
         onNavigateToFaq = onNavigateToFaq,
         onSendFeedbackClick = { showFeedbackPage = true }

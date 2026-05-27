@@ -47,19 +47,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import com.axomprahari.R
+import com.axomprahari.data.remote.dto.VerifyOtpResponse
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun VerifyOtpScreen(
     phone: String,
+    onVerifyOtp: suspend (String, String) -> Result<VerifyOtpResponse>,
     onLoginSuccess: (String) -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToPrivacyPolicy: () -> Unit,
     onNavigateToTermsOfService: () -> Unit
 ) {
+    val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     val LoginBgTop = MaterialTheme.colorScheme.background
@@ -108,6 +113,7 @@ fun VerifyOtpScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -351,9 +357,19 @@ fun VerifyOtpScreen(
                     if (isValid) {
                         loading = true
                         scope.launch {
-                            delay(1200)
+                            val result = onVerifyOtp(phone, code)
                             loading = false
-                            onNavigateToProfile()
+                            result.onSuccess { response ->
+                                if (response.isNewUser) {
+                                    Toast.makeText(context, "Welcome! Please complete your profile.", Toast.LENGTH_SHORT).show()
+                                    onNavigateToProfile()
+                                } else {
+                                    Toast.makeText(context, "Verification Successful!", Toast.LENGTH_SHORT).show()
+                                    onLoginSuccess(response.token)
+                                }
+                            }.onFailure { error ->
+                                Toast.makeText(context, error.message ?: "Failed to verify OTP", Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
                 },

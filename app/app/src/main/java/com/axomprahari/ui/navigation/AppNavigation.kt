@@ -10,9 +10,10 @@ import androidx.navigation.compose.rememberNavController
 import com.axomprahari.viewmodel.MainViewModel
 import com.axomprahari.viewmodel.MainUiState
 import com.axomprahari.ui.screens.*
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun RootNavigationGraph(viewModel: MainViewModel = viewModel()) {
+fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
 
@@ -34,6 +35,7 @@ fun RootNavigationGraph(viewModel: MainViewModel = viewModel()) {
                         onNavigateToVerify = { phone ->
                             navController.navigate("verify_otp/$phone")
                         },
+                        onRequestOtp = { phone -> viewModel.requestOtp(phone) },
                         onNavigateToGuidelineFaq = {
                             navController.navigate("guideline_faq")
                         },
@@ -49,6 +51,7 @@ fun RootNavigationGraph(viewModel: MainViewModel = viewModel()) {
                     val phone = backStackEntry.arguments?.getString("phone") ?: ""
                     VerifyOtpScreen(
                         phone = phone,
+                        onVerifyOtp = { p, otp -> viewModel.verifyOtp(p, otp) },
                         onLoginSuccess = { token ->
                             viewModel.login(token)
                         },
@@ -67,7 +70,16 @@ fun RootNavigationGraph(viewModel: MainViewModel = viewModel()) {
                     )
                 }
                 composable("complete_profile") {
+                    val tempToken by viewModel.tempAuthToken.collectAsStateWithLifecycle()
                     CompleteProfileScreen(
+                        onCompleteProfile = { fullName, email, username ->
+                            viewModel.completeProfile(
+                                token = tempToken ?: "",
+                                fullName = fullName,
+                                email = email,
+                                username = username
+                            )
+                        },
                         onRegistrationSuccess = { token ->
                             viewModel.login(token)
                         }
@@ -92,11 +104,13 @@ fun RootNavigationGraph(viewModel: MainViewModel = viewModel()) {
         }
         is MainUiState.Authenticated -> {
             val reportsList by viewModel.reportsList.collectAsStateWithLifecycle()
+            val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
             NavHost(navController = navController, startDestination = "dashboard") {
                 composable("dashboard") {
                     DashboardScreen(
                         navController = navController,
                         reportsList = reportsList,
+                        userProfile = userProfile,
                         onReportSubmitted = { viewModel.addReport(it) },
                         onLogout = { viewModel.logout() },
                         onNavigateToFaq = { navController.navigate("guideline_faq") }
@@ -106,6 +120,7 @@ fun RootNavigationGraph(viewModel: MainViewModel = viewModel()) {
                     ReportScreen(
                         navController = navController,
                         reportsList = reportsList,
+                        userProfile = userProfile,
                         onLogout = { viewModel.logout() },
                         onNavigateToFaq = { navController.navigate("guideline_faq") }
                     )
@@ -114,6 +129,7 @@ fun RootNavigationGraph(viewModel: MainViewModel = viewModel()) {
                     ProfileScreen(
                         navController = navController,
                         reportsList = reportsList,
+                        userProfile = userProfile,
                         onLogout = { viewModel.logout() },
                         onNavigateToFaq = { navController.navigate("guideline_faq") }
                     )
@@ -121,6 +137,7 @@ fun RootNavigationGraph(viewModel: MainViewModel = viewModel()) {
                 composable("violations") {
                     ViolationsScreen(
                         navController = navController,
+                        userProfile = userProfile,
                         onLogout = { viewModel.logout() },
                         onNavigateToFaq = { navController.navigate("guideline_faq") }
                     )

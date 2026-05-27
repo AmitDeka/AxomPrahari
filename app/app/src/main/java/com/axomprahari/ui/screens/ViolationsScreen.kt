@@ -26,10 +26,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
+import com.axomprahari.data.remote.dto.UserProfile
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViolationsScreen(
     navController: NavController,
+    userProfile: UserProfile?,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {}
 ) {
@@ -42,6 +45,7 @@ fun ViolationsScreen(
         drawerState = drawerState,
         navController = navController,
         currentRoute = "violations",
+        userProfile = userProfile,
         onLogout = onLogout,
         onNavigateToFaq = onNavigateToFaq,
         onSendFeedbackClick = { showFeedbackPage = true }

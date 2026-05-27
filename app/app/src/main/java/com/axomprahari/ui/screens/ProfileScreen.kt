@@ -25,12 +25,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.axomprahari.data.model.TrafficReport
 import com.axomprahari.data.model.ReportStatus
+import com.axomprahari.data.remote.dto.UserProfile
 import com.axomprahari.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -39,6 +40,7 @@ import kotlinx.coroutines.launch
 fun ProfileScreen(
     navController: NavController,
     reportsList: List<TrafficReport>,
+    userProfile: UserProfile?,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {}
 ) {
@@ -51,6 +53,7 @@ fun ProfileScreen(
         drawerState = drawerState,
         navController = navController,
         currentRoute = "profile",
+        userProfile = userProfile,
         onLogout = onLogout,
         onNavigateToFaq = onNavigateToFaq,
         onSendFeedbackClick = { showFeedbackPage = true }
@@ -149,6 +152,7 @@ fun ProfileScreen(
             ) {
                 ProfileTab(
                     reportsList = reportsList,
+                    userProfile = userProfile,
                     onLogout = onLogout,
                     onNavigateToFaq = onNavigateToFaq,
                     onNavigateToPrivacy = { navController.navigate("privacy_policy") },
@@ -177,6 +181,7 @@ fun ProfileScreen(
 @Composable
 fun ProfileTab(
     reportsList: List<TrafficReport>,
+    userProfile: UserProfile?,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit,
     onNavigateToPrivacy: () -> Unit,
@@ -184,10 +189,18 @@ fun ProfileTab(
     onSendFeedbackClick: () -> Unit
 ) {
     val context = LocalContext.current
-    var fullName by remember { mutableStateOf("Rahul Sharma") }
-    var username by remember { mutableStateOf("rahul_sharma") }
-    var email by remember { mutableStateOf("rahul.sharma@domain.in") }
-    val phoneNumber = "+91 98765 43210"
+    var fullName by remember { mutableStateOf(userProfile?.fullName ?: "Loading...") }
+    var username by remember { mutableStateOf(userProfile?.username ?: "") }
+    var email by remember { mutableStateOf(userProfile?.email ?: "") }
+    val phoneNumber = userProfile?.phoneNumber ?: ""
+
+    LaunchedEffect(userProfile) {
+        userProfile?.let {
+            fullName = it.fullName
+            username = it.username
+            email = it.email
+        }
+    }
 
     // Dialog state for edit profile
     var showEditDialog by remember { mutableStateOf(false) }
@@ -197,14 +210,16 @@ fun ProfileTab(
     var tempUsername by remember { mutableStateOf(username) }
     var tempEmail by remember { mutableStateOf(email) }
 
-    // Dialog state for password
-    var showPasswordDialog by remember { mutableStateOf(false) }
-    var currentPassword by remember { mutableStateOf("") }
-    var newPassword by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
+    LaunchedEffect(showEditDialog) {
+        if (showEditDialog) {
+            tempName = fullName
+            tempUsername = username
+            tempEmail = email
+        }
+    }
 
     // Stats calculations
-    val totalPoints = 450
+    val totalPoints = userProfile?.rewardPoints ?: 0
     val totalReports = reportsList.size
     val verifiedCount = reportsList.count { it.status == ReportStatus.VERIFIED }
 
@@ -424,27 +439,7 @@ fun ProfileTab(
                     Text("Update Profile", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
                 }
 
-                // Update Password Button
-                Button(
-                    onClick = {
-                        currentPassword = ""
-                        newPassword = ""
-                        confirmPassword = ""
-                        showPasswordDialog = true
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                ) {
-                    Icon(imageVector = Icons.Default.Lock, contentDescription = "Edit Password")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Update Password", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
-                }
+
             }
         }
 
@@ -559,7 +554,7 @@ fun ProfileTab(
                     OutlinedTextField(
                         value = phoneNumber,
                         onValueChange = {},
-                        label = { Text("Phone Number (Read-Only)") },
+                        label = { Text("Phone Number") },
                         leadingIcon = { Icon(Icons.Default.Phone, contentDescription = "Phone") },
                         enabled = false,
                         shape = RoundedCornerShape(10.dp),
@@ -622,82 +617,7 @@ fun ProfileTab(
         )
     }
 
-    // Edit Password Dialog
-    if (showPasswordDialog) {
-        AlertDialog(
-            onDismissRequest = { showPasswordDialog = false },
-            title = {
-                Text(
-                    text = "Update Password",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                )
-            },
-            text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Current Password
-                    OutlinedTextField(
-                        value = currentPassword,
-                        onValueChange = { currentPassword = it },
-                        label = { Text("Current Password") },
-                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Current Password") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
 
-                    // New Password
-                    OutlinedTextField(
-                        value = newPassword,
-                        onValueChange = { newPassword = it },
-                        label = { Text("New Password") },
-                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "New Password") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    // Confirm New Password
-                    OutlinedTextField(
-                        value = confirmPassword,
-                        onValueChange = { confirmPassword = it },
-                        label = { Text("Confirm New Password") },
-                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Confirm New Password") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (newPassword != confirmPassword) {
-                            Toast.makeText(context, "New passwords do not match!", Toast.LENGTH_SHORT).show()
-                        } else if (newPassword.isEmpty() || currentPassword.isEmpty()) {
-                            Toast.makeText(context, "Password cannot be empty!", Toast.LENGTH_SHORT).show()
-                        } else {
-                            showPasswordDialog = false
-                            Toast.makeText(context, "Password updated successfully!", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text("Save Password", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showPasswordDialog = false }
-                ) {
-                    Text("Cancel", fontWeight = FontWeight.Bold)
-                }
-            },
-            shape = RoundedCornerShape(20.dp)
-        )
-    }
 }
 
 @Composable

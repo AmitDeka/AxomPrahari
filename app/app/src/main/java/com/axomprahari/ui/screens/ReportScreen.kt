@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 fun ReportScreen(
     navController: NavController,
     reportsList: List<TrafficReport>,
+    userProfile: com.axomprahari.data.remote.dto.UserProfile?,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {}
 ) {
@@ -50,6 +51,7 @@ fun ReportScreen(
         drawerState = drawerState,
         navController = navController,
         currentRoute = "report",
+        userProfile = userProfile,
         onLogout = onLogout,
         onNavigateToFaq = onNavigateToFaq,
         onSendFeedbackClick = { showFeedbackPage = true }

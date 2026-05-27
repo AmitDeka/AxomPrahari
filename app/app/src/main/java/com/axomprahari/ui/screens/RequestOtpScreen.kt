@@ -33,18 +33,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import com.axomprahari.R
 import com.axomprahari.ui.theme.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun RequestOtpScreen(
     onNavigateToVerify: (String) -> Unit,
+    onRequestOtp: suspend (String) -> Result<String>,
     onNavigateToGuidelineFaq: () -> Unit,
     onNavigateToPrivacyPolicy: () -> Unit,
     onNavigateToTermsOfService: () -> Unit
 ) {
+    val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     val LoginBgTop = MaterialTheme.colorScheme.background
@@ -78,6 +81,7 @@ fun RequestOtpScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 32.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -250,9 +254,14 @@ fun RequestOtpScreen(
                     if (isValid) {
                         loading = true
                         scope.launch {
-                            delay(1000)
+                            val result = onRequestOtp(phoneNumber)
                             loading = false
-                            onNavigateToVerify(phoneNumber)
+                            result.onSuccess {
+                                Toast.makeText(context, "OTP Sent successfully!", Toast.LENGTH_SHORT).show()
+                                onNavigateToVerify(phoneNumber)
+                            }.onFailure { error ->
+                                Toast.makeText(context, error.message ?: "Failed to send OTP", Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
                 },
