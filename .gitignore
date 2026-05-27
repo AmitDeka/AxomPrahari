@@ -5,4 +5,7 @@ API_DOCS.md
 /api/v1/verifyAdminCRUD.js
 /api/v1/verifyNotifications.js
 /api/v1/verifyCitizenProfileUpdate.js
-/api/v1/verifyCitizenDashboardStats.js
+/api/v1/verifyCitizenProfileUpdate.js
+/api/v1/verifyViolationUpdates.js
+/api/v1/migrateFeedbacks.js
+/api/v1/verifyFeedbacks.js

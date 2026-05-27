@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.axomprahari.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -118,7 +119,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
 
             // ── App Name ──
             Text(
-                text = "AXOM PRAHARI",
+                text = stringResource(R.string.splash_app_name),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     color = SplashDarkGreen,
                     fontWeight = FontWeight.Black,
@@ -132,7 +133,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
 
             // ── Tagline ──
             Text(
-                text = "THE CIVIC SENTINEL",
+                text = stringResource(R.string.splash_tagline),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = SplashDarkGreen.copy(alpha = 0.6f),
                     fontWeight = FontWeight.Medium,
@@ -186,7 +187,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
-                text = "EMPOWERING CITIZEN SENTINEL",
+                text = stringResource(R.string.splash_footer),
                 style = MaterialTheme.typography.labelSmall.copy(
                     color = SplashDarkGreen.copy(alpha = 0.45f),
                     fontWeight = FontWeight.Medium,

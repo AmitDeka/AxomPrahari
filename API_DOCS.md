@@ -29,6 +29,7 @@ This document outlines all currently available API endpoints in the Node.js back
 | **POST**    | `/api/v1/citizen/reports/`              | Authenticated (Any) | Submits a new violation report (spam-limited).                                                                                                         |
 | **GET**     | `/api/v1/citizen/reports/`              | Authenticated (Any) | Retrieves a paginated list of their own submitted reports (filterable by status).                                                                      |
 | **PUT**     | `/api/v1/citizen/profile`               | Authenticated (Any) | Updates the citizen's own name, email, and username (validates uniqueness, blocks phone number updates).                                               |
+| **POST**    | `/api/v1/citizen/feedback`              | Authenticated (Any) | Submits feedback (requires citizen_id, feedback_category, message, and optional image_key/image_url).                                                  |
 
 ## 4. Violation Management Endpoints (Admin)
 
@@ -78,14 +79,22 @@ _\*Subject to strict Access Control Boundaries (see Section 10)._
 - **Police Admin Only:** Requires an admin JWT with at least the `police_admin` role (Super Admins inherit this).
 - **Super Admin Only:** Strictly restricted to the `super_admin` role.
 
-## 8. Custom Identification Fields
+## 8. Feedback Management Endpoints (Admin)
+
+| HTTP Method | Endpoint Path              | Privilege / Role  | Description                                                     |
+| :---------- | :------------------------- | :---------------- | :-------------------------------------------------------------- |
+| **GET**     | `/api/v1/admin/feedbacks`  | Police Admin Only | Retrieves all citizen feedbacks with pagination (page, limit). |
+
+---
+
+## 9. Custom Identification Fields
 
 To facilitate user-friendly communications and lookups, the system automatically generates unique custom identifiers:
 
 - **Citizen ID (`citizen_id`):** Format `APC-[6-character Alphanumeric]` (e.g. `APC-8K9A2M`). Generated automatically during initial citizen verification.
 - **Report ID (`report_id`):** Format `REP-[YYMMDD]-[6-character Random Hex]` (e.g. `REP-260520-E4B28C`). Generated automatically upon violation report submission.
 
-## 9. Admin Fields & Schema Validation
+## 10. Admin Fields & Schema Validation
 
 When creating or updating administrators via `/api/v1/admin/create` or `/api/v1/admin/:id`, the request bodies are validated using `zod`. The key properties include:
 
@@ -96,7 +105,7 @@ When creating or updating administrators via `/api/v1/admin/create` or `/api/v1/
 - **`email`**: Valid email format string (must be unique).
 - **`password`**: Must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number.
 
-## 10. Admin Access Control Boundaries & Security Constraints
+## 11. Admin Access Control Boundaries & Security Constraints
 
 To enforce security boundaries between administrative roles, the backend verifies the following rules on every operation:
 

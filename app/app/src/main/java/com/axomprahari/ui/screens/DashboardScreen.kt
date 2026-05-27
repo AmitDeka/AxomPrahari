@@ -50,6 +50,8 @@ import kotlinx.coroutines.launch
 import com.axomprahari.ui.theme.*
 import androidx.navigation.NavController
 import com.axomprahari.data.remote.dto.CitizenReportDto
+import androidx.compose.ui.res.stringResource
+import com.axomprahari.R
 
 
 
@@ -92,7 +94,7 @@ fun DashboardScreen(
                     CenterAlignedTopAppBar(
                         title = {
                             Text(
-                                text = if (showFeedbackPage) "Xazag Axom" else "Axom Prahari",
+                                text = if (showFeedbackPage) stringResource(R.string.axom_prahari_title) else stringResource(R.string.axom_prahari_title),
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
@@ -114,7 +116,7 @@ fun DashboardScreen(
                             }) {
                                 Icon(
                                     imageVector = if (showBack) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.Menu,
-                                    contentDescription = if (showBack) "Go back" else "Open navigation drawer",
+                                    contentDescription = if (showBack) stringResource(R.string.go_back_desc) else stringResource(R.string.open_nav_drawer_desc),
                                     tint = MaterialTheme.colorScheme.onSurface
                                 )
                             }
@@ -134,8 +136,8 @@ fun DashboardScreen(
                             onClick = {
                                 isReportingOffence = false
                             },
-                            icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard") },
-                            label = { Text("Dashboard", fontSize = 11.sp) },
+                            icon = { Icon(Icons.Default.Dashboard, contentDescription = stringResource(R.string.nav_dashboard)) },
+                            label = { Text(stringResource(R.string.nav_dashboard), fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -151,8 +153,8 @@ fun DashboardScreen(
                                     restoreState = true
                                 }
                             },
-                            icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = "Reports") },
-                            label = { Text("Reports", fontSize = 11.sp) },
+                            icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = stringResource(R.string.nav_reports)) },
+                            label = { Text(stringResource(R.string.nav_reports), fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -168,8 +170,8 @@ fun DashboardScreen(
                                     restoreState = true
                                 }
                             },
-                            icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Profile") },
-                            label = { Text("Profile", fontSize = 11.sp) },
+                            icon = { Icon(Icons.Default.AccountCircle, contentDescription = stringResource(R.string.nav_profile)) },
+                            label = { Text(stringResource(R.string.nav_profile), fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -222,7 +224,7 @@ fun DashboardScreen(
                 FeedbackScreen(
                     onSubmit = { category, message ->
                         showFeedbackPage = false
-                        Toast.makeText(context, "Feedback submitted successfully!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -286,13 +288,13 @@ fun DashboardTab(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Lens,
-                            contentDescription = "Camera Lens",
+                            contentDescription = stringResource(R.string.camera_lens_desc),
                             tint = Color.White.copy(alpha = 0.3f),
                             modifier = Modifier.size(60.dp)
                         )
                         Icon(
                             imageVector = Icons.Default.PhotoCamera,
-                            contentDescription = "Camera Shutter",
+                            contentDescription = stringResource(R.string.camera_shutter_desc),
                             tint = Color.White,
                             modifier = Modifier.size(32.dp)
                         )
@@ -302,7 +304,7 @@ fun DashboardTab(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Report Offence",
+                    text = stringResource(R.string.report_offence_title),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -310,7 +312,7 @@ fun DashboardTab(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Capture real-time evidence for immediate civic intervention.",
+                    text = stringResource(R.string.report_offence_subtitle),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     ),
@@ -347,7 +349,7 @@ fun DashboardTab(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Star,
-                            contentDescription = "Points",
+                            contentDescription = stringResource(R.string.points_desc),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.size(18.dp)
                         )
@@ -362,7 +364,7 @@ fun DashboardTab(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "REWARD POINTS",
+                        text = stringResource(R.string.reward_points_label),
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             fontWeight = FontWeight.Bold
@@ -393,7 +395,7 @@ fun DashboardTab(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Assignment,
-                            contentDescription = "Pending Reports",
+                            contentDescription = stringResource(R.string.pending_reports_desc),
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(18.dp)
                         )
@@ -408,7 +410,7 @@ fun DashboardTab(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "PENDING REPORTS",
+                        text = stringResource(R.string.pending_reports_label),
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             fontWeight = FontWeight.Bold
@@ -428,7 +430,7 @@ fun DashboardTab(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Recent Submissions",
+                    text = stringResource(R.string.recent_submissions_title),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -436,7 +438,7 @@ fun DashboardTab(
                 )
                 Icon(
                     imageVector = Icons.Default.History,
-                    contentDescription = "History",
+                    contentDescription = stringResource(R.string.history_desc),
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                 )
             }
@@ -451,7 +453,7 @@ fun DashboardTab(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No submissions yet. Start reporting!",
+                        text = stringResource(R.string.no_submissions_text),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                         )
@@ -524,10 +526,10 @@ fun ReportItemCardContent(report: CitizenReportDto) {
     }
 
     val statusText = when (report.status) {
-        "accepted" -> "Verified"
-        "pending" -> "Pending"
-        "rejected" -> "Rejected"
-        else -> "Unknown"
+        "accepted" -> stringResource(R.string.status_verified)
+        "pending" -> stringResource(R.string.status_pending)
+        "rejected" -> stringResource(R.string.status_rejected)
+        else -> stringResource(R.string.status_unknown)
     }
 
     Row(
@@ -546,7 +548,7 @@ fun ReportItemCardContent(report: CitizenReportDto) {
                     "Triple Riding" -> Icons.Default.Info
                     else -> Icons.Default.Warning
                 },
-                contentDescription = "Violation Icon",
+                contentDescription = stringResource(R.string.violation_icon_desc),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -560,7 +562,7 @@ fun ReportItemCardContent(report: CitizenReportDto) {
                 verticalAlignment = Alignment.Top
             ) {
                 Text(
-                    text = report.offenceName ?: "Unknown Offence",
+                    text = report.offenceName ?: stringResource(R.string.unknown_offence_text),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -587,7 +589,7 @@ fun ReportItemCardContent(report: CitizenReportDto) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = report.locationName ?: "Unknown Location",
+                text = report.locationName ?: stringResource(R.string.unknown_location_text),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 ),
@@ -661,7 +663,7 @@ fun UserStatsCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Welcome back,",
+                        text = stringResource(R.string.welcome_back_text),
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = subtleWhite,
                             fontWeight = FontWeight.Medium,
@@ -670,7 +672,7 @@ fun UserStatsCard(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = userProfile?.fullName ?: "Guest",
+                        text = userProfile?.fullName ?: stringResource(R.string.guest_name_text),
                         style = MaterialTheme.typography.titleLarge.copy(
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
@@ -713,7 +715,7 @@ fun UserStatsCard(
                 horizontalArrangement = Arrangement.spacedBy(0.dp)
             ) {
                 StatPill(
-                    label = "REPORTS",
+                    label = stringResource(R.string.stat_reports_label),
                     value = reportStats?.total?.toString() ?: "0",
                     accentColor = accentGreen,
                     modifier = Modifier.weight(1f)
@@ -727,7 +729,7 @@ fun UserStatsCard(
                         .align(Alignment.CenterVertically)
                 )
                 StatPill(
-                    label = "VERIFIED",
+                    label = stringResource(R.string.stat_verified_label),
                     value = reportStats?.accepted?.toString() ?: "0",
                     accentColor = accentGreen,
                     modifier = Modifier.weight(1f)
@@ -740,7 +742,7 @@ fun UserStatsCard(
                         .align(Alignment.CenterVertically)
                 )
                 StatPill(
-                    label = "REJECTED",
+                    label = stringResource(R.string.stat_rejected_label),
                     value = reportStats?.rejected?.toString() ?: "0",
                     accentColor = MaterialTheme.colorScheme.error,
                     modifier = Modifier.weight(1f)

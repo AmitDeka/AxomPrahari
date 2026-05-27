@@ -28,6 +28,8 @@ import kotlinx.coroutines.launch
 
 import com.axomprahari.data.remote.dto.UserProfile
 import com.axomprahari.data.remote.dto.ViolationDto
+import androidx.compose.ui.res.stringResource
+import com.axomprahari.R
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import kotlinx.coroutines.delay
 
@@ -61,7 +63,7 @@ fun ViolationsScreen(
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            text = if (showFeedbackPage) "Xazag Axom" else "Traffic Guidelines",
+                            text = if (showFeedbackPage) stringResource(R.string.axom_prahari_title) else stringResource(R.string.traffic_guidelines_title),
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -79,7 +81,7 @@ fun ViolationsScreen(
                         }) {
                             Icon(
                                 imageVector = if (isFeedback) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.Menu,
-                                contentDescription = if (isFeedback) "Go back" else "Open navigation drawer",
+                                contentDescription = if (isFeedback) stringResource(R.string.go_back_desc) else stringResource(R.string.open_navigation_drawer_desc),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -103,8 +105,8 @@ fun ViolationsScreen(
                                 restoreState = true
                             }
                         },
-                        icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard") },
-                        label = { Text("Dashboard", fontSize = 11.sp) },
+                        icon = { Icon(Icons.Default.Dashboard, contentDescription = stringResource(R.string.dashboard_tab)) },
+                        label = { Text(stringResource(R.string.dashboard_tab), fontSize = 11.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -120,8 +122,8 @@ fun ViolationsScreen(
                                 restoreState = true
                             }
                         },
-                        icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = "Reports") },
-                        label = { Text("Reports", fontSize = 11.sp) },
+                        icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = stringResource(R.string.reports_tab)) },
+                        label = { Text(stringResource(R.string.reports_tab), fontSize = 11.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -137,8 +139,8 @@ fun ViolationsScreen(
                                 restoreState = true
                             }
                         },
-                        icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Profile") },
-                        label = { Text("Profile", fontSize = 11.sp) },
+                        icon = { Icon(Icons.Default.AccountCircle, contentDescription = stringResource(R.string.profile_tab)) },
+                        label = { Text(stringResource(R.string.profile_tab), fontSize = 11.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -178,7 +180,7 @@ fun ViolationsScreen(
                     FeedbackScreen(
                         onSubmit = { category, message ->
                             showFeedbackPage = false
-                            Toast.makeText(context, "Feedback submitted successfully!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
                         }
                     )
                 }

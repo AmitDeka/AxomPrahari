@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { getCitizenDashboard, updateProfile } from '../controllers/citizen.controller.js';
+import { submitFeedback } from '../controllers/feedback.controller.js';
 import { getCitizenViolations } from '../controllers/violation.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
 import { validateRequest } from '../middlewares/validate.middleware.js';
-import { updateProfileSchema } from '../middlewares/validators/citizen.validator.js';
+import { updateProfileSchema, createFeedbackSchema } from '../middlewares/validators/citizen.validator.js';
 
 const router = Router();
 
@@ -28,6 +29,14 @@ router.put(
   verifyToken,
   validateRequest(updateProfileSchema),
   updateProfile
+);
+
+// Submit citizen feedback
+router.post(
+  '/feedback',
+  verifyToken,
+  validateRequest(createFeedbackSchema),
+  submitFeedback
 );
 
 export default router;

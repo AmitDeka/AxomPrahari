@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.isSystemInDarkTheme
 import com.axomprahari.ui.theme.*
+import androidx.compose.ui.res.stringResource
+import com.axomprahari.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +50,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Guidelines & FAQ",
+                        text = stringResource(R.string.faq_screen_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -106,7 +108,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Search for guidelines...",
+                    text = stringResource(R.string.faq_search_placeholder),
                     color = LoginDarkGreen.copy(alpha = 0.4f),
                     fontSize = 15.sp
                 )
@@ -131,7 +133,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Be a Sentinel",
+                        text = stringResource(R.string.faq_be_a_sentinel_title),
                         style = TextStyle(
                             color = Color.White,
                             fontSize = 20.sp,
@@ -140,7 +142,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Your reports directly assist Assam State Police in maintaining road safety and order.",
+                        text = stringResource(R.string.faq_be_a_sentinel_desc),
                         style = TextStyle(
                             color = Color.White.copy(alpha = 0.8f),
                             fontSize = 14.sp,
@@ -158,7 +160,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                         modifier = Modifier.height(40.dp)
                     ) {
                         Text(
-                            text = "DOWNLOAD MANUAL",
+                            text = stringResource(R.string.faq_download_manual_btn),
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp
                         )
@@ -170,10 +172,10 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
 
             // ── Accordion Items (Placeholders) ──
             val faqItems = listOf(
-                "How to take valid photos?" to "Placeholder guideline details for capturing high-quality, non-blurry photos from safe distances that clearly show license plates and violations context.",
-                "What offences can I report?" to "Placeholder information listing reportable violations under the M.V. Act, such as riding without a helmet, triple riding, and red light jumping.",
-                "How does the points system work?" to "Placeholder reward system rules explaining how sentinel XP points are accumulated, rankings (Gold, Platinum), and point verification flows.",
-                "Is my identity kept private?" to "Placeholder security summary describing data encryption, private profiles, anonymous reports handling, and citizen identity privacy safeguards."
+                stringResource(R.string.faq_q1) to stringResource(R.string.faq_a1),
+                stringResource(R.string.faq_q2) to stringResource(R.string.faq_a2),
+                stringResource(R.string.faq_q3) to stringResource(R.string.faq_a3),
+                stringResource(R.string.faq_q4) to stringResource(R.string.faq_a4)
             )
 
             faqItems.forEachIndexed { index, (question, answer) ->
@@ -256,7 +258,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Critical Reminder",
+                            text = stringResource(R.string.faq_critical_reminder_title),
                             style = TextStyle(
                                 color = MaterialTheme.colorScheme.onErrorContainer,
                                 fontSize = 14.sp,
@@ -265,7 +267,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Always prioritize your safety. Never attempt to take photos while driving.",
+                            text = stringResource(R.string.faq_critical_reminder_desc),
                             style = TextStyle(
                                 color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f),
                                 fontSize = 12.sp,

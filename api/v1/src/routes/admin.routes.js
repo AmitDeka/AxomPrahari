@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createNewAdmin, deleteAdmin, toggleAdminStatus, updateAdmin, getAdminDashboard, getAllAdminsList } from '../controllers/admin.controller.js';
+import { getFeedbacks } from '../controllers/feedback.controller.js';
 import { verifyToken, requireRole } from '../middlewares/auth.middleware.js';
 import { validateRequest } from '../middlewares/validate.middleware.js';
 import * as AuthValidator from '../middlewares/validators/auth.validator.js';
@@ -21,6 +22,9 @@ router.use(requireRole(['super_admin', 'police_admin']));
 
 // Get all admins
 router.get('/list', getAllAdminsList);
+
+// Get all feedback (Admin)
+router.get('/feedbacks', getFeedbacks);
 
 // Create a new police admin
 router.post(

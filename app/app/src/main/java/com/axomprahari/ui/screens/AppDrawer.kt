@@ -21,6 +21,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import com.axomprahari.data.remote.dto.UserProfile
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
+import com.axomprahari.R
 
 @Composable
 fun AppDrawer(
@@ -34,6 +37,14 @@ fun AppDrawer(
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val versionName = remember(context) {
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
+        } catch (e: Exception) {
+            "1.0.0"
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -62,7 +73,7 @@ fun AppDrawer(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Person,
-                                contentDescription = "Profile Photo",
+                                contentDescription = stringResource(R.string.profile_photo_desc),
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.size(36.dp)
                             )
@@ -71,7 +82,7 @@ fun AppDrawer(
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = userProfile?.fullName ?: "Loading...",
+                                    text = userProfile?.fullName ?: stringResource(R.string.loading_text),
                                     style = MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurface
@@ -88,7 +99,7 @@ fun AppDrawer(
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Check,
-                                            contentDescription = "Verified",
+                                            contentDescription = stringResource(R.string.verified_desc),
                                             tint = MaterialTheme.colorScheme.onPrimary,
                                             modifier = Modifier.size(10.dp)
                                         )
@@ -116,13 +127,13 @@ fun AppDrawer(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Star,
-                                contentDescription = "Rewards",
+                                contentDescription = stringResource(R.string.rewards_desc),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "${userProfile?.rewardPoints ?: 0} Reward Points",
+                                text = "${userProfile?.rewardPoints ?: 0} ${stringResource(R.string.reward_points_suffix)}",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontWeight = FontWeight.Bold
@@ -142,7 +153,7 @@ fun AppDrawer(
                     ) {
                         DrawerMenuItem(
                             icon = Icons.Default.Dashboard,
-                            label = "Dashboard",
+                            label = stringResource(R.string.nav_dashboard),
                             isSelected = currentRoute == "dashboard",
                             onClick = {
                                 scope.launch { drawerState.close() }
@@ -157,7 +168,7 @@ fun AppDrawer(
                         )
                         DrawerMenuItem(
                             icon = Icons.Default.Traffic,
-                            label = "Traffic Violations",
+                            label = stringResource(R.string.nav_traffic_violations),
                             isSelected = currentRoute == "violations",
                             onClick = {
                                 scope.launch { drawerState.close() }
@@ -172,7 +183,7 @@ fun AppDrawer(
                         )
                         DrawerMenuItem(
                             icon = Icons.Default.Person,
-                            label = "Account",
+                            label = stringResource(R.string.nav_account),
                             isSelected = currentRoute == "profile",
                             onClick = {
                                 scope.launch { drawerState.close() }
@@ -187,7 +198,7 @@ fun AppDrawer(
                         )
                         DrawerMenuItem(
                             icon = Icons.AutoMirrored.Filled.Help,
-                            label = "FAQ",
+                            label = stringResource(R.string.nav_faq),
                             isSelected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
@@ -196,7 +207,7 @@ fun AppDrawer(
                         )
                         DrawerMenuItem(
                             icon = Icons.Default.Feedback,
-                            label = "Send Feedback",
+                            label = stringResource(R.string.nav_send_feedback),
                             isSelected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
@@ -223,12 +234,12 @@ fun AppDrawer(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Logout",
+                            contentDescription = stringResource(R.string.logout_btn_desc),
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Logout",
+                            text = stringResource(R.string.logout_btn),
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
@@ -236,7 +247,7 @@ fun AppDrawer(
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     Text(
-                        text = "App Version 1.0.0",
+                        text = stringResource(R.string.app_version_text, versionName),
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                             fontWeight = FontWeight.Medium

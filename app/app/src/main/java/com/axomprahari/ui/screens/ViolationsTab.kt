@@ -23,7 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import androidx.compose.ui.res.stringResource
+import com.axomprahari.R
 data class TrafficViolationInfo(
     val id: String,
     val type: String,
@@ -35,15 +36,21 @@ data class TrafficViolationInfo(
 
 @Composable
 fun ViolationsTab(violationsList: List<com.axomprahari.data.remote.dto.ViolationDto>) {
+    val unknownViolation = stringResource(R.string.unknown_violation)
+    val mvAct = stringResource(R.string.mv_act)
+    val notApplicable = stringResource(R.string.not_applicable)
+    val noDesc = stringResource(R.string.no_description_provided)
+    val noInst = stringResource(R.string.no_instructions_provided)
+
     val violations = remember(violationsList) {
         violationsList.map { dto ->
             TrafficViolationInfo(
                 id = dto.id.toString(),
-                type = dto.offenceName ?: "Unknown Violation",
-                section = dto.mvActCode ?: "M.V. Act",
-                fine = dto.penalty ?: "N/A",
-                description = dto.description ?: "No description provided.",
-                instructions = dto.evidenceRequirement ?: "No instructions provided."
+                type = dto.offenceName ?: unknownViolation,
+                section = dto.mvActCode ?: mvAct,
+                fine = dto.penalty ?: notApplicable,
+                description = dto.description ?: noDesc,
+                instructions = dto.evidenceRequirement ?: noInst
             )
         }
     }
@@ -57,14 +64,14 @@ fun ViolationsTab(violationsList: List<com.axomprahari.data.remote.dto.Violation
     ) {
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Violation Guidelines",
+            text = stringResource(R.string.violation_guidelines_title),
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
         )
         Text(
-            text = "Familiarize yourself with traffic rules in Assam and learn how to report them correctly.",
+            text = stringResource(R.string.violation_guidelines_desc),
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             ),
@@ -121,7 +128,7 @@ fun EmptyGuidelinesState() {
         }
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "No Guidelines Added",
+            text = stringResource(R.string.no_guidelines_added_title),
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -130,7 +137,7 @@ fun EmptyGuidelinesState() {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "No traffic guidelines or violation master entries have been registered yet. Pull down to refresh and fetch the latest master rules.",
+            text = stringResource(R.string.no_guidelines_added_desc),
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             ),
@@ -180,7 +187,7 @@ fun ViolationCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Warning,
-                        contentDescription = "Warning",
+                        contentDescription = stringResource(R.string.warning_desc),
                         tint = if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                         modifier = Modifier.size(20.dp)
                     )
@@ -207,7 +214,7 @@ fun ViolationCard(
 
                 Icon(
                     imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = "Expand/Collapse",
+                    contentDescription = stringResource(R.string.expand_collapse_desc),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
             }
@@ -241,13 +248,13 @@ fun ViolationCard(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Info,
-                                contentDescription = "Fine Amount",
+                                contentDescription = stringResource(R.string.fine_amount_desc),
                                 tint = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Penalty: ${violation.fine}",
+                                text = stringResource(R.string.penalty_prefix) + " ${violation.fine}",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onErrorContainer
@@ -260,7 +267,7 @@ fun ViolationCard(
 
                     // Description text
                     Text(
-                        text = "Description",
+                        text = stringResource(R.string.description_title),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -277,7 +284,7 @@ fun ViolationCard(
 
                     // How to report guidelines
                     Text(
-                        text = "Evidence Requirements",
+                        text = stringResource(R.string.evidence_requirements_title),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface

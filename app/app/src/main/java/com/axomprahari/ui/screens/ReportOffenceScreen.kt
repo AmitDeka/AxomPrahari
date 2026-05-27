@@ -37,6 +37,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.axomprahari.data.remote.dto.CitizenReportDto
+import androidx.compose.ui.res.stringResource
+import com.axomprahari.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +69,7 @@ fun ReportOffenceScreen(
     ) { isGranted ->
         hasCameraPermission = isGranted
         if (!isGranted) {
-            Toast.makeText(context, "Camera permission is required to capture media", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.camera_permission_required), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -78,7 +80,7 @@ fun ReportOffenceScreen(
         val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
         hasLocationPermission = fineGranted || coarseGranted
         if (!hasLocationPermission) {
-            Toast.makeText(context, "Location permission is required to fetch GPS coordinates", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.location_permission_required), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -152,7 +154,7 @@ fun ReportOffenceScreen(
             ) {
                 Column {
                     Text(
-                        text = "Report Offence",
+                        text = stringResource(R.string.report_offence_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -160,7 +162,7 @@ fun ReportOffenceScreen(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Fill in the details below to log a traffic violation.",
+                        text = stringResource(R.string.report_offence_subtitle),
                         style = MaterialTheme.typography.bodySmall.copy(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
@@ -205,7 +207,7 @@ fun ReportOffenceScreen(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = if (captureMode == "Photo") "Photo Attached Successfully" else "Video Attached Successfully",
+                                text = if (captureMode == "Photo") stringResource(R.string.photo_attached_success) else stringResource(R.string.video_attached_success),
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
@@ -213,7 +215,7 @@ fun ReportOffenceScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Tap to recapture",
+                                text = stringResource(R.string.tap_to_recapture),
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                 )
@@ -229,7 +231,7 @@ fun ReportOffenceScreen(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "Tap to Capture Photo/Video",
+                                text = stringResource(R.string.tap_to_capture_media),
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -237,7 +239,7 @@ fun ReportOffenceScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Back device camera only (Required)",
+                                text = stringResource(R.string.back_camera_required),
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                 )
@@ -259,7 +261,7 @@ fun ReportOffenceScreen(
                     value = selectedOffence,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("SELECT OFFENCE TYPE", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                    label = { Text(stringResource(R.string.select_offence_type), fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isDropdownExpanded) },
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
@@ -293,7 +295,7 @@ fun ReportOffenceScreen(
             OutlinedTextField(
                 value = vehicleNumber,
                 onValueChange = { vehicleNumber = it.uppercase() },
-                label = { Text("VEHICLE NUMBER", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                label = { Text(stringResource(R.string.vehicle_number_label), fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                 placeholder = { Text("e.g. AS-01-XX-1234") },
                 leadingIcon = {
                     Icon(
@@ -319,7 +321,7 @@ fun ReportOffenceScreen(
                 value = systemDateTime,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("SYSTEM DATE & TIME (AUTOMATIC)", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                label = { Text(stringResource(R.string.system_date_time_label), fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Event,
@@ -353,11 +355,11 @@ fun ReportOffenceScreen(
                         }
                 ) {
                     OutlinedTextField(
-                        value = "Tap to Grant Location Permission",
+                        value = stringResource(R.string.tap_to_grant_location),
                         onValueChange = {},
                         readOnly = true,
                         enabled = false,
-                        label = { Text("GPS LOCATION (REQUIRED)", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                        label = { Text(stringResource(R.string.gps_location_required_label), fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.GpsOff,
@@ -380,7 +382,7 @@ fun ReportOffenceScreen(
                     value = gpsCoordinates,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("GPS COORDINATES (AUTOMATIC)", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                    label = { Text(stringResource(R.string.gps_coordinates_label), fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.GpsFixed,
@@ -404,7 +406,7 @@ fun ReportOffenceScreen(
             OutlinedTextField(
                 value = locationReference,
                 onValueChange = { locationReference = it },
-                label = { Text("LOCATION REFERENCE (LANDMARK)", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                label = { Text(stringResource(R.string.location_reference_label), fontSize = 11.sp, fontWeight = FontWeight.Bold) },
                 placeholder = { Text("e.g. Near G.S. Road flyover, next to Petrol Pump") },
                 leadingIcon = {
                     Icon(
@@ -429,8 +431,8 @@ fun ReportOffenceScreen(
             OutlinedTextField(
                 value = additionalNotes,
                 onValueChange = { additionalNotes = it },
-                label = { Text("ADDITIONAL DESCRIPTION (OPTIONAL)", fontSize = 11.sp, fontWeight = FontWeight.Bold) },
-                placeholder = { Text("Add any extra details or text about the violation...") },
+                label = { Text(stringResource(R.string.additional_description_label), fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                placeholder = { Text(stringResource(R.string.additional_description_hint)) },
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -457,7 +459,7 @@ fun ReportOffenceScreen(
                         .weight(1f)
                         .height(50.dp)
                 ) {
-                    Text("Cancel", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.cancel_btn), fontWeight = FontWeight.Bold)
                 }
 
                 Button(
@@ -506,7 +508,7 @@ fun ReportOffenceScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Submit",
+                            text = stringResource(R.string.submit_btn),
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold
                             )
@@ -562,7 +564,7 @@ fun ReportOffenceScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Camera permission required for live preview",
+                            text = stringResource(R.string.camera_permission_required_live_preview),
                             color = Color.White,
                             style = MaterialTheme.typography.bodyMedium
                         )
@@ -677,13 +679,13 @@ fun ReportOffenceScreen(
                                     if (captureMode == "Photo") {
                                         mediaCapturedPath = "captured_image.jpg"
                                         showLiveCamera = false
-                                        Toast.makeText(context, "Photo Captured!", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.photo_captured_success), Toast.LENGTH_SHORT).show()
                                     } else {
                                         isRecording = !isRecording
                                         if (!isRecording) {
                                             mediaCapturedPath = "captured_video.mp4"
                                             showLiveCamera = false
-                                            Toast.makeText(context, "Video Recorded!", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, context.getString(R.string.video_recorded_success), Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 },

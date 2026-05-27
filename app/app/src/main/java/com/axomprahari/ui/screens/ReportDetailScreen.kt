@@ -25,7 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axomprahari.data.remote.dto.CitizenReportDto
-
+import androidx.compose.ui.res.stringResource
+import com.axomprahari.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,10 +50,10 @@ fun ReportDetailScreen(
     }
 
     val statusText = when (report.status) {
-        "accepted" -> "Verified & Approved"
-        "pending" -> "Under Review"
-        "rejected" -> "Rejected"
-        else -> "Unknown"
+        "accepted" -> stringResource(R.string.status_verified_approved)
+        "pending" -> stringResource(R.string.status_under_review)
+        "rejected" -> stringResource(R.string.status_rejected)
+        else -> stringResource(R.string.status_unknown)
     }
 
     val mockReportId = "REP-260523-${report.id.hashCode().coerceAtLeast(0).toString(16).uppercase().take(6).padStart(6, 'B')}"
@@ -64,7 +65,7 @@ fun ReportDetailScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Report Details",
+                        text = stringResource(R.string.report_details_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -147,7 +148,7 @@ fun ReportDetailScreen(
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = if (isVideo) "Attached Video Evidence" else "Attached Photo Evidence",
+                            text = if (isVideo) stringResource(R.string.attached_video_evidence) else stringResource(R.string.attached_photo_evidence),
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -184,7 +185,7 @@ fun ReportDetailScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "STATUS",
+                            text = stringResource(R.string.status_label),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                                 fontWeight = FontWeight.Bold
@@ -211,7 +212,7 @@ fun ReportDetailScreen(
                     // Violation Type
                     DetailRow(
                         icon = Icons.Default.Warning,
-                        label = "VIOLATION TYPE",
+                        label = stringResource(R.string.violation_type_label),
                         value = report.offenceName ?: "N/A"
                     )
 
@@ -220,7 +221,7 @@ fun ReportDetailScreen(
                     // Report ID
                     DetailRow(
                         icon = Icons.Default.Fingerprint,
-                        label = "REPORT ID",
+                        label = stringResource(R.string.report_id_label),
                         value = mockReportId
                     )
 
@@ -229,7 +230,7 @@ fun ReportDetailScreen(
                     // Reward Points
                     DetailRow(
                         icon = Icons.Default.Star,
-                        label = "REWARD POINTS",
+                        label = stringResource(R.string.reward_points_label),
                         value = if (report.status == "accepted") "+100 XP Added" else "100 XP (Pending Verification)"
                     )
                 }
@@ -253,7 +254,7 @@ fun ReportDetailScreen(
                     val userLocation = report.locationName ?: "N/A"
                     DetailRow(
                         icon = Icons.Default.LocationOn,
-                        label = "USER LOCATION REFERENCE",
+                        label = stringResource(R.string.user_location_reference_label),
                         value = userLocation
                     )
 
@@ -267,14 +268,14 @@ fun ReportDetailScreen(
                         Box(modifier = Modifier.weight(1f)) {
                             DetailRow(
                                 icon = Icons.Default.GpsFixed,
-                                label = "LATITUDE",
+                                label = stringResource(R.string.latitude_label),
                                 value = report.latitude ?: "N/A"
                             )
                         }
                         Box(modifier = Modifier.weight(1f)) {
                             DetailRow(
                                 icon = Icons.Default.GpsFixed,
-                                label = "LONGITUDE",
+                                label = stringResource(R.string.longitude_label),
                                 value = report.longitude ?: "N/A"
                             )
                         }
@@ -293,14 +294,14 @@ fun ReportDetailScreen(
                         Box(modifier = Modifier.weight(1f)) {
                             DetailRow(
                                 icon = Icons.Default.Event,
-                                label = "REPORT DATE",
+                                label = stringResource(R.string.report_date_label),
                                 value = dateStr
                             )
                         }
                         Box(modifier = Modifier.weight(1f)) {
                             DetailRow(
                                 icon = Icons.Default.Schedule,
-                                label = "REPORT TIME",
+                                label = stringResource(R.string.report_time_label),
                                 value = timeStr
                             )
                         }
@@ -323,14 +324,14 @@ fun ReportDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "ADDITIONAL SENTINEL NOTES",
+                        text = stringResource(R.string.additional_notes_label),
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                             fontWeight = FontWeight.Bold
                         )
                     )
                     Text(
-                        text = report.message?.takeIf { it.isNotBlank() } ?: "No additional text message or description was entered by the user.",
+                        text = report.message?.takeIf { it.isNotBlank() } ?: stringResource(R.string.no_additional_notes_desc),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                             lineHeight = 20.sp

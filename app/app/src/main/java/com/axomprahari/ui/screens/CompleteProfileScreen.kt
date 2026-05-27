@@ -168,7 +168,7 @@ fun CompleteProfileScreen(
                                 .padding(horizontal = 12.dp, vertical = 4.dp)
                         ) {
                             Text(
-                                text = "SMART CITY INITIATIVE",
+                                text = stringResource(R.string.comp_profile_smart_city_badge),
                                 style = TextStyle(
                                     color = Color.White,
                                     fontSize = 9.sp,
@@ -179,7 +179,7 @@ fun CompleteProfileScreen(
                         }
                         
                         Text(
-                            text = "Complete Profile",
+                            text = stringResource(R.string.comp_profile_title),
                             style = TextStyle(
                                 color = Color.White,
                                 fontSize = 24.sp,
@@ -194,7 +194,7 @@ fun CompleteProfileScreen(
 
             // ── Intro Text ──
             Text(
-                text = "Join the digital monolith of Assam. Your profile details ensure accountable and high-impact civic reporting.",
+                text = stringResource(R.string.comp_profile_intro),
                 style = TextStyle(
                     color = loginDarkGreen.copy(alpha = 0.7f),
                     fontSize = 15.sp,
@@ -210,7 +210,7 @@ fun CompleteProfileScreen(
             ProfileInputField(
                 value = fullName,
                 onValueChange = { fullName = it },
-                label = "FULL NAME",
+                label = stringResource(R.string.comp_profile_full_name_label),
                 placeholder = "Arjun Baruah",
                 leadingIcon = Icons.Default.AssignmentInd
             )
@@ -218,7 +218,7 @@ fun CompleteProfileScreen(
             ProfileInputField(
                 value = username,
                 onValueChange = { username = it },
-                label = "USERNAME",
+                label = stringResource(R.string.comp_profile_username_label),
                 placeholder = "arjun_x",
                 leadingIcon = Icons.Default.AlternateEmail
             )
@@ -226,7 +226,7 @@ fun CompleteProfileScreen(
             ProfileInputField(
                 value = email,
                 onValueChange = { email = it },
-                label = "EMAIL ADDRESS",
+                label = stringResource(R.string.comp_profile_email_label),
                 placeholder = "arjun@xazag.gov.in",
                 leadingIcon = Icons.Default.Email,
                 keyboardType = KeyboardType.Email
@@ -234,7 +234,7 @@ fun CompleteProfileScreen(
 
             if (!isEmailValid) {
                 Text(
-                    text = "Please enter a valid email address",
+                    text = stringResource(R.string.comp_profile_invalid_email),
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier
@@ -272,7 +272,7 @@ fun CompleteProfileScreen(
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Text(
-                        text = "By proceeding, you agree to our Civic Responsibility Charter. Data is stored on decentralized smart-city infrastructure.",
+                        text = stringResource(R.string.comp_profile_civic_charter),
                         style = TextStyle(
                             color = loginDarkGreen.copy(alpha = 0.7f),
                             fontSize = 12.sp,
@@ -293,10 +293,10 @@ fun CompleteProfileScreen(
                             val result = onCompleteProfile(fullName, email, username)
                             loading = false
                             result.onSuccess { token ->
-                                Toast.makeText(context, "Profile completed successfully!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.comp_profile_toast_success), Toast.LENGTH_SHORT).show()
                                 onRegistrationSuccess(token)
                             }.onFailure { error ->
-                                Toast.makeText(context, error.message ?: "Failed to complete profile", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, error.message ?: context.getString(R.string.comp_profile_toast_failed), Toast.LENGTH_LONG).show()
                             }
                         }
                     }
@@ -330,7 +330,7 @@ fun CompleteProfileScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Start Reporting",
+                            text = stringResource(R.string.comp_profile_btn_start_reporting),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -357,7 +357,7 @@ fun CompleteProfileScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "HELP CENTER",
+                    text = stringResource(R.string.comp_profile_footer_help_center),
                     style = TextStyle(
                         color = loginDarkGreen.copy(alpha = 0.6f),
                         fontSize = 12.sp,
@@ -370,7 +370,7 @@ fun CompleteProfileScreen(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
-                    text = "PRIVACY POLICY",
+                    text = stringResource(R.string.comp_profile_footer_privacy_policy),
                     style = TextStyle(
                         color = loginDarkGreen.copy(alpha = 0.6f),
                         fontSize = 12.sp,
@@ -397,7 +397,7 @@ fun CompleteProfileScreen(
                 )
 
                 Text(
-                    text = "SECURED BY KAZIRANGA SMART INFRASTRUCTURE",
+                    text = stringResource(R.string.comp_profile_footer_secured_by),
                     style = TextStyle(
                         color = loginDarkGreen.copy(alpha = 0.4f),
                         fontSize = 9.sp,

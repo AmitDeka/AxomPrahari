@@ -152,7 +152,7 @@ fun RequestOtpScreen(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Welcome back.",
+                    text = stringResource(R.string.req_otp_welcome_back),
                     style = TextStyle(
                         color = LoginDarkGreen,
                         fontSize = 32.sp,
@@ -161,7 +161,7 @@ fun RequestOtpScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Securely access your civic dashboard and report traffic incidents.",
+                    text = stringResource(R.string.req_otp_securely_access),
                     style = TextStyle(
                         color = LoginDarkGreen.copy(alpha = 0.7f),
                         fontSize = 15.sp,
@@ -179,7 +179,7 @@ fun RequestOtpScreen(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "PHONE NUMBER",
+                    text = stringResource(R.string.req_otp_phone_number_label),
                     style = TextStyle(
                         color = LoginDarkGreen.copy(alpha = 0.5f),
                         fontSize = 11.sp,
@@ -234,7 +234,7 @@ fun RequestOtpScreen(
                         decorationBox = { innerTextField ->
                             if (phoneNumber.isEmpty()) {
                                 Text(
-                                    text = "Enter phone number",
+                                    text = stringResource(R.string.req_otp_enter_phone_placeholder),
                                     color = LoginDarkGreen.copy(alpha = 0.4f),
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Normal
@@ -247,7 +247,7 @@ fun RequestOtpScreen(
 
                 if (phoneNumber.isNotEmpty() && !isValid) {
                     Text(
-                        text = "Please enter a valid 10-digit phone number",
+                        text = stringResource(R.string.req_otp_invalid_phone),
                         color = MaterialTheme.colorScheme.error,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(top = 8.dp)
@@ -266,10 +266,10 @@ fun RequestOtpScreen(
                             val result = onRequestOtp(phoneNumber)
                             loading = false
                             result.onSuccess {
-                                Toast.makeText(context, "OTP Sent successfully!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.req_otp_toast_otp_sent), Toast.LENGTH_SHORT).show()
                                 onNavigateToVerify(phoneNumber)
                             }.onFailure { error ->
-                                Toast.makeText(context, error.message ?: "Failed to send OTP", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, error.message ?: context.getString(R.string.req_otp_toast_otp_failed), Toast.LENGTH_LONG).show()
                             }
                         }
                     }
@@ -303,7 +303,7 @@ fun RequestOtpScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "GET OTP",
+                            text = stringResource(R.string.req_otp_btn_get_otp),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -330,7 +330,7 @@ fun RequestOtpScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "HELP CENTER",
+                    text = stringResource(R.string.req_otp_footer_help_center),
                     style = TextStyle(
                         color = LoginDarkGreen.copy(alpha = 0.6f),
                         fontSize = 12.sp,
@@ -343,7 +343,7 @@ fun RequestOtpScreen(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
-                    text = "PRIVACY POLICY",
+                    text = stringResource(R.string.req_otp_footer_privacy_policy),
                     style = TextStyle(
                         color = LoginDarkGreen.copy(alpha = 0.6f),
                         fontSize = 12.sp,
@@ -370,7 +370,7 @@ fun RequestOtpScreen(
                 )
 
                 Text(
-                    text = "SECURED BY KAZIRANGA SMART INFRASTRUCTURE",
+                    text = stringResource(R.string.req_otp_footer_secured_by),
                     style = TextStyle(
                         color = LoginDarkGreen.copy(alpha = 0.4f),
                         fontSize = 9.sp,

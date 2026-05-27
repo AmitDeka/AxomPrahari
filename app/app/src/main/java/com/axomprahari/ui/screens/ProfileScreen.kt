@@ -34,6 +34,8 @@ import com.axomprahari.data.model.ReportStatus
 import com.axomprahari.data.remote.dto.UserProfile
 import com.axomprahari.ui.theme.*
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import com.axomprahari.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +67,7 @@ fun ProfileScreen(
                 CenterAlignedTopAppBar(
                     title = {
                         Text(
-                            text = if (showFeedbackPage) "Xazag Axom" else "Profile Settings",
+                            text = if (showFeedbackPage) stringResource(R.string.axom_prahari_title) else stringResource(R.string.profile_settings_title),
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -83,7 +85,7 @@ fun ProfileScreen(
                         }) {
                             Icon(
                                 imageVector = if (isFeedback) Icons.AutoMirrored.Filled.ArrowBack else Icons.Default.Menu,
-                                contentDescription = if (isFeedback) "Go back" else "Open navigation drawer",
+                                contentDescription = if (isFeedback) stringResource(R.string.go_back_desc) else stringResource(R.string.open_navigation_drawer_desc),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -107,8 +109,8 @@ fun ProfileScreen(
                                 restoreState = true
                             }
                         },
-                        icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard") },
-                        label = { Text("Dashboard", fontSize = 11.sp) },
+                        icon = { Icon(Icons.Default.Dashboard, contentDescription = stringResource(R.string.dashboard_tab)) },
+                        label = { Text(stringResource(R.string.dashboard_tab), fontSize = 11.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -124,8 +126,8 @@ fun ProfileScreen(
                                 restoreState = true
                             }
                         },
-                        icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = "Reports") },
-                        label = { Text("Reports", fontSize = 11.sp) },
+                        icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = stringResource(R.string.reports_tab)) },
+                        label = { Text(stringResource(R.string.reports_tab), fontSize = 11.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -135,8 +137,8 @@ fun ProfileScreen(
                     NavigationBarItem(
                         selected = true,
                         onClick = { /* Already here */ },
-                        icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Profile") },
-                        label = { Text("Profile", fontSize = 11.sp) },
+                        icon = { Icon(Icons.Default.AccountCircle, contentDescription = stringResource(R.string.profile_tab)) },
+                        label = { Text(stringResource(R.string.profile_tab), fontSize = 11.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -173,7 +175,7 @@ fun ProfileScreen(
                     FeedbackScreen(
                         onSubmit = { category, message ->
                             showFeedbackPage = false
-                            Toast.makeText(context, "Feedback submitted successfully!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
@@ -195,7 +197,8 @@ fun ProfileTab(
     onUpdateProfile: (String, String, String, (Result<UserProfile>) -> Unit) -> Unit
 ) {
     val context = LocalContext.current
-    var fullName by remember { mutableStateOf(userProfile?.fullName ?: "Loading...") }
+    val loadingText = stringResource(R.string.loading_text)
+    var fullName by remember { mutableStateOf(userProfile?.fullName ?: loadingText) }
     var username by remember { mutableStateOf(userProfile?.username ?: "") }
     var email by remember { mutableStateOf(userProfile?.email ?: "") }
     val phoneNumber = userProfile?.phoneNumber ?: ""
@@ -252,7 +255,7 @@ fun ProfileTab(
             ) {
                 Icon(
                     imageVector = Icons.Default.Person,
-                    contentDescription = "Profile Photo",
+                    contentDescription = stringResource(R.string.profile_photo_desc),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(64.dp)
                 )
@@ -278,7 +281,7 @@ fun ProfileTab(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Badge,
-                            contentDescription = "Citizen ID",
+                            contentDescription = stringResource(R.string.citizen_id_desc),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
@@ -345,7 +348,7 @@ fun ProfileTab(
                         )
                     )
                     Text(
-                        text = "POINTS",
+                        text = stringResource(R.string.points_label),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
@@ -374,7 +377,7 @@ fun ProfileTab(
                         )
                     )
                     Text(
-                        text = "REPORTS",
+                        text = stringResource(R.string.reports_label),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
@@ -403,7 +406,7 @@ fun ProfileTab(
                         )
                     )
                     Text(
-                        text = "VERIFIED",
+                        text = stringResource(R.string.verified_label),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
@@ -419,7 +422,7 @@ fun ProfileTab(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "ACCOUNT",
+                text = stringResource(R.string.account_section_title),
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
@@ -441,15 +444,15 @@ fun ProfileTab(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     // Name Info
-                    AccountInfoRow(icon = Icons.Default.Person, title = "Name", value = fullName)
+                    AccountInfoRow(icon = Icons.Default.Person, title = stringResource(R.string.name_label), value = fullName)
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f), modifier = Modifier.padding(horizontal = 20.dp))
                     
                     // Username Info
-                    AccountInfoRow(icon = Icons.Default.Badge, title = "Username", value = username)
+                    AccountInfoRow(icon = Icons.Default.Badge, title = stringResource(R.string.username_label), value = username)
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f), modifier = Modifier.padding(horizontal = 20.dp))
 
                     // Email Info
-                    AccountInfoRow(icon = Icons.Default.Email, title = "Email Address", value = email)
+                    AccountInfoRow(icon = Icons.Default.Email, title = stringResource(R.string.email_address_label), value = email)
                 }
             }
 
@@ -477,9 +480,9 @@ fun ProfileTab(
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 ) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit Profile")
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit_profile_desc))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Update Profile", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
+                    Text(stringResource(R.string.update_profile_btn), style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
                 }
 
 
@@ -492,7 +495,7 @@ fun ProfileTab(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "PREFERENCES",
+                text = stringResource(R.string.preferences_section_title),
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
@@ -511,9 +514,9 @@ fun ProfileTab(
                 )
             ) {
                 Column {
-                    ProfileMenuRow(icon = Icons.Default.Lock, title = "Privacy Policy", onClick = onNavigateToPrivacy)
+                    ProfileMenuRow(icon = Icons.Default.Lock, title = stringResource(R.string.privacy_policy_title), onClick = onNavigateToPrivacy)
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f), modifier = Modifier.padding(horizontal = 20.dp))
-                    ProfileMenuRow(icon = Icons.Default.Description, title = "Terms of Service", onClick = onNavigateToTerms)
+                    ProfileMenuRow(icon = Icons.Default.Description, title = stringResource(R.string.terms_of_service_title), onClick = onNavigateToTerms)
                 }
             }
         }
@@ -524,7 +527,7 @@ fun ProfileTab(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "SUPPORT",
+                text = stringResource(R.string.support_section_title),
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
@@ -543,9 +546,9 @@ fun ProfileTab(
                 )
             ) {
                 Column {
-                    ProfileMenuRow(icon = Icons.Default.Feedback, title = "Submit Feedback", onClick = onSendFeedbackClick)
+                    ProfileMenuRow(icon = Icons.Default.Feedback, title = stringResource(R.string.submit_feedback_title), onClick = onSendFeedbackClick)
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f), modifier = Modifier.padding(horizontal = 20.dp))
-                    ProfileMenuRow(icon = Icons.AutoMirrored.Filled.Help, title = "FAQ", onClick = onNavigateToFaq)
+                    ProfileMenuRow(icon = Icons.AutoMirrored.Filled.Help, title = stringResource(R.string.faq_title), onClick = onNavigateToFaq)
                 }
             }
         }
@@ -564,12 +567,12 @@ fun ProfileTab(
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                contentDescription = "Logout",
+                contentDescription = stringResource(R.string.logout_desc),
                 modifier = Modifier.size(22.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "LOGOUT FROM ACCOUNT",
+                text = stringResource(R.string.logout_from_account_btn),
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 0.5.sp
@@ -587,7 +590,7 @@ fun ProfileTab(
             onDismissRequest = { if (!isUpdating) showEditDialog = false },
             title = {
                 Text(
-                    text = "Update Profile",
+                    text = stringResource(R.string.update_profile_btn),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
             },
@@ -600,8 +603,8 @@ fun ProfileTab(
                     OutlinedTextField(
                         value = phoneNumber,
                         onValueChange = {},
-                        label = { Text("Phone Number") },
-                        leadingIcon = { Icon(Icons.Default.Phone, contentDescription = "Phone") },
+                        label = { Text(stringResource(R.string.phone_number_label)) },
+                        leadingIcon = { Icon(Icons.Default.Phone, contentDescription = stringResource(R.string.phone_desc)) },
                         enabled = false,
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -611,8 +614,8 @@ fun ProfileTab(
                     OutlinedTextField(
                         value = tempName,
                         onValueChange = { tempName = it },
-                        label = { Text("Full Name") },
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Name") },
+                        label = { Text(stringResource(R.string.full_name_label)) },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = stringResource(R.string.name_label)) },
                         enabled = !isUpdating,
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -622,8 +625,8 @@ fun ProfileTab(
                     OutlinedTextField(
                         value = tempUsername,
                         onValueChange = { tempUsername = it },
-                        label = { Text("Username") },
-                        leadingIcon = { Icon(Icons.Default.Badge, contentDescription = "Username") },
+                        label = { Text(stringResource(R.string.username_label)) },
+                        leadingIcon = { Icon(Icons.Default.Badge, contentDescription = stringResource(R.string.username_label)) },
                         enabled = !isUpdating,
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -633,8 +636,8 @@ fun ProfileTab(
                     OutlinedTextField(
                         value = tempEmail,
                         onValueChange = { tempEmail = it },
-                        label = { Text("Email Address") },
-                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email") },
+                        label = { Text(stringResource(R.string.email_address_label)) },
+                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = stringResource(R.string.email_desc)) },
                         enabled = !isUpdating,
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -645,7 +648,7 @@ fun ProfileTab(
                 Button(
                     onClick = {
                         if (tempName.isBlank() || tempUsername.isBlank() || tempEmail.isBlank()) {
-                            Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.fill_in_all_fields_toast), Toast.LENGTH_SHORT).show()
                             return@Button
                         }
                         isUpdating = true
@@ -656,9 +659,9 @@ fun ProfileTab(
                                 username = tempUsername
                                 email = tempEmail
                                 showEditDialog = false
-                                Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.profile_updated_success_toast), Toast.LENGTH_SHORT).show()
                             }.onFailure { error ->
-                                Toast.makeText(context, error.message ?: "Update failed", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, error.message ?: context.getString(R.string.update_failed_toast), Toast.LENGTH_LONG).show()
                             }
                         }
                     },
@@ -672,7 +675,7 @@ fun ProfileTab(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Save Changes", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.save_changes_btn), fontWeight = FontWeight.Bold)
                     }
                 }
             },
@@ -680,7 +683,7 @@ fun ProfileTab(
                 TextButton(
                     onClick = { showEditDialog = false }
                 ) {
-                    Text("Cancel", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.cancel_btn), fontWeight = FontWeight.Bold)
                 }
             },
             shape = RoundedCornerShape(20.dp)
@@ -775,7 +778,7 @@ fun ProfileMenuRow(
         )
         Icon(
             imageVector = Icons.Default.ChevronRight,
-            contentDescription = "Arrow",
+            contentDescription = stringResource(R.string.arrow_desc),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
             modifier = Modifier.size(20.dp)
         )

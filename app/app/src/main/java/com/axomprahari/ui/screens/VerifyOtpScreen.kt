@@ -182,7 +182,7 @@ fun VerifyOtpScreen(
 
             // ── Headers ──
             Text(
-                text = "Verify Phone",
+                text = stringResource(R.string.ver_otp_verify_phone_title),
                 style = TextStyle(
                     color = LoginDarkGreen,
                     fontSize = 28.sp,
@@ -194,7 +194,7 @@ fun VerifyOtpScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Enter the code sent to your number",
+                text = stringResource(R.string.ver_otp_enter_code_subtitle),
                 style = TextStyle(
                     color = LoginDarkGreen.copy(alpha = 0.6f),
                     fontSize = 15.sp,
@@ -228,7 +228,7 @@ fun VerifyOtpScreen(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "CHANGE",
+                    text = stringResource(R.string.ver_otp_btn_change),
                     style = TextStyle(
                         color = LoginDarkGreen,
                         fontSize = 13.sp,
@@ -333,7 +333,7 @@ fun VerifyOtpScreen(
                     )
                      Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Resend in 0:${countdown.toString().padStart(2, '0')}",
+                        text = "${stringResource(R.string.ver_otp_resend_in)} 0:${countdown.toString().padStart(2, '0')}",
                         style = TextStyle(
                             color = LoginDarkGreen.copy(alpha = 0.7f),
                             fontSize = 12.sp,
@@ -348,7 +348,7 @@ fun VerifyOtpScreen(
             // RESEND CODE text button
             val canResend = countdown == 0
             Text(
-                text = "RESEND CODE",
+                text = stringResource(R.string.ver_otp_btn_resend_code),
                 style = TextStyle(
                     color = if (canResend) LoginDarkGreen else LoginDarkGreen.copy(alpha = 0.3f),
                     fontSize = 13.sp,
@@ -375,14 +375,14 @@ fun VerifyOtpScreen(
                             loading = false
                             result.onSuccess { response ->
                                 if (response.isNewUser) {
-                                    Toast.makeText(context, "Welcome! Please complete your profile.", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.ver_otp_toast_welcome_profile), Toast.LENGTH_SHORT).show()
                                     onNavigateToProfile()
                                 } else {
-                                    Toast.makeText(context, "Verification Successful!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.ver_otp_toast_verify_success), Toast.LENGTH_SHORT).show()
                                     onLoginSuccess(response.token)
                                 }
                             }.onFailure { error ->
-                                Toast.makeText(context, error.message ?: "Failed to verify OTP", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, error.message ?: context.getString(R.string.ver_otp_toast_verify_failed), Toast.LENGTH_LONG).show()
                             }
                         }
                     }
@@ -416,7 +416,7 @@ fun VerifyOtpScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "VERIFY & PROCEED",
+                            text = stringResource(R.string.ver_otp_btn_verify_proceed),
                             style = TextStyle(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -439,19 +439,19 @@ fun VerifyOtpScreen(
 
             // ── Terms & Privacy Footer ──
             val annotatedText = buildAnnotatedString {
-                append("By continuing, you agree to the Axom Prahari ")
+                append(stringResource(R.string.ver_otp_terms_agree))
                 
                 pushStringAnnotation(tag = "TERMS", annotation = "terms")
                 withStyle(style = SpanStyle(color = LoginDarkGreen, fontWeight = FontWeight.Bold)) {
-                    append("Terms of Service")
+                    append(stringResource(R.string.ver_otp_terms_of_service))
                 }
                 pop()
                 
-                append(" and ")
+                append(stringResource(R.string.ver_otp_and))
                 
                 pushStringAnnotation(tag = "PRIVACY", annotation = "privacy")
                 withStyle(style = SpanStyle(color = LoginDarkGreen, fontWeight = FontWeight.Bold)) {
-                    append("Privacy Policy")
+                    append(stringResource(R.string.ver_otp_privacy_policy))
                 }
                 pop()
                 

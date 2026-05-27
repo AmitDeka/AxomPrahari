@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.axomprahari.R
 import com.axomprahari.ui.theme.*
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +43,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Terms of Service",
+                        text = stringResource(R.string.tos_screen_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -83,7 +84,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             ) {
                 // ── Header Title & Subtitle ──
                 Text(
-                    text = "OFFICIAL DOCUMENTATION",
+                    text = stringResource(R.string.tos_official_documentation),
                     style = TextStyle(
                         color = LoginDarkGreen.copy(alpha = 0.5f),
                         fontSize = 11.sp,
@@ -96,7 +97,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
 
                 val appName = stringResource(id = R.string.app_name)
             Text(
-                text = "Welcome to $appName. By utilizing this citizen sentinel platform, you agree to comply with our service guidelines, obligations, and legal governance rules outlined below.",
+                text = stringResource(R.string.tos_welcome_desc, appName),
                 style = TextStyle(
                     color = LoginDarkGreen.copy(alpha = 0.7f),
                     fontSize = 14.sp,
@@ -108,10 +109,10 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
 
             // ── Section 1: Terms of Use ──
-            TermsSectionHeader(number = "1", title = "Acceptance of Terms")
+            TermsSectionHeader(number = "1", title = stringResource(R.string.tos_section_1_title))
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Placeholder statements regarding terms acceptance. By registering a verified phone number and logging into the platform, you legally consent to be bound by these service conditions, local ordinances, and civilian sentinel rules.",
+                text = stringResource(R.string.tos_section_1_desc),
                 style = TextStyle(
                     color = LoginDarkGreen.copy(alpha = 0.8f),
                     fontSize = 14.sp,
@@ -122,10 +123,10 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
 
             // ── Section 2: User Responsibility ──
-            TermsSectionHeader(number = "2", title = "Citizen Responsibilities")
+            TermsSectionHeader(number = "2", title = stringResource(R.string.tos_section_2_title))
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Placeholder information highlighting user obligations. Sentinel program members agree to submit truthful, accurate, and non-falsified reports. Misuse of the platform is strictly prohibited.",
+                text = stringResource(R.string.tos_section_2_desc),
                 style = TextStyle(
                     color = LoginDarkGreen.copy(alpha = 0.8f),
                     fontSize = 14.sp,
@@ -151,7 +152,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Warning: Intentional submission of falsified evidence is a punishable offense under state regulations.",
+                        text = stringResource(R.string.tos_warning_falsified_evidence),
                         style = TextStyle(
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             fontSize = 13.sp,
@@ -166,10 +167,10 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
 
             // ── Section 3: Service Availability & Limitations ──
-            TermsSectionHeader(number = "3", title = "Service Uptime & Limitations")
+            TermsSectionHeader(number = "3", title = stringResource(R.string.tos_section_3_title))
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Placeholder statements regarding terms of service, platform availability, service uptime, liability limitations, and intellectual property protections for the sentinel platform infrastructure.",
+                text = stringResource(R.string.tos_section_3_desc),
                 style = TextStyle(
                     color = LoginDarkGreen.copy(alpha = 0.8f),
                     fontSize = 14.sp,
@@ -180,10 +181,10 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
 
             // ── Section 4: Governance & Legislative Framework ──
-            TermsSectionHeader(number = "4", title = "Governance & Legislation")
+            TermsSectionHeader(number = "4", title = stringResource(R.string.tos_section_4_title))
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Placeholder text mapping out the governance frameworks, including regional transport regulations and legal rules backing civilian reporting protocols.",
+                text = stringResource(R.string.tos_section_4_desc),
                 style = TextStyle(
                     color = LoginDarkGreen.copy(alpha = 0.8f),
                     fontSize = 14.sp,
@@ -200,7 +201,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
                     modifier = Modifier.padding(20.dp)
                 ) {
                     Text(
-                        text = "Legislative Framework",
+                        text = stringResource(R.string.tos_legislative_framework_title),
                         style = TextStyle(
                             color = Color.White,
                             fontSize = 16.sp,
@@ -209,7 +210,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "These policies are governed by the Information Technology Act of India and local ordinances of the Assam Department of Transport.",
+                        text = stringResource(R.string.tos_legislative_framework_desc),
                         style = TextStyle(
                             color = Color.White.copy(alpha = 0.8f),
                             fontSize = 13.sp,
@@ -228,7 +229,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "DOWNLOAD FULL TERMS PDF",
+                                text = stringResource(R.string.tos_download_terms_pdf_btn),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
                             )
@@ -247,7 +248,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
 
             // ── Footer Copyright ──
             Text(
-                text = "Last modified: October 24, 2023. Version 2.4.0-Sentinel\n© 2023 Digital Assam Initiatives. All Rights Reserved.",
+                text = stringResource(R.string.tos_footer_copyright),
                 style = TextStyle(
                     color = LoginDarkGreen.copy(alpha = 0.4f),
                     fontSize = 11.sp,

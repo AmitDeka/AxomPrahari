@@ -36,6 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.axomprahari.R
 import com.axomprahari.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +45,8 @@ import com.axomprahari.ui.theme.*
 fun FeedbackScreen(
     onSubmit: (String, String) -> Unit
 ) {
-    var selectedCategory by remember { mutableStateOf("Suggestion") }
+    val initialCategory = stringResource(R.string.feedback_category_suggestion)
+    var selectedCategory by remember { mutableStateOf(initialCategory) }
     var feedbackMessage by remember { mutableStateOf("") }
     var isDropdownExpanded by remember { mutableStateOf(false) }
     var selectedPhotoUri by remember { mutableStateOf<android.net.Uri?>(null) }
@@ -51,12 +54,12 @@ fun FeedbackScreen(
     val context = LocalContext.current
 
     val categories = listOf(
-        "Suggestion",
-        "Bug Report",
-        "App Performance",
-        "Offence Verification",
-        "Reward Points Issue",
-        "Other"
+        stringResource(R.string.feedback_category_suggestion),
+        stringResource(R.string.feedback_category_bug_report),
+        stringResource(R.string.feedback_category_app_performance),
+        stringResource(R.string.feedback_category_offence_verification),
+        stringResource(R.string.feedback_category_reward_points),
+        stringResource(R.string.feedback_category_other)
     )
 
     var limitedPhotos by remember { mutableStateOf<List<android.net.Uri>>(emptyList()) }
@@ -100,12 +103,12 @@ fun FeedbackScreen(
                 val size = getUriSize(context, uri)
                 if (size <= 5 * 1024 * 1024) {
                     selectedPhotoUri = uri
-                    Toast.makeText(context, "Image attached successfully", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.feedback_image_attached_success), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "Image size exceeds the 5MB limit.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, context.getString(R.string.feedback_image_size_exceeds_limit), Toast.LENGTH_LONG).show()
                 }
             } else {
-                Toast.makeText(context, "Only PNG, JPG, JPEG, and WEBP images are allowed.", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.feedback_image_format_not_allowed), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -145,7 +148,7 @@ fun FeedbackScreen(
             loadLimitedPhotos()
             showLimitedPhotosPicker = true
         } else {
-            Toast.makeText(context, "Permission required to access photos. Please enable it in App Settings.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.feedback_permission_required), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -214,7 +217,7 @@ fun FeedbackScreen(
 
             // Main Title & Description
             Text(
-                text = "How can we improve?",
+                text = stringResource(R.string.feedback_title_how_can_we_improve),
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.onBackground
@@ -222,7 +225,7 @@ fun FeedbackScreen(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Your feedback helps us build a safer and smarter Assam. We value every detail you share.",
+                text = stringResource(R.string.feedback_description),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                     lineHeight = 22.sp
@@ -233,7 +236,7 @@ fun FeedbackScreen(
 
             // SELECT CATEGORY Section
             Text(
-                text = "SELECT CATEGORY",
+                text = stringResource(R.string.feedback_select_category),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
@@ -285,7 +288,7 @@ fun FeedbackScreen(
 
             // YOUR MESSAGE Section
             Text(
-                text = "YOUR MESSAGE",
+                text = stringResource(R.string.feedback_your_message),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
@@ -299,7 +302,7 @@ fun FeedbackScreen(
                 onValueChange = { feedbackMessage = it },
                 placeholder = {
                     Text(
-                        text = "Describe your experience or suggest a feature...",
+                        text = stringResource(R.string.feedback_message_placeholder),
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                     )
                 },
@@ -321,7 +324,7 @@ fun FeedbackScreen(
 
             // ATTACH CONTEXT (OPTIONAL) Section
             Text(
-                text = "ATTACH CONTEXT (OPTIONAL)",
+                text = stringResource(R.string.feedback_attach_context),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
@@ -364,7 +367,7 @@ fun FeedbackScreen(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "Upload or drag & drop a photo here",
+                                text = stringResource(R.string.feedback_upload_photo),
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -372,7 +375,7 @@ fun FeedbackScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Supports PNG, JPG, JPEG, or WEBP formats",
+                                text = stringResource(R.string.feedback_supports_formats),
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                 )
@@ -445,7 +448,7 @@ fun FeedbackScreen(
                         IconButton(
                             onClick = {
                                 selectedPhotoUri = null
-                                Toast.makeText(context, "Attachment removed", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.feedback_attachment_removed), Toast.LENGTH_SHORT).show()
                             },
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
@@ -494,7 +497,7 @@ fun FeedbackScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Submit Feedback",
+                        text = stringResource(R.string.feedback_submit_btn),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Bold
                         )
@@ -518,7 +521,7 @@ fun FeedbackScreen(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = "Select from Allowed Photos",
+                    text = stringResource(R.string.feedback_select_from_allowed_photos),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -526,7 +529,7 @@ fun FeedbackScreen(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "You gave limited access. Choose one of these or add more photos.",
+                    text = stringResource(R.string.feedback_limited_access_desc),
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                     )
@@ -561,7 +564,7 @@ fun FeedbackScreen(
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "Manage Access",
+                                    text = stringResource(R.string.feedback_manage_access),
                                     style = MaterialTheme.typography.bodySmall.copy(
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 10.sp
@@ -597,9 +600,9 @@ fun FeedbackScreen(
                                     if (size <= 5 * 1024 * 1024) {
                                         selectedPhotoUri = uri
                                         showLimitedPhotosPicker = false
-                                        Toast.makeText(context, "Photo attached successfully", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.feedback_photo_attached_successfully), Toast.LENGTH_SHORT).show()
                                     } else {
-                                        Toast.makeText(context, "Image size exceeds the 5MB limit.", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(context, context.getString(R.string.feedback_image_size_exceeds_limit), Toast.LENGTH_LONG).show()
                                     }
                                 }
                         ) {

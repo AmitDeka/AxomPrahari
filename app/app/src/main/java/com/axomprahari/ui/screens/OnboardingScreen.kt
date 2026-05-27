@@ -20,10 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.axomprahari.R
 import com.axomprahari.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -39,20 +41,20 @@ data class OnboardingSlide(
 fun OnboardingScreen(onFinishOnboarding: () -> Unit) {
     val slides = listOf(
         OnboardingSlide(
-            title = "Spot Violations",
-            description = "Capture traffic violations instantly. Help keep Assam's roads safe and orderly.",
+            title = stringResource(R.string.onboarding_title_spot_violations),
+            description = stringResource(R.string.onboarding_desc_spot_violations),
             icon = Icons.Default.CameraAlt,
             color = MaterialTheme.colorScheme.primary // Blue
         ),
         OnboardingSlide(
-            title = "Report Securely",
-            description = "Submit photos or videos directly to traffic authorities with secure and anonymous reporting options.",
+            title = stringResource(R.string.onboarding_title_report_securely),
+            description = stringResource(R.string.onboarding_desc_report_securely),
             icon = Icons.Default.Shield,
             color = MaterialTheme.colorScheme.secondary // Emerald Green
         ),
         OnboardingSlide(
-            title = "Build Reputation",
-            description = "Earn trust points and badges as your reports get verified. Become a guardian of your community.",
+            title = stringResource(R.string.onboarding_title_build_reputation),
+            description = stringResource(R.string.onboarding_desc_build_reputation),
             icon = Icons.Default.Star,
             color = MaterialTheme.colorScheme.tertiary // Gold
         )
@@ -73,7 +75,7 @@ fun OnboardingScreen(onFinishOnboarding: () -> Unit) {
                 if (pagerState.currentPage < slides.size - 1) {
                     TextButton(onClick = onFinishOnboarding) {
                         Text(
-                            text = "Skip",
+                            text = stringResource(R.string.onboarding_btn_skip),
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 16.sp
@@ -207,7 +209,7 @@ fun OnboardingScreen(onFinishOnboarding: () -> Unit) {
                     )
                 ) {
                     Text(
-                        text = if (isLastPage) "Get Started" else "Next →",
+                        text = if (isLastPage) stringResource(R.string.onboarding_btn_get_started) else stringResource(R.string.onboarding_btn_next),
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )

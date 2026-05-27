@@ -79,3 +79,13 @@ CREATE TABLE IF NOT EXISTS admin_notifications (
 );
 
 CREATE INDEX IF NOT EXISTS idx_admin_notifications_read ON admin_notifications(is_read, recipient_role);
+
+-- Table to store citizen feedback
+CREATE TABLE IF NOT EXISTS feedbacks (
+    id SERIAL PRIMARY KEY,
+    citizen_id INT REFERENCES users(id) ON DELETE CASCADE,
+    feedback_category VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    image_url VARCHAR(500),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

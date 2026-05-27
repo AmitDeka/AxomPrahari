@@ -31,6 +31,8 @@ import androidx.navigation.NavController
 import com.axomprahari.data.remote.dto.CitizenReportDto
 import com.axomprahari.ui.theme.*
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import com.axomprahari.R
 
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import kotlinx.coroutines.delay
@@ -66,7 +68,7 @@ fun ReportScreen(
                     CenterAlignedTopAppBar(
                         title = {
                             Text(
-                                text = if (showFeedbackPage) "Xazag Axom" else "All Reports",
+                                text = if (showFeedbackPage) stringResource(R.string.axom_prahari_title) else stringResource(R.string.all_reports_title),
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
@@ -109,7 +111,7 @@ fun ReportScreen(
                                 }
                             },
                             icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard") },
-                            label = { Text("Dashboard", fontSize = 11.sp) },
+                            label = { Text(stringResource(R.string.dashboard_tab), fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -120,7 +122,7 @@ fun ReportScreen(
                             selected = true,
                             onClick = { /* Already here */ },
                             icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = "Reports") },
-                            label = { Text("Reports", fontSize = 11.sp) },
+                            label = { Text(stringResource(R.string.reports_tab), fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -137,7 +139,7 @@ fun ReportScreen(
                                 }
                             },
                             icon = { Icon(Icons.Default.AccountCircle, contentDescription = "Profile") },
-                            label = { Text("Profile", fontSize = 11.sp) },
+                            label = { Text(stringResource(R.string.profile_tab), fontSize = 11.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -184,7 +186,7 @@ fun ReportScreen(
                 FeedbackScreen(
                     onSubmit = { category, message ->
                         showFeedbackPage = false
-                        Toast.makeText(context, "Feedback submitted successfully!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -229,7 +231,7 @@ fun ReportsTab(
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Search by type or location...") },
+            placeholder = { Text(stringResource(R.string.search_by_type_location)) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth(),
@@ -282,7 +284,7 @@ fun ReportsTab(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "No Reports Found",
+                    text = stringResource(R.string.no_reports_found),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -290,7 +292,7 @@ fun ReportsTab(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = if (searchQuery.isNotEmpty()) "Try adjusting your search or filters." else "You haven't submitted any reports yet.",
+                    text = if (searchQuery.isNotEmpty()) stringResource(R.string.adjust_search_filters) else stringResource(R.string.no_reports_submitted),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
