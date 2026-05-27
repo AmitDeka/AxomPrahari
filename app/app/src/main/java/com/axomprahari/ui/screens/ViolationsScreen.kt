@@ -27,8 +27,9 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
 import com.axomprahari.data.remote.dto.UserProfile
-
 import com.axomprahari.data.remote.dto.ViolationDto
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +37,7 @@ fun ViolationsScreen(
     navController: NavController,
     userProfile: UserProfile?,
     violationsList: List<ViolationDto>,
+    onRefresh: () -> Unit,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {}
 ) {
@@ -43,6 +45,7 @@ fun ViolationsScreen(
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var showFeedbackPage by remember { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
 
     AppDrawer(
         drawerState = drawerState,
@@ -151,7 +154,20 @@ fun ViolationsScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                ViolationsTab(violationsList = violationsList)
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        isRefreshing = true
+                        scope.launch {
+                            onRefresh()
+                            delay(1200)
+                            isRefreshing = false
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    ViolationsTab(violationsList = violationsList)
+                }
 
                 // Feedback Page Fullscreen Overlay
                 AnimatedVisibility(

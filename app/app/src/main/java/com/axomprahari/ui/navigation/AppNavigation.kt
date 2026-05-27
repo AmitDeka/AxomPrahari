@@ -140,6 +140,7 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                         navController = navController,
                         userProfile = userProfile,
                         violationsList = violationsList,
+                        onRefresh = { viewModel.refreshViolations() },
                         onLogout = { viewModel.logout() },
                         onNavigateToFaq = { navController.navigate("guideline_faq") }
                     )

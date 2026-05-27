@@ -58,10 +58,13 @@ export default function ViolationsPage() {
   const [statusTargetViolation, setStatusTargetViolation] = useState(null);
 
   // Form input states
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [offenceName, setOffenceName] = useState("");
+  const [mvActCode, setMvActCode] = useState("");
   const [fineAmount, setFineAmount] = useState("");
   const [rewardPoints, setRewardPoints] = useState("");
+  const [penalty, setPenalty] = useState("");
+  const [description, setDescription] = useState("");
+  const [evidenceRequirement, setEvidenceRequirement] = useState("");
 
   const fetchViolations = async () => {
     try {
@@ -96,20 +99,26 @@ export default function ViolationsPage() {
   const openCreateDialog = () => {
     setFormMode("create");
     setTargetViolation(null);
-    setTitle("");
-    setDescription("");
+    setOffenceName("");
+    setMvActCode("");
     setFineAmount("");
     setRewardPoints("");
+    setPenalty("");
+    setDescription("");
+    setEvidenceRequirement("");
     setIsFormOpen(true);
   };
 
   const openEditDialog = (vio) => {
     setFormMode("edit");
     setTargetViolation(vio);
-    setTitle(vio.offence_name || "");
-    setDescription(vio.mv_act_code || "");
+    setOffenceName(vio.offence_name || "");
+    setMvActCode(vio.mv_act_code || "");
     setFineAmount((vio.fine_amount || 0).toString());
     setRewardPoints((vio.reward_points || 0).toString());
+    setPenalty(vio.penalty || "");
+    setDescription(vio.description || "");
+    setEvidenceRequirement(vio.evidence_requirement || "");
     setIsFormOpen(true);
   };
 
@@ -125,13 +134,27 @@ export default function ViolationsPage() {
 
   const handleSaveViolation = async (e) => {
     e.preventDefault();
-    if (!title || !fineAmount || !rewardPoints) return;
+    if (
+      !offenceName ||
+      !mvActCode ||
+      !fineAmount ||
+      !rewardPoints ||
+      !penalty ||
+      !description ||
+      !evidenceRequirement
+    ) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
 
     const payload = {
-      offence_name: title,
-      mv_act_code: description,
+      offence_name: offenceName,
+      mv_act_code: mvActCode,
       fine_amount: parseFloat(fineAmount) || 0,
       reward_points: parseInt(rewardPoints, 10) || 0,
+      penalty,
+      description,
+      evidence_requirement: evidenceRequirement,
     };
 
     try {
@@ -250,12 +273,14 @@ export default function ViolationsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[120px]">Violation ID</TableHead>
-                  <TableHead>Title & Description</TableHead>
-                  <TableHead className="w-[150px]">Default Fine</TableHead>
-                  <TableHead className="w-[150px]">Reward Points</TableHead>
-                  <TableHead className="w-[120px]">Active Status</TableHead>
-                  <TableHead className="text-right w-[180px]">
+                  <TableHead className="w-[100px]">Violation ID</TableHead>
+                  <TableHead className="min-w-[220px]">Offence & Description</TableHead>
+                  <TableHead className="w-[120px]">Default Fine</TableHead>
+                  <TableHead className="w-[120px]">Reward Points</TableHead>
+                  <TableHead className="min-w-[150px]">Legal Penalty</TableHead>
+                  <TableHead className="min-w-[180px]">Evidence Required</TableHead>
+                  <TableHead className="w-[100px]">Status</TableHead>
+                  <TableHead className="text-right w-[150px]">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -264,22 +289,31 @@ export default function ViolationsPage() {
                 {Array.from({ length: 4 }).map((_, rIndex) => (
                   <TableRow key={rIndex}>
                     <TableCell>
-                      <Skeleton className="h-4 w-16 font-mono" />
+                      <Skeleton className="h-4 w-12 font-mono" />
                     </TableCell>
                     <TableCell>
                       <div className="space-y-2">
-                        <Skeleton className="h-4 w-40" />
-                        <Skeleton className="h-3 w-72" />
+                        <div className="flex gap-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-4 w-16" />
+                        </div>
+                        <Skeleton className="h-3 w-60" />
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-16" />
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-16" />
                     </TableCell>
                     <TableCell>
-                      <Skeleton className="h-5 w-16 rounded-full" />
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-32" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-5 w-12 rounded-full" />
                     </TableCell>
                     <TableCell className="text-right flex items-center justify-end gap-2 h-full py-5">
                       <Skeleton className="size-8 rounded-lg" />
@@ -301,12 +335,14 @@ export default function ViolationsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[120px]">Violation ID</TableHead>
-                  <TableHead>Title & Description</TableHead>
-                  <TableHead className="w-[150px]">Default Fine</TableHead>
-                  <TableHead className="w-[150px]">Reward Points</TableHead>
-                  <TableHead className="w-[120px]">Active Status</TableHead>
-                  <TableHead className="text-right w-[180px]">
+                  <TableHead className="w-[100px]">Violation ID</TableHead>
+                  <TableHead className="min-w-[220px]">Offence & Description</TableHead>
+                  <TableHead className="w-[120px]">Default Fine</TableHead>
+                  <TableHead className="w-[120px]">Reward Points</TableHead>
+                  <TableHead className="min-w-[150px]">Legal Penalty</TableHead>
+                  <TableHead className="min-w-[180px]">Evidence Required</TableHead>
+                  <TableHead className="w-[100px]">Status</TableHead>
+                  <TableHead className="text-right w-[150px]">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -314,17 +350,22 @@ export default function ViolationsPage() {
               <TableBody>
                 {violations.map((vio) => (
                   <TableRow key={vio.id}>
-                    <TableCell className="font-mono font-semibold">
+                    <TableCell className="font-mono font-semibold text-xs">
                       VIO-{String(vio.id).padStart(3, "0")}
                     </TableCell>
                     <TableCell>
-                      <div>
-                        <div className="font-bold text-sm text-foreground">
-                          {vio.offence_name}
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="font-semibold text-sm text-foreground">
+                            {vio.offence_name}
+                          </span>
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 border border-zinc-200/50 dark:border-zinc-700/50">
+                            {vio.mv_act_code}
+                          </span>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1 max-w-[400px]">
-                          {vio.mv_act_code}
-                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2 max-w-[300px] leading-relaxed">
+                          {vio.description}
+                        </p>
                       </div>
                     </TableCell>
                     <TableCell className="font-semibold text-sm">
@@ -339,6 +380,16 @@ export default function ViolationsPage() {
                       <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                         <AwardIcon className="size-4" />
                         <span>{vio.reward_points} Pts</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-xs text-foreground line-clamp-2 max-w-[150px] leading-relaxed font-medium">
+                        {vio.penalty}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-xs text-muted-foreground line-clamp-2 max-w-[180px] leading-relaxed">
+                        {vio.evidence_requirement}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -394,7 +445,7 @@ export default function ViolationsPage() {
 
       {/* Creation/Edition Dialog Form */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[450px]">
+        <DialogContent className="sm:max-w-[500px]">
           <form onSubmit={handleSaveViolation} className="space-y-4">
             <DialogHeader>
               <DialogTitle>
@@ -416,23 +467,69 @@ export default function ViolationsPage() {
                   type="text"
                   required
                   placeholder="e.g. Speeding, Red Light Violation"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  value={offenceName}
+                  onChange={(e) => setOffenceName(e.target.value)}
                   className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-muted-foreground">
+                    MV Act Code / Section
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Section 184"
+                    value={mvActCode}
+                    onChange={(e) => setMvActCode(e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-muted-foreground">
+                    Legal Penalty Terms
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Fine up to Rs. 5000"
+                    value={penalty}
+                    onChange={(e) => setPenalty(e.target.value)}
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-muted-foreground">
                   Detailed Description
                 </label>
                 <textarea
+                  required
                   placeholder="Describe the nature of this violation context..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
+                  rows={2}
                   className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary resize-none"
                 />
               </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Evidence Requirement
+                </label>
+                <textarea
+                  required
+                  placeholder="e.g. Clear photo/video of vehicle and number plate..."
+                  value={evidenceRequirement}
+                  onChange={(e) => setEvidenceRequirement(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary resize-none"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-muted-foreground">

@@ -33,9 +33,12 @@ class MainViewModel @Inject constructor(
     private val _violationsList = MutableStateFlow<List<ViolationDto>>(emptyList())
     val violationsList: StateFlow<List<ViolationDto>> = _violationsList.asStateFlow()
 
+    private var currentToken: String? = null
+
     init {
         viewModelScope.launch {
             preferencesManager.userToken.collect { token ->
+                currentToken = token
                 if (!token.isNullOrEmpty()) {
                     fetchDashboard(token)
                     fetchViolations(token)
@@ -44,6 +47,12 @@ class MainViewModel @Inject constructor(
                     _violationsList.value = emptyList()
                 }
             }
+        }
+    }
+
+    fun refreshViolations() {
+        currentToken?.let { token ->
+            fetchViolations(token)
         }
     }
 

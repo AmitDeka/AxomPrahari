@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -73,19 +74,69 @@ fun ViolationsTab(violationsList: List<com.axomprahari.data.remote.dto.Violation
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(bottom = 24.dp),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(violations, key = { it.id }) { violation ->
-                val isExpanded = expandedItemId == violation.id
-                ViolationCard(
-                    violation = violation,
-                    isExpanded = isExpanded,
-                    onToggleExpand = {
-                        expandedItemId = if (isExpanded) null else violation.id
-                    }
-                )
+            if (violations.isEmpty()) {
+                item {
+                    EmptyGuidelinesState()
+                }
+            } else {
+                items(violations, key = { it.id }) { violation ->
+                    val isExpanded = expandedItemId == violation.id
+                    ViolationCard(
+                        violation = violation,
+                        isExpanded = isExpanded,
+                        onToggleExpand = {
+                            expandedItemId = if (isExpanded) null else violation.id
+                        }
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+fun EmptyGuidelinesState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 80.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(90.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(48.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "No Guidelines Added",
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            ),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "No traffic guidelines or violation master entries have been registered yet. Pull down to refresh and fetch the latest master rules.",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
     }
 }
 
