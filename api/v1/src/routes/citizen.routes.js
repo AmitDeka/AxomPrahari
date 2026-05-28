@@ -4,6 +4,7 @@ import { submitFeedback } from '../controllers/feedback.controller.js';
 import { getCitizenViolations } from '../controllers/violation.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
 import { validateRequest } from '../middlewares/validate.middleware.js';
+import { feedbackRateLimiter } from '../middlewares/rateLimit.middleware.js';
 import { updateProfileSchema, createFeedbackSchema } from '../middlewares/validators/citizen.validator.js';
 
 const router = Router();
@@ -35,6 +36,7 @@ router.put(
 router.post(
   '/feedback',
   verifyToken,
+  feedbackRateLimiter,
   validateRequest(createFeedbackSchema),
   submitFeedback
 );

@@ -33,17 +33,52 @@ export const generalApiLimiter = rateLimit({
 });
 
 /**
- * Specific rate limiter for Citizen Violation Reports & Uploads.
- * Limits to 5 reports per hour per IP.
+ * Specific rate limiter for generating presigned URLs.
  */
-export const uploadRateLimiter = rateLimit({
+export const presignedUrlRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // Limit each IP to 5 requests per `windowMs`
+  max: process.env.NODE_ENV === 'production' ? 20 : 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 'error',
+    message: 'Too many upload requests. Please try again later.',
+  },
+  handler: (req, res, next, options) => {
+    res.status(options.statusCode).json(options.message);
+  }
+});
+
+/**
+ * Specific rate limiter for Citizen Violation Reports.
+ * Limits to 12 reports per hour per IP in production, 60 in testing.
+ */
+export const reportRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: process.env.NODE_ENV === 'production' ? 12 : 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
     status: 'error',
     message: 'You have reached the maximum number of violation reports allowed per hour to prevent spam. Please try again later.',
+  },
+  handler: (req, res, next, options) => {
+    res.status(options.statusCode).json(options.message);
+  }
+});
+
+/**
+ * Specific rate limiter for Citizen Feedback.
+ * Limits to 6 feedbacks per hour per IP in production, 60 in testing.
+ */
+export const feedbackRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: process.env.NODE_ENV === 'production' ? 6 : 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 'error',
+    message: 'You have reached the maximum number of feedbacks allowed per hour to prevent spam. Please try again later.',
   },
   handler: (req, res, next, options) => {
     res.status(options.statusCode).json(options.message);
