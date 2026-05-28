@@ -309,8 +309,17 @@ class MainViewModel @Inject constructor(
                     refreshReports() // Update local list from server
                     onResult(Result.success("Report submitted successfully"))
                 } else {
-                    val errorBody = reportResponse.errorBody()?.string() ?: "Unknown error"
-                    throw Exception("Failed to submit report: $errorBody")
+                    val errorBody = reportResponse.errorBody()?.string()
+                    var errorMessage = "Unknown error"
+                    if (!errorBody.isNullOrBlank()) {
+                        try {
+                            val errorResponse = com.google.gson.Gson().fromJson(errorBody, com.axomprahari.data.remote.dto.ApiErrorResponse::class.java)
+                            errorMessage = errorResponse.readable()
+                        } catch (e: Exception) {
+                            errorMessage = errorBody
+                        }
+                    }
+                    throw Exception(errorMessage)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

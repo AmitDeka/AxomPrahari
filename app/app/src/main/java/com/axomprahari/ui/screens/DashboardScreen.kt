@@ -624,8 +624,28 @@ fun ReportItemCardContent(report: CitizenReportDto) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                val dateStr = try {
+                    val inFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                    val outFormat = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+                    outFormat.format(inFormat.parse(report.incidentDate ?: "")!!)
+                } catch (e: Exception) {
+                    report.incidentDate ?: ""
+                }
+                val timeStr = try {
+                    val inFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+                    val outFormat = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault())
+                    outFormat.format(inFormat.parse(report.incidentTime ?: "")!!)
+                } catch (e: Exception) {
+                    try {
+                        val inFormat2 = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                        val outFormat2 = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault())
+                        outFormat2.format(inFormat2.parse(report.incidentTime ?: "")!!)
+                    } catch (e2: Exception) {
+                        report.incidentTime ?: ""
+                    }
+                }
                 Text(
-                    text = "${report.incidentDate ?: ""} ${report.incidentTime ?: ""}".trim(),
+                    text = "$dateStr $timeStr".trim(),
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                         fontSize = 12.sp
@@ -767,6 +787,19 @@ fun UserStatsCard(
                     label = stringResource(R.string.stat_rejected_label),
                     value = reportStats?.rejected?.toString() ?: "0",
                     accentColor = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.weight(1f)
+                )
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(40.dp)
+                        .background(dividerColor)
+                        .align(Alignment.CenterVertically)
+                )
+                StatPill(
+                    label = "Reward XP",
+                    value = userProfile?.rewardPoints?.toString() ?: "0",
+                    accentColor = Color(0xFFFFD700),
                     modifier = Modifier.weight(1f)
                 )
             }

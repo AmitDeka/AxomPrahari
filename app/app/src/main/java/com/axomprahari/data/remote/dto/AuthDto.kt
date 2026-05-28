@@ -129,7 +129,8 @@ data class CitizenReportDto(
     @SerializedName("admin_message") val adminMessage: String?,
     @SerializedName("latitude") val latitude: String?,
     @SerializedName("longitude") val longitude: String?,
-    @SerializedName("created_at") val createdAt: String?
+    @SerializedName("created_at") val createdAt: String?,
+    @SerializedName("reward_points") val rewardPoints: Int?
 )
 
 data class CitizenReportsData(

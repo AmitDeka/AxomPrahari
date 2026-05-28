@@ -721,7 +721,7 @@ fun ReportOffenceScreen(
                                             ContextCompat.getMainExecutor(context),
                                             object : ImageCapture.OnImageSavedCallback {
                                                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                                                    mediaCapturedPath = photoFile.absolutePath
+                                                    mediaCapturedPath = android.net.Uri.fromFile(photoFile).toString()
                                                     showLiveCamera = false
                                                     Toast.makeText(context, context.getString(R.string.photo_captured_success), Toast.LENGTH_SHORT).show()
                                                 }
@@ -737,7 +737,7 @@ fun ReportOffenceScreen(
                                             if (!dummyVideoFile.exists()) {
                                                 dummyVideoFile.createNewFile()
                                             }
-                                            mediaCapturedPath = dummyVideoFile.absolutePath
+                                            mediaCapturedPath = android.net.Uri.fromFile(dummyVideoFile).toString()
                                             showLiveCamera = false
                                             Toast.makeText(context, context.getString(R.string.video_recorded_success), Toast.LENGTH_SHORT).show()
                                         }

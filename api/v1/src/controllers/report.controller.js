@@ -186,6 +186,15 @@ export const reviewReport = async (req, res) => {
       });
     }
 
+    // Grant reward points if report is accepted
+    if (status === 'accepted') {
+      const violation = await ViolationModel.getViolationById(updatedReport.violation_id);
+      if (violation && violation.reward_points > 0) {
+        const UserModel = await import('../models/user.model.js');
+        await UserModel.addRewardPoints(updatedReport.citizen_id, violation.reward_points);
+      }
+    }
+
     const { getReadableMediaUrl } = await import('../utils/s3.util.js');
     const resolvedReport = {
       ...updatedReport,

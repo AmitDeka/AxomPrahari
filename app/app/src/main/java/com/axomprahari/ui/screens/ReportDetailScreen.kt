@@ -98,71 +98,7 @@ fun ReportDetailScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Attached Media Evidence Card
-            val isVideo = report.mediaUrl?.endsWith(".mp4") ?: false
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                border = androidx.compose.foundation.BorderStroke(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                )
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Simulated preview background using gradients
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f)
-                                    )
-                                )
-                            )
-                    )
-                    
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .background(MaterialTheme.colorScheme.surface, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = if (isVideo) Icons.Default.PlayArrow else Icons.Default.PhotoCamera,
-                                contentDescription = if (isVideo) "Video Play" else "Photo View",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = if (isVideo) stringResource(R.string.attached_video_evidence) else stringResource(R.string.attached_photo_evidence),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        )
-                        Text(
-                            text = report.mediaUrl ?: "evidence_file.jpg",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            )
-                        )
-                    }
-                }
-            }
+            // Removed Attached Media Evidence Card per user request
 
             // 2. Info Summary Card (Status, Type, Points, ID)
             Card(
@@ -228,10 +164,11 @@ fun ReportDetailScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.06f))
 
                     // Reward Points
+                    val points = report.rewardPoints ?: 0
                     DetailRow(
                         icon = Icons.Default.Star,
                         label = stringResource(R.string.reward_points_label),
-                        value = if (report.status == "accepted") "+100 XP Added" else "100 XP (Pending Verification)"
+                        value = if (report.status == "accepted") "+$points XP Added" else "$points XP (Pending Verification)"
                     )
                 }
             }
@@ -283,9 +220,27 @@ fun ReportDetailScreen(
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.06f))
 
-                    // Date & Time separately
-                    val dateStr = report.incidentDate ?: "N/A"
-                    val timeStr = report.incidentTime ?: "N/A"
+                    // Date & Time separately (Formatted to Indian format & 12-hour time)
+                    val dateStr = try {
+                        val inFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                        val outFormat = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+                        outFormat.format(inFormat.parse(report.incidentDate ?: "")!!)
+                    } catch (e: Exception) {
+                        report.incidentDate ?: "N/A"
+                    }
+                    val timeStr = try {
+                        val inFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+                        val outFormat = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault())
+                        outFormat.format(inFormat.parse(report.incidentTime ?: "")!!)
+                    } catch (e: Exception) {
+                        try {
+                            val inFormat2 = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                            val outFormat2 = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault())
+                            outFormat2.format(inFormat2.parse(report.incidentTime ?: "")!!)
+                        } catch (e2: Exception) {
+                            report.incidentTime ?: "N/A"
+                        }
+                    }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),

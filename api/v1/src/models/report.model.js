@@ -53,7 +53,7 @@ export const createReport = async (citizenId, data) => {
 
 export const getCitizenReports = async (citizenId, statusFilter = null, limit = 10, offset = 0) => {
   let query = `
-    SELECT r.*, v.offence_name, v.mv_act_code 
+    SELECT r.*, v.offence_name, v.mv_act_code, v.reward_points 
     FROM violation_reports r
     JOIN violation_master v ON r.violation_id = v.id
     WHERE r.citizen_id = $1
@@ -88,7 +88,7 @@ export const getCitizenReports = async (citizenId, statusFilter = null, limit = 
 
 export const getAdminReports = async (statusFilter = null, limit = 20, offset = 0) => {
   let query = `
-    SELECT r.*, v.offence_name, v.mv_act_code, u.full_name as citizen_name, u.phone_number, u.citizen_id as citizen_code
+    SELECT r.*, v.offence_name, v.mv_act_code, v.reward_points, u.full_name as citizen_name, u.phone_number, u.citizen_id as citizen_code
     FROM violation_reports r
     JOIN violation_master v ON r.violation_id = v.id
     JOIN users u ON r.citizen_id = u.id

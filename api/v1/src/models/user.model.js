@@ -57,6 +57,14 @@ export const completeCitizenProfile = async (id, fullName, email, username) => {
   return result.rows[0];
 };
 
+export const addRewardPoints = async (id, points) => {
+  const result = await db.query(
+    'UPDATE users SET reward_points = reward_points + $1 WHERE id = $2 RETURNING reward_points',
+    [points, id]
+  );
+  return result.rows[0];
+};
+
 export const createAdminUser = async (email, passwordHash, fullName, role, rank, jurisdictionDistrict) => {
   const result = await db.query(
     `INSERT INTO users (email, password_hash, role, full_name, rank, jurisdiction_district, profile_status) 
