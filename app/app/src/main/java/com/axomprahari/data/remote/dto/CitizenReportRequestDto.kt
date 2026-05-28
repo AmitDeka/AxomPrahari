@@ -1,29 +1,27 @@
 package com.axomprahari.data.remote.dto
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.google.gson.annotations.SerializedName
 
-@Serializable
 data class CitizenReportRequestDto(
-    @SerialName("violation_id")
+    @SerializedName("violation_id")
     val violationId: Int,
     
-    @SerialName("media_url")
+    @SerializedName("media_url")
     val mediaUrl: String,
     
-    @SerialName("location_name")
+    @SerializedName("location_name")
     val locationName: String,
     
     val latitude: Double,
     val longitude: Double,
     
-    @SerialName("vehicle_number")
+    @SerializedName("vehicle_number")
     val vehicleNumber: String,
     
-    @SerialName("incident_date")
+    @SerializedName("incident_date")
     val incidentDate: String,
     
-    @SerialName("incident_time")
+    @SerializedName("incident_time")
     val incidentTime: String,
     
     val message: String? = null

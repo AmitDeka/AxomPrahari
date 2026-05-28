@@ -65,6 +65,7 @@ fun DashboardScreen(
     reportsList: List<CitizenReportDto>,
     userProfile: com.axomprahari.data.remote.dto.UserProfile?,
     reportStats: com.axomprahari.data.remote.dto.ReportStats?,
+    violationsList: List<com.axomprahari.data.remote.dto.ViolationDto>,
     onReportSubmit: (Int, String, String, Double, Double, String, String?, (Result<String>) -> Unit) -> Unit,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {},
@@ -195,6 +196,7 @@ fun DashboardScreen(
                             isReportingOffence = false
                         }
                         ReportOffenceScreen(
+                            violations = violationsList,
                             onReportSubmit = { vId, mPath, lName, lat, lon, vNum, msg, onResult ->
                                 onReportSubmit(vId, mPath, lName, lat, lon, vNum, msg) { result ->
                                     if (result.isSuccess) {

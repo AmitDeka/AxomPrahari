@@ -44,6 +44,7 @@ import com.axomprahari.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportOffenceScreen(
+    violations: List<com.axomprahari.data.remote.dto.ViolationDto>,
     onReportSubmit: (
         violationId: Int,
         mediaPath: String,
@@ -135,14 +136,11 @@ fun ReportOffenceScreen(
     var flashEnabled by remember { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
 
-    val offenceTypes = listOf(
-        "No Helmet",
-        "Triple Riding",
-        "Wrong Side Driving",
-        "Red Light Jump",
-        "Speeding",
-        "Illegal Parking"
-    )
+    // No hardcoded offences anymore
+    val offenceNames = violations.map { it.offenceName ?: "Unknown" }
+    if (selectedOffence == "No Helmet" && offenceNames.isNotEmpty() && !offenceNames.contains("No Helmet")) {
+        selectedOffence = offenceNames.first()
+    }
 
     Box(
         modifier = Modifier
@@ -283,17 +281,26 @@ fun ReportOffenceScreen(
                         focusedLabelColor = MaterialTheme.colorScheme.primary
                     )
                 )
-                ExposedDropdownMenu(
+                DropdownMenu(
                     expanded = isDropdownExpanded,
-                    onDismissRequest = { isDropdownExpanded = false }
+                    onDismissRequest = { isDropdownExpanded = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
                 ) {
-                    offenceTypes.forEach { selectionOption ->
+                    offenceNames.forEach { offence ->
                         DropdownMenuItem(
-                            text = { Text(selectionOption) },
+                            text = { 
+                                Text(
+                                    offence,
+                                    style = MaterialTheme.typography.bodyLarge
+                                ) 
+                            },
                             onClick = {
-                                selectedOffence = selectionOption
+                                selectedOffence = offence
                                 isDropdownExpanded = false
-                            }
+                            },
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                         )
                     }
                 }
@@ -477,12 +484,12 @@ fun ReportOffenceScreen(
                         val coordsList = gpsCoordinates.split(",")
                         val lat = if (coordsList.isNotEmpty()) coordsList[0].replace(Regex("[^0-9.]"), "").toDoubleOrNull() ?: 26.1408 else 26.1408
                         val lon = if (coordsList.size > 1) coordsList[1].replace(Regex("[^0-9.]"), "").toDoubleOrNull() ?: 91.7378 else 91.7378
-                        val violationId = offenceTypes.indexOf(selectedOffence) + 1
+                        val actualId = violations.find { it.offenceName == selectedOffence }?.id ?: 1
                         val finalLocation = if (locationReference.isNotBlank()) locationReference else "G.S. Road, Guwahati"
                         
                         isSubmitting = true
                         onReportSubmit(
-                            violationId,
+                            actualId,
                             mediaCapturedPath!!,
                             finalLocation,
                             lat,
@@ -530,7 +537,7 @@ fun ReportOffenceScreen(
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (isSubmitting) stringResource(R.string.uploading_btn_text) else stringResource(R.string.submit_btn),
+                            text = if (isSubmitting) "Uploading..." else stringResource(R.string.submit_btn),
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold
                             )

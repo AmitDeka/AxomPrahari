@@ -112,6 +112,7 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
             val reportsList by viewModel.reportsList.collectAsStateWithLifecycle()
             val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
             val reportStats by viewModel.reportStats.collectAsStateWithLifecycle()
+            val violationsList by viewModel.violationsList.collectAsStateWithLifecycle()
             NavHost(navController = navController, startDestination = "dashboard") {
                 composable("dashboard") {
                     DashboardScreen(
@@ -119,6 +120,7 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                         reportsList = reportsList,
                         userProfile = userProfile,
                         reportStats = reportStats,
+                        violationsList = violationsList,
                         onReportSubmit = { vId, mPath, lName, lat, lon, vNum, msg, onResult -> 
                             viewModel.submitReport(vId, mPath, lName, lat, lon, vNum, msg, onResult)
                         },

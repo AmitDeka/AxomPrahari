@@ -509,7 +509,7 @@ fun FeedbackScreen(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (isSubmitting) stringResource(R.string.uploading_btn_text) else stringResource(R.string.feedback_submit_btn),
+                        text = if (isSubmitting) "Uploading..." else stringResource(R.string.feedback_submit_btn),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Bold
                         )

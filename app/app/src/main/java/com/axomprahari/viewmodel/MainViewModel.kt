@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.google.gson.Gson
 import javax.inject.Inject
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 
 sealed interface MainUiState {
     object Loading : MainUiState
@@ -26,7 +28,9 @@ sealed interface MainUiState {
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val apiService: com.axomprahari.data.remote.ApiService,
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
 
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
@@ -267,8 +271,20 @@ class MainViewModel @Inject constructor(
                 val finalImageUrl = presignedResponse.body()?.data?.fileUrl ?: throw Exception("Missing final URL")
 
                 // 4. Upload Media to R2
-                val uploadSuccess = authRepository.uploadMedia(uploadUrl, extension, mediaPath)
-                if (!uploadSuccess) {
+                val uri = android.net.Uri.parse(mediaPath)
+                val contentResolver = context.contentResolver
+                val inputStream = contentResolver.openInputStream(uri)
+                val bytes = inputStream?.readBytes()
+                inputStream?.close()
+
+                if (bytes == null) {
+                    throw Exception("Could not read file from device")
+                }
+
+                val requestBody = bytes.toRequestBody(extension.toMediaTypeOrNull())
+                val uploadResponse = apiService.uploadFileToR2(uploadUrl, extension, requestBody)
+                
+                if (!uploadResponse.isSuccessful) {
                     throw Exception("Failed to upload media to R2")
                 }
 
