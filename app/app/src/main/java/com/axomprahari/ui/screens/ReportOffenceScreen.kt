@@ -3,6 +3,7 @@ package com.axomprahari.ui.screens
 import android.Manifest
 import android.content.pm.PackageManager
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -524,6 +525,9 @@ fun ReportOffenceScreen(
             enter = fadeIn() + expandVertically(),
             exit = fadeOut() + shrinkVertically()
         ) {
+            BackHandler(enabled = showLiveCamera) {
+                showLiveCamera = false
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()

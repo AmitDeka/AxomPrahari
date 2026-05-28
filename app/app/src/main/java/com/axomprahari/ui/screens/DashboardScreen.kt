@@ -11,6 +11,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.*
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -190,6 +191,9 @@ fun DashboardScreen(
                 ) {
                     // Main content (Dashboard/Report Offence)
                     if (isReportingOffence) {
+                        BackHandler(enabled = true) {
+                            isReportingOffence = false
+                        }
                         ReportOffenceScreen(
                             reportsList = reportsList,
                             onReportSubmitted = { newReport ->
@@ -220,6 +224,9 @@ fun DashboardScreen(
                         enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
                         exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
                     ) {
+                        BackHandler(enabled = showFeedbackPage) {
+                            showFeedbackPage = false
+                        }
                         FeedbackScreen(
                             onSubmit = { category, message, imageUri ->
                                 onFeedbackSubmit(category, message, imageUri?.toString()) { result ->

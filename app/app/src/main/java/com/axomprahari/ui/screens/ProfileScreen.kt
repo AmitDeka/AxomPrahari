@@ -2,6 +2,7 @@ package com.axomprahari.ui.screens
 
 import android.widget.Toast
 import androidx.compose.animation.*
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -173,6 +174,9 @@ fun ProfileScreen(
                     enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
                     exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
                 ) {
+                    BackHandler(enabled = showFeedbackPage) {
+                        showFeedbackPage = false
+                    }
                     FeedbackScreen(
                         onSubmit = { category, message, imageUri ->
                             onFeedbackSubmit(category, message, imageUri?.toString()) { result ->
