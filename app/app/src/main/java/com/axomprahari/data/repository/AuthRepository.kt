@@ -71,7 +71,7 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
         } else {
-            if (response.code() == 401) throw Exception("HTTP 401 Unauthorized")
+            if (response.code() == 401 || response.code() == 403) throw Exception("HTTP 401 Unauthorized")
             throw Exception(parseError(response.errorBody()?.string()))
         }
     }
