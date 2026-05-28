@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
 <resources>
-    <string name="app_name">Axom Prahari</string>
     <string name="app_tagline">CIVIC INTELLIGENCE SENTINEL</string>
     <string name="onboarding_title_spot_violations">Spot Violations</string>
     <string name="onboarding_desc_spot_violations">Capture traffic violations instantly. Help keep Assam\'s roads safe and orderly.</string>

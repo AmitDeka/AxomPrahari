@@ -23,6 +23,26 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        
+        ndk {
+            abiFilters.add("arm64-v8a")
+            abiFilters.add("x86_64")
+        }
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("stable") {
+            dimension = "environment"
+            // No suffix needed, retains default com.axomprahari
+            resValue("string", "app_name", "Axom Prahari")
+        }
+        create("beta") {
+            dimension = "environment"
+            applicationIdSuffix = ".beta"
+            versionNameSuffix = "-beta"
+            resValue("string", "app_name", "Axom Prahari (Beta)")
+        }
     }
 
     buildTypes {
