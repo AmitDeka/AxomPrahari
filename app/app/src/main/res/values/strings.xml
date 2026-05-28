@@ -102,7 +102,7 @@
     <string name="status_label">STATUS</string>
     <string name="violation_type_label">VIOLATION TYPE</string>
     <string name="report_id_label">REPORT ID</string>
-    <string name="user_location_reference_label">USER LOCATION REFERENCE</string>
+    <string name="user_location_reference_label">LOCATION REFERENCE</string>
     <string name="latitude_label">LATITUDE</string>
     <string name="longitude_label">LONGITUDE</string>
     <string name="report_date_label">REPORT DATE</string>

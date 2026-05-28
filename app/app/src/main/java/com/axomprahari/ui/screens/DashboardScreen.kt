@@ -66,7 +66,7 @@ fun DashboardScreen(
     userProfile: com.axomprahari.data.remote.dto.UserProfile?,
     reportStats: com.axomprahari.data.remote.dto.ReportStats?,
     violationsList: List<com.axomprahari.data.remote.dto.ViolationDto>,
-    onReportSubmit: (Int, String, String, Double, Double, String, String?, (Result<String>) -> Unit) -> Unit,
+    onReportSubmit: (Int, String, String?, Double?, Double?, String, String?, (Result<String>) -> Unit) -> Unit,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {},
     onFeedbackSubmit: (String, String, String?, (Result<String>) -> Unit) -> Unit
@@ -787,19 +787,6 @@ fun UserStatsCard(
                     label = stringResource(R.string.stat_rejected_label),
                     value = reportStats?.rejected?.toString() ?: "0",
                     accentColor = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.weight(1f)
-                )
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .height(40.dp)
-                        .background(dividerColor)
-                        .align(Alignment.CenterVertically)
-                )
-                StatPill(
-                    label = "Reward XP",
-                    value = userProfile?.rewardPoints?.toString() ?: "0",
-                    accentColor = Color(0xFFFFD700),
                     modifier = Modifier.weight(1f)
                 )
             }

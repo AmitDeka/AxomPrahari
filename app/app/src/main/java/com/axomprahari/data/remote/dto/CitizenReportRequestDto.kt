@@ -10,10 +10,10 @@ data class CitizenReportRequestDto(
     val mediaUrl: String,
     
     @SerializedName("location_name")
-    val locationName: String,
+    val locationName: String?,
     
-    val latitude: Double,
-    val longitude: Double,
+    val latitude: Double?,
+    val longitude: Double?,
     
     @SerializedName("vehicle_number")
     val vehicleNumber: String,

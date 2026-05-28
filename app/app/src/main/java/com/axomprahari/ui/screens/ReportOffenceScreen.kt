@@ -50,9 +50,9 @@ fun ReportOffenceScreen(
     onReportSubmit: (
         violationId: Int,
         mediaPath: String,
-        locationName: String,
-        latitude: Double,
-        longitude: Double,
+        locationName: String?,
+        latitude: Double?,
+        longitude: Double?,
         vehicleNumber: String,
         message: String?,
         onResult: (Result<String>) -> Unit
@@ -111,10 +111,61 @@ fun ReportOffenceScreen(
     }
 
     // GPS coordinates state (unified single field)
-    var gpsCoordinates by remember { mutableStateOf("Fetching GPS coordinates...") }
+    var gpsCoordinates by remember { mutableStateOf("Tap fetch icon to get location") }
+    var isFetchingGps by remember { mutableStateOf(false) }
+    val locationManager = remember { context.getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager }
+
+    val fetchGps = {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            isFetchingGps = true
+            gpsCoordinates = "Fetching..."
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                locationManager.getCurrentLocation(
+                    android.location.LocationManager.GPS_PROVIDER,
+                    null,
+                    ContextCompat.getMainExecutor(context)
+                ) { location ->
+                    if (location != null) {
+                        gpsCoordinates = "${location.latitude}, ${location.longitude}"
+                        isFetchingGps = false
+                    } else {
+                        locationManager.getCurrentLocation(
+                            android.location.LocationManager.NETWORK_PROVIDER,
+                            null,
+                            ContextCompat.getMainExecutor(context)
+                        ) { netLoc ->
+                            isFetchingGps = false
+                            if (netLoc != null) {
+                                gpsCoordinates = "${netLoc.latitude}, ${netLoc.longitude}"
+                            } else {
+                                gpsCoordinates = "Location unavailable"
+                            }
+                        }
+                    }
+                }
+            } else {
+                val location = locationManager.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
+                    ?: locationManager.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER)
+                isFetchingGps = false
+                if (location != null) {
+                    gpsCoordinates = "${location.latitude}, ${location.longitude}"
+                } else {
+                    gpsCoordinates = "Location unavailable"
+                }
+            }
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
     LaunchedEffect(hasLocationPermission) {
-        if (hasLocationPermission) {
-            gpsCoordinates = "26.1408° N, 91.7378° E"
+        if (hasLocationPermission && (gpsCoordinates == "Tap fetch icon to get location" || gpsCoordinates == "Fetching GPS coordinates...")) {
+            fetchGps()
         }
     }
 
@@ -278,7 +329,7 @@ fun ReportOffenceScreen(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(),
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
@@ -411,6 +462,23 @@ fun ReportOffenceScreen(
                             tint = MaterialTheme.colorScheme.primary
                         )
                     },
+                    trailingIcon = {
+                        IconButton(onClick = fetchGps) {
+                            if (isFetchingGps) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = "Fetch GPS",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    },
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -486,10 +554,10 @@ fun ReportOffenceScreen(
                 Button(
                     onClick = {
                         val coordsList = gpsCoordinates.split(",")
-                        val lat = if (coordsList.isNotEmpty()) coordsList[0].replace(Regex("[^0-9.]"), "").toDoubleOrNull() ?: 26.1408 else 26.1408
-                        val lon = if (coordsList.size > 1) coordsList[1].replace(Regex("[^0-9.]"), "").toDoubleOrNull() ?: 91.7378 else 91.7378
+                        val lat = if (coordsList.isNotEmpty()) coordsList[0].replace(Regex("[^0-9.-]"), "").toDoubleOrNull() else null
+                        val lon = if (coordsList.size > 1) coordsList[1].replace(Regex("[^0-9.-]"), "").toDoubleOrNull() else null
                         val actualId = violations.find { it.offenceName == selectedOffence }?.id ?: 1
-                        val finalLocation = if (locationReference.isNotBlank()) locationReference else "G.S. Road, Guwahati"
+                        val finalLocation = locationReference.takeIf { it.isNotBlank() }
                         
                         isSubmitting = true
                         onReportSubmit(

@@ -56,8 +56,7 @@ fun ReportDetailScreen(
         else -> stringResource(R.string.status_unknown)
     }
 
-    val mockReportId = "REP-260523-${report.id.hashCode().coerceAtLeast(0).toString(16).uppercase().take(6).padStart(6, 'B')}"
-
+    val realReportId = report.reportId
     BackHandler(onBack = onBack)
 
     Scaffold(
@@ -158,7 +157,7 @@ fun ReportDetailScreen(
                     DetailRow(
                         icon = Icons.Default.Fingerprint,
                         label = stringResource(R.string.report_id_label),
-                        value = mockReportId
+                        value = realReportId
                     )
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.06f))

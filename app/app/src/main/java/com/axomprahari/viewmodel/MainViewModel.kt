@@ -238,9 +238,9 @@ class MainViewModel @Inject constructor(
     fun submitReport(
         violationId: Int,
         mediaPath: String, // Local URI path
-        locationName: String,
-        latitude: Double,
-        longitude: Double,
+        locationName: String?,
+        latitude: Double?,
+        longitude: Double?,
         vehicleNumber: String,
         message: String? = null,
         onResult: (Result<String>) -> Unit
