@@ -69,7 +69,6 @@ interface ApiService {
     @PUT
     suspend fun uploadFileToR2(
         @retrofit2.http.Url url: String,
-        @Header("Content-Type") contentType: String,
         @Body file: okhttp3.RequestBody
     ): Response<Unit>
 }

@@ -39,12 +39,24 @@ data class CompleteProfileResponse(
     @SerializedName("token") val token: String
 )
 
+data class ApiErrorDetail(
+    @SerializedName("message") val message: String? = null
+)
+
 /** Generic error shape returned by the API */
 data class ApiErrorResponse(
     @SerializedName("error") val error: String? = null,
-    @SerializedName("message") val message: String? = null
+    @SerializedName("message") val message: String? = null,
+    @SerializedName("errors") val errors: List<ApiErrorDetail>? = null
 ) {
-    fun readable(): String = error ?: message ?: "An unexpected error occurred"
+    fun readable(): String {
+        val baseMessage = error ?: message ?: "An unexpected error occurred"
+        if (!errors.isNullOrEmpty()) {
+            val details = errors.mapNotNull { it.message }.joinToString(", ")
+            return "$baseMessage: $details"
+        }
+        return baseMessage
+    }
 }
 
 data class UserProfile(

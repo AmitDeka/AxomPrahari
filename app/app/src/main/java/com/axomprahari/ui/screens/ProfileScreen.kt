@@ -183,6 +183,8 @@ fun ProfileScreen(
                                 if (result.isSuccess) {
                                     showFeedbackPage = false
                                     Toast.makeText(context, context.getString(R.string.feedback_submitted_success), Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, result.exceptionOrNull()?.message ?: "Error", Toast.LENGTH_SHORT).show()
                                 }
                                 onResult(result)
                             }

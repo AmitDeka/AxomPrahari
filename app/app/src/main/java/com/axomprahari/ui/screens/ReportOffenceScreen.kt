@@ -8,6 +8,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.animation.*
@@ -135,6 +137,8 @@ fun ReportOffenceScreen(
     var mediaCapturedPath by remember { mutableStateOf<String?>(null) }
     var flashEnabled by remember { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
+
+    val imageCapture = remember { ImageCapture.Builder().build() }
 
     // No hardcoded offences anymore
     val offenceNames = violations.map { it.offenceName ?: "Unknown" }
@@ -582,7 +586,8 @@ fun ReportOffenceScreen(
                                     cameraProvider.bindToLifecycle(
                                         lifecycleOwner,
                                         cameraSelector,
-                                        preview
+                                        preview,
+                                        imageCapture
                                     )
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -709,13 +714,30 @@ fun ReportOffenceScreen(
                                 .border(4.dp, Color.White, CircleShape)
                                 .clickable {
                                     if (captureMode == "Photo") {
-                                        mediaCapturedPath = "captured_image.jpg"
-                                        showLiveCamera = false
-                                        Toast.makeText(context, context.getString(R.string.photo_captured_success), Toast.LENGTH_SHORT).show()
+                                        val photoFile = java.io.File(context.cacheDir, "captured_image_${System.currentTimeMillis()}.jpg")
+                                        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+                                        imageCapture.takePicture(
+                                            outputOptions,
+                                            ContextCompat.getMainExecutor(context),
+                                            object : ImageCapture.OnImageSavedCallback {
+                                                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                                    mediaCapturedPath = photoFile.absolutePath
+                                                    showLiveCamera = false
+                                                    Toast.makeText(context, context.getString(R.string.photo_captured_success), Toast.LENGTH_SHORT).show()
+                                                }
+                                                override fun onError(exc: ImageCaptureException) {
+                                                    Toast.makeText(context, "Photo capture failed", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        )
                                     } else {
                                         isRecording = !isRecording
                                         if (!isRecording) {
-                                            mediaCapturedPath = "captured_video.mp4"
+                                            val dummyVideoFile = java.io.File(context.cacheDir, "captured_video_${System.currentTimeMillis()}.mp4")
+                                            if (!dummyVideoFile.exists()) {
+                                                dummyVideoFile.createNewFile()
+                                            }
+                                            mediaCapturedPath = dummyVideoFile.absolutePath
                                             showLiveCamera = false
                                             Toast.makeText(context, context.getString(R.string.video_recorded_success), Toast.LENGTH_SHORT).show()
                                         }

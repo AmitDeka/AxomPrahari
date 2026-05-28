@@ -161,7 +161,7 @@ class AuthRepository @Inject constructor(
             
             // 3. Upload to R2
             val requestBody = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
-            val uploadResponse = api.uploadFileToR2(presignedData.uploadUrl, mimeType, requestBody)
+            val uploadResponse = api.uploadFileToR2(presignedData.uploadUrl, requestBody)
             
             if (!uploadResponse.isSuccessful) {
                 return Result.failure(Exception("Failed to upload image to server"))

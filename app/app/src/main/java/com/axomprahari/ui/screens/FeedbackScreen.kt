@@ -478,7 +478,7 @@ fun FeedbackScreen(
                         isSubmitting = false
                     }
                 },
-                enabled = feedbackMessage.isNotBlank() && !isSubmitting,
+                enabled = feedbackMessage.trim().length >= 5 && !isSubmitting,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,

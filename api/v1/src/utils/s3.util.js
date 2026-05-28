@@ -62,10 +62,17 @@ export const generateDownloadUrl = async (fileKey) => {
 export const getReadableMediaUrl = async (mediaUrl) => {
   if (!mediaUrl) return '';
 
-  // Extract key (last path segment) if it's a full URL
+  // Extract key if it's a full URL, preserving folder structure
   let fileKey = mediaUrl;
-  if (mediaUrl.includes('/')) {
-    fileKey = mediaUrl.split('/').pop();
+  if (mediaUrl.startsWith('http')) {
+    try {
+      const urlObj = new URL(mediaUrl);
+      // Remove the leading slash from the pathname to get the correct S3 key
+      fileKey = urlObj.pathname.substring(1);
+    } catch (e) {
+      // Fallback
+      fileKey = mediaUrl.split('/').pop();
+    }
   }
 
   if (process.env.R2_BUCKET_PRIVATE === 'true') {

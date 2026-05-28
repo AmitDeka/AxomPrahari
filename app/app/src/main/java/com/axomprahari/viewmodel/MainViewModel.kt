@@ -282,7 +282,7 @@ class MainViewModel @Inject constructor(
                 }
 
                 val requestBody = bytes.toRequestBody(extension.toMediaTypeOrNull())
-                val uploadResponse = apiService.uploadFileToR2(uploadUrl, extension, requestBody)
+                val uploadResponse = apiService.uploadFileToR2(uploadUrl, requestBody)
                 
                 if (!uploadResponse.isSuccessful) {
                     throw Exception("Failed to upload media to R2")
@@ -347,7 +347,9 @@ class MainViewModel @Inject constructor(
                     finalImageKey = uploadResult.getOrNull()?.first
                     finalImageUrl = uploadResult.getOrNull()?.second
                 } else {
-                    onResult(Result.failure(uploadResult.exceptionOrNull() ?: Exception("Upload failed")))
+                    val ex = uploadResult.exceptionOrNull()
+                    val msg = ex?.message ?: "Unknown upload error"
+                    onResult(Result.failure(Exception("Media Upload Failed: $msg")))
                     return@launch
                 }
             }
