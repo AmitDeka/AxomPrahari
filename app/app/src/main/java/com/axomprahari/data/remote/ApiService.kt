@@ -41,6 +41,12 @@ interface ApiService {
         @Header("Authorization") bearerToken: String
     ): Response<CitizenReportsResponse>
 
+    @POST("api/v1/citizen/reports")
+    suspend fun submitReport(
+        @Header("Authorization") bearerToken: String,
+        @Body request: CitizenReportRequestDto
+    ): Response<CitizenReportDto>
+
     @PUT("api/v1/citizen/profile")
     suspend fun updateProfile(
         @Header("Authorization") bearerToken: String,

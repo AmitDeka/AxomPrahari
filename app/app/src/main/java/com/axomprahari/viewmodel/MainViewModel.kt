@@ -231,6 +231,78 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun submitReport(
+        violationId: Int,
+        mediaPath: String, // Local URI path
+        locationName: String,
+        latitude: Double,
+        longitude: Double,
+        vehicleNumber: String,
+        message: String? = null,
+        onResult: (Result<String>) -> Unit
+    ) {
+        val token = currentToken
+        if (token.isNullOrEmpty()) {
+            onResult(Result.failure(Exception("Not authenticated")))
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                // 1. Generate Folder Name (report/YYYY-MM-DD)
+                val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                val todayStr = dateFormat.format(java.util.Date())
+                val folderPath = "report/$todayStr"
+                
+                // 2. Extract extension from path (or assume jpg)
+                val extension = if (mediaPath.endsWith(".mp4", ignoreCase = true)) "video/mp4" else "image/jpeg"
+
+                // 3. Get Presigned URL
+                val presignedResponse = apiService.getPresignedUrl("Bearer $token", extension, folderPath)
+                if (!presignedResponse.isSuccessful) {
+                    throw Exception("Failed to get presigned URL: ${presignedResponse.message()}")
+                }
+                
+                val uploadUrl = presignedResponse.body()?.data?.uploadUrl ?: throw Exception("Missing upload URL")
+                val finalImageUrl = presignedResponse.body()?.data?.fileUrl ?: throw Exception("Missing final URL")
+
+                // 4. Upload Media to R2
+                val uploadSuccess = authRepository.uploadMedia(uploadUrl, extension, mediaPath)
+                if (!uploadSuccess) {
+                    throw Exception("Failed to upload media to R2")
+                }
+
+                // 5. Submit the Report to Backend
+                val timeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+                val timeStr = timeFormat.format(java.util.Date())
+
+                val requestDto = com.axomprahari.data.remote.dto.CitizenReportRequestDto(
+                    violationId = violationId,
+                    mediaUrl = finalImageUrl,
+                    locationName = locationName,
+                    latitude = latitude,
+                    longitude = longitude,
+                    vehicleNumber = vehicleNumber,
+                    incidentDate = todayStr,
+                    incidentTime = timeStr,
+                    message = message
+                )
+
+                val reportResponse = apiService.submitReport("Bearer $token", requestDto)
+                if (reportResponse.isSuccessful) {
+                    refreshReports() // Update local list from server
+                    onResult(Result.success("Report submitted successfully"))
+                } else {
+                    val errorBody = reportResponse.errorBody()?.string() ?: "Unknown error"
+                    throw Exception("Failed to submit report: $errorBody")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onResult(Result.failure(e))
+            }
+        }
+    }
+
     fun addReport(report: com.axomprahari.data.remote.dto.CitizenReportDto) {
         _reportsList.value = listOf(report) + _reportsList.value
     }

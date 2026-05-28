@@ -43,13 +43,14 @@ import com.axomprahari.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedbackScreen(
-    onSubmit: (String, String, android.net.Uri?) -> Unit
+    onSubmit: (String, String, android.net.Uri?, (Result<String>) -> Unit) -> Unit
 ) {
     val initialCategory = stringResource(R.string.feedback_category_suggestion)
     var selectedCategory by remember { mutableStateOf(initialCategory) }
     var feedbackMessage by remember { mutableStateOf("") }
     var isDropdownExpanded by remember { mutableStateOf(false) }
     var selectedPhotoUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    var isSubmitting by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -472,9 +473,12 @@ fun FeedbackScreen(
             // Submit Button
             Button(
                 onClick = {
-                    onSubmit(selectedCategory, feedbackMessage, selectedPhotoUri)
+                    isSubmitting = true
+                    onSubmit(selectedCategory, feedbackMessage, selectedPhotoUri) { result ->
+                        isSubmitting = false
+                    }
                 },
-                enabled = feedbackMessage.isNotBlank(),
+                enabled = feedbackMessage.isNotBlank() && !isSubmitting,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -490,14 +494,22 @@ fun FeedbackScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Send Icon",
-                        modifier = Modifier.size(18.dp)
-                    )
+                    if (isSubmitting) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Send,
+                            contentDescription = "Send Icon",
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = stringResource(R.string.feedback_submit_btn),
+                        text = if (isSubmitting) stringResource(R.string.uploading_btn_text) else stringResource(R.string.feedback_submit_btn),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Bold
                         )

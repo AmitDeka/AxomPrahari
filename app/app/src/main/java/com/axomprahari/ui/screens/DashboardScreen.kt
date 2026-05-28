@@ -65,7 +65,7 @@ fun DashboardScreen(
     reportsList: List<CitizenReportDto>,
     userProfile: com.axomprahari.data.remote.dto.UserProfile?,
     reportStats: com.axomprahari.data.remote.dto.ReportStats?,
-    onReportSubmitted: (CitizenReportDto) -> Unit,
+    onReportSubmit: (Int, String, String, Double, Double, String, String?, (Result<String>) -> Unit) -> Unit,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {},
     onFeedbackSubmit: (String, String, String?, (Result<String>) -> Unit) -> Unit
@@ -195,10 +195,13 @@ fun DashboardScreen(
                             isReportingOffence = false
                         }
                         ReportOffenceScreen(
-                            reportsList = reportsList,
-                            onReportSubmitted = { newReport ->
-                                onReportSubmitted(newReport)
-                                isReportingOffence = false
+                            onReportSubmit = { vId, mPath, lName, lat, lon, vNum, msg, onResult ->
+                                onReportSubmit(vId, mPath, lName, lat, lon, vNum, msg) { result ->
+                                    if (result.isSuccess) {
+                                        isReportingOffence = false
+                                    }
+                                    onResult(result)
+                                }
                             },
                             onCancel = {
                                 isReportingOffence = false
@@ -228,7 +231,7 @@ fun DashboardScreen(
                             showFeedbackPage = false
                         }
                         FeedbackScreen(
-                            onSubmit = { category, message, imageUri ->
+                            onSubmit = { category, message, imageUri, onResult ->
                                 onFeedbackSubmit(category, message, imageUri?.toString()) { result ->
                                     if (result.isSuccess) {
                                         showFeedbackPage = false
@@ -236,6 +239,7 @@ fun DashboardScreen(
                                     } else {
                                         Toast.makeText(context, result.exceptionOrNull()?.message ?: "Error", Toast.LENGTH_SHORT).show()
                                     }
+                                    onResult(result)
                                 }
                             }
                         )

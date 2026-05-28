@@ -44,8 +44,16 @@ import com.axomprahari.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportOffenceScreen(
-    reportsList: List<CitizenReportDto>,
-    onReportSubmitted: (CitizenReportDto) -> Unit,
+    onReportSubmit: (
+        violationId: Int,
+        mediaPath: String,
+        locationName: String,
+        latitude: Double,
+        longitude: Double,
+        vehicleNumber: String,
+        message: String?,
+        onResult: (Result<String>) -> Unit
+    ) -> Unit,
     onCancel: () -> Unit
 ) {
     val context = LocalContext.current
@@ -125,6 +133,7 @@ fun ReportOffenceScreen(
     var isRecording by remember { mutableStateOf(false) }
     var mediaCapturedPath by remember { mutableStateOf<String?>(null) }
     var flashEnabled by remember { mutableStateOf(false) }
+    var isSubmitting by remember { mutableStateOf(false) }
 
     val offenceTypes = listOf(
         "No Helmet",
@@ -466,27 +475,31 @@ fun ReportOffenceScreen(
                 Button(
                     onClick = {
                         val coordsList = gpsCoordinates.split(",")
-                        val lat = if (coordsList.isNotEmpty()) coordsList[0].trim() else "26.1408° N"
-                        val lon = if (coordsList.size > 1) coordsList[1].trim() else "91.7378° E"
-                        val report = CitizenReportDto(
-                            id = reportsList.size + 1,
-                            reportId = "REP-${reportsList.size + 1}",
-                            offenceName = selectedOffence,
-                            locationName = if (locationReference.isNotBlank()) locationReference else "G.S. Road, Guwahati",
-                            incidentDate = systemDateTime.split(" ").getOrNull(0) ?: "",
-                            incidentTime = systemDateTime.split(" ").getOrNull(1) ?: "",
-                            status = "pending",
-                            mediaUrl = mediaCapturedPath,
-                            vehicleNumber = vehicleNumber,
-                            message = additionalNotes,
-                            adminMessage = null,
-                            latitude = lat,
-                            longitude = lon,
-                            createdAt = systemDateTime
-                        )
-                        onReportSubmitted(report)
+                        val lat = if (coordsList.isNotEmpty()) coordsList[0].replace(Regex("[^0-9.]"), "").toDoubleOrNull() ?: 26.1408 else 26.1408
+                        val lon = if (coordsList.size > 1) coordsList[1].replace(Regex("[^0-9.]"), "").toDoubleOrNull() ?: 91.7378 else 91.7378
+                        val violationId = offenceTypes.indexOf(selectedOffence) + 1
+                        val finalLocation = if (locationReference.isNotBlank()) locationReference else "G.S. Road, Guwahati"
+                        
+                        isSubmitting = true
+                        onReportSubmit(
+                            violationId,
+                            mediaCapturedPath!!,
+                            finalLocation,
+                            lat,
+                            lon,
+                            vehicleNumber,
+                            additionalNotes
+                        ) { result ->
+                            isSubmitting = false
+                            if (result.isSuccess) {
+                                Toast.makeText(context, result.getOrNull() ?: "Success", Toast.LENGTH_SHORT).show()
+                                onCancel() // Close screen on success
+                            } else {
+                                Toast.makeText(context, result.exceptionOrNull()?.message ?: "Error", Toast.LENGTH_LONG).show()
+                            }
+                        }
                     },
-                    enabled = vehicleNumber.isNotBlank() && mediaCapturedPath != null,
+                    enabled = vehicleNumber.isNotBlank() && mediaCapturedPath != null && !isSubmitting,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -502,14 +515,22 @@ fun ReportOffenceScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = "Submit Icon",
-                            modifier = Modifier.size(20.dp)
-                        )
+                        if (isSubmitting) {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Send,
+                                contentDescription = "Submit Icon",
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = stringResource(R.string.submit_btn),
+                            text = if (isSubmitting) stringResource(R.string.uploading_btn_text) else stringResource(R.string.submit_btn),
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold
                             )

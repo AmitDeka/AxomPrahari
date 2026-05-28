@@ -22,9 +22,9 @@ export const getPresignedUrl = async (req, res) => {
 
     // Determine file extension
     const extension = fileType.split('/')[1] || 'bin';
-    // Sanitize folder to prevent path traversal
-    const safeFolder = folder.replace(/[^a-zA-Z0-9-_]/g, '');
-    const uniqueFileName = `${safeFolder}/${crypto.randomUUID()}.${extension}`;
+    // Sanitize folder to prevent path traversal (allow alphanumeric, hyphens, underscores, and forward slashes)
+    const safeFolder = folder.replace(/[^a-zA-Z0-9-_/]/g, '').replace(/\/+/g, '/').replace(/^\/|\/$/g, '');
+    const uniqueFileName = `${safeFolder ? safeFolder + '/' : ''}${crypto.randomUUID()}.${extension}`;
 
     // Generate R2 presigned URL
     const uploadUrl = await generateUploadUrl(uniqueFileName, fileType);

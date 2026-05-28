@@ -119,7 +119,9 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                         reportsList = reportsList,
                         userProfile = userProfile,
                         reportStats = reportStats,
-                        onReportSubmitted = { viewModel.addReport(it) },
+                        onReportSubmit = { vId, mPath, lName, lat, lon, vNum, msg, onResult -> 
+                            viewModel.submitReport(vId, mPath, lName, lat, lon, vNum, msg, onResult)
+                        },
                         onLogout = { viewModel.logout() },
                         onNavigateToFaq = { navController.navigate("guideline_faq") },
                         onFeedbackSubmit = { category, message, imageUrl, onResult -> 
