@@ -1,3 +1,6 @@
+import java.util.Date
+import java.text.SimpleDateFormat
+
 @file:Suppress("DEPRECATION")
 
 plugins {
@@ -12,12 +15,16 @@ android {
     namespace = "com.axomprahari"
     compileSdk = 36
 
+    val buildTime = Date()
+    val dynamicVersionCode = (buildTime.time / 100000).toInt()
+    val dynamicVersionName = "1." + SimpleDateFormat("MM.dd.HHmm").format(buildTime)
+
     defaultConfig {
         applicationId = "com.axomprahari"
         minSdk = 29
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.5.28.26-beta"
+        versionCode = dynamicVersionCode
+        versionName = dynamicVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
