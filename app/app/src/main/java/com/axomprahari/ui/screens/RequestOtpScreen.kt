@@ -109,7 +109,7 @@ fun RequestOtpScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.app_logo),
+                    painter = painterResource(id = if (isDark) R.drawable.app_logo_dark else R.drawable.app_logo),
                     contentDescription = "Axom Prahari Logo",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
@@ -280,10 +280,10 @@ fun RequestOtpScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = LoginDarkGreen,
-                    contentColor = Color.White,
-                    disabledContainerColor = LoginDarkGreen.copy(alpha = 0.3f),
-                    disabledContentColor = Color.White.copy(alpha = 0.5f)
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                 ),
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 2.dp,
@@ -293,7 +293,7 @@ fun RequestOtpScreen(
             ) {
                 if (loading) {
                     CircularProgressIndicator(
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.5.dp
                     )

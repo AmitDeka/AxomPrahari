@@ -34,7 +34,7 @@ fun ReportDetailScreen(
     report: CitizenReportDto,
     onBack: () -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
+
     val statusColor = when (report.status) {
         "accepted" -> MaterialTheme.colorScheme.primaryContainer
         "pending" -> MaterialTheme.colorScheme.secondaryContainer

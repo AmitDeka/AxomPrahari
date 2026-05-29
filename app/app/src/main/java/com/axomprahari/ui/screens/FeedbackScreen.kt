@@ -195,7 +195,7 @@ fun FeedbackScreen(
         }
     }
 
-    val isDark = isSystemInDarkTheme()
+
     val bgMainColor = MaterialTheme.colorScheme.background
     val cardContainerColor = MaterialTheme.colorScheme.surfaceVariant
     val cardAttachedColor = MaterialTheme.colorScheme.primaryContainer

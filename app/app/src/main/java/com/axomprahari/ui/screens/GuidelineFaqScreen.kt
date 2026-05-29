@@ -37,7 +37,7 @@ import com.axomprahari.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuidelineFaqScreen(onBack: () -> Unit) {
-    val isDark = isSystemInDarkTheme()
+
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     val LoginBgTop = MaterialTheme.colorScheme.background
     val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -284,7 +284,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
 
 @Composable
 private fun borderStroke(isExpanded: Boolean): androidx.compose.foundation.BorderStroke {
-    val isDark = isSystemInDarkTheme()
+
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     return androidx.compose.foundation.BorderStroke(
         width = 1.dp,

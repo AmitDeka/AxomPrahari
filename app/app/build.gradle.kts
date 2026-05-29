@@ -17,7 +17,7 @@ android {
 
     val buildTime = Date()
     val dynamicVersionCode = (buildTime.time / 100000).toInt()
-    val dynamicVersionName = "1." + SimpleDateFormat("MM.dd.HHmm").format(buildTime)
+    val dynamicVersionName = "1." + SimpleDateFormat("yy.MM.ddHHmm").format(buildTime)
 
     defaultConfig {
         applicationId = "com.axomprahari"
@@ -30,11 +30,11 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        
-        ndk {
-            abiFilters.add("arm64-v8a")
-            abiFilters.add("x86_64")
-        }
+//
+//        ndk {
+//            abiFilters.add("arm64-v8a")
+//            abiFilters.add("x86_64")
+//        }
     }
 
     flavorDimensions += "environment"
@@ -59,6 +59,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {

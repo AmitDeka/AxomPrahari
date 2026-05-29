@@ -108,7 +108,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.app_logo),
+                    painter = painterResource(id = if (isDark) R.drawable.app_logo_dark else R.drawable.app_logo),
                     contentDescription = "Axom Prahari Logo",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
@@ -121,7 +121,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
             Text(
                 text = stringResource(R.string.splash_app_name),
                 style = MaterialTheme.typography.headlineLarge.copy(
-                    color = SplashDarkGreen,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 2.sp,
                     fontSize = 30.sp
@@ -135,7 +135,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
             Text(
                 text = stringResource(R.string.splash_tagline),
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = SplashDarkGreen.copy(alpha = 0.6f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 4.sp,
                     fontSize = 13.sp
@@ -189,7 +189,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
             Text(
                 text = stringResource(R.string.splash_footer),
                 style = MaterialTheme.typography.labelSmall.copy(
-                    color = SplashDarkGreen.copy(alpha = 0.45f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 2.sp,
                     fontSize = 10.sp

@@ -32,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TermsOfServiceScreen(onBack: () -> Unit) {
-    val isDark = isSystemInDarkTheme()
+
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     val LoginBgTop = MaterialTheme.colorScheme.background
     val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -266,7 +266,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
 
 @Composable
 fun TermsSectionHeader(number: String, title: String) {
-    val isDark = isSystemInDarkTheme()
+
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(

@@ -72,7 +72,7 @@ fun DashboardScreen(
     onFeedbackSubmit: (String, String, String?, (Result<String>) -> Unit) -> Unit
 ) {
     val context = LocalContext.current
-    val isDark = isSystemInDarkTheme()
+
     val scope = rememberCoroutineScope()
     
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -265,7 +265,7 @@ fun DashboardTab(
     onReportClick: (CitizenReportDto) -> Unit,
     onReportSpotClick: () -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
+
     val scrollState = rememberScrollState()
     
     Column(
@@ -514,37 +514,18 @@ fun DashboardTab(
 // Inner helper content to show report items cleanly
 @Composable
 fun ReportItemCardContent(report: CitizenReportDto) {
-    val isDark = isSystemInDarkTheme()
-    val statusColor = if (isDark) {
-        when (report.status) {
-            "accepted" -> MaterialTheme.colorScheme.primaryContainer
-            "pending" -> MaterialTheme.colorScheme.secondaryContainer
-            "rejected" -> MaterialTheme.colorScheme.errorContainer
-            else -> MaterialTheme.colorScheme.secondaryContainer
-        }
-    } else {
-        when (report.status) {
-            "accepted" -> MaterialTheme.colorScheme.primaryContainer
-            "pending" -> MaterialTheme.colorScheme.secondaryContainer
-            "rejected" -> MaterialTheme.colorScheme.errorContainer
-            else -> MaterialTheme.colorScheme.secondaryContainer
-        }
+    val statusColor = when (report.status) {
+        "accepted" -> MaterialTheme.colorScheme.primaryContainer
+        "pending" -> MaterialTheme.colorScheme.secondaryContainer
+        "rejected" -> MaterialTheme.colorScheme.errorContainer
+        else -> MaterialTheme.colorScheme.secondaryContainer
     }
 
-    val statusTextColor = if (isDark) {
-        when (report.status) {
-            "accepted" -> MaterialTheme.colorScheme.onPrimaryContainer
-            "pending" -> MaterialTheme.colorScheme.onSecondaryContainer
-            "rejected" -> MaterialTheme.colorScheme.onErrorContainer
-            else -> MaterialTheme.colorScheme.onSecondaryContainer
-        }
-    } else {
-        when (report.status) {
-            "accepted" -> MaterialTheme.colorScheme.onPrimaryContainer
-            "pending" -> MaterialTheme.colorScheme.onSecondaryContainer
-            "rejected" -> MaterialTheme.colorScheme.onErrorContainer
-            else -> MaterialTheme.colorScheme.onSecondaryContainer
-        }
+    val statusTextColor = when (report.status) {
+        "accepted" -> MaterialTheme.colorScheme.onPrimaryContainer
+        "pending" -> MaterialTheme.colorScheme.onSecondaryContainer
+        "rejected" -> MaterialTheme.colorScheme.onErrorContainer
+        else -> MaterialTheme.colorScheme.onSecondaryContainer
     }
 
     val statusText = when (report.status) {
@@ -661,13 +642,11 @@ fun UserStatsCard(
     userProfile: com.axomprahari.data.remote.dto.UserProfile?,
     reportStats: com.axomprahari.data.remote.dto.ReportStats?
 ) {
-    val isDark = isSystemInDarkTheme()
-
     // Card colours: dark slate in both modes (looks premium on light & dark)
-    val cardBg = if (isDark) Color(0xFF0F1C1B) else Color(0xFF0D1F1E)
+    val cardBg = com.axomprahari.ui.theme.LocalCustomColors.current.dashboardCardBg
     val accentGreen = MaterialTheme.colorScheme.secondary
-    val subtleWhite = Color.White.copy(alpha = 0.55f)
-    val dividerColor = Color.White.copy(alpha = 0.08f)
+    val subtleWhite = com.axomprahari.ui.theme.LocalCustomColors.current.subtleText
+    val dividerColor = com.axomprahari.ui.theme.LocalCustomColors.current.subtleDivider
 
     Box(
         modifier = Modifier

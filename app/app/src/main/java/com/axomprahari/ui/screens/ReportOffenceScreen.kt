@@ -61,7 +61,7 @@ fun ReportOffenceScreen(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val isDark = isSystemInDarkTheme()
+
 
     var hasCameraPermission by remember {
         mutableStateOf(

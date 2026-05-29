@@ -11,6 +11,11 @@ import com.axomprahari.viewmodel.MainViewModel
 import com.axomprahari.viewmodel.MainUiState
 import com.axomprahari.ui.screens.*
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.tween
 
 @Composable
 fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
@@ -22,14 +27,28 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
             SplashScreen(onAnimationComplete = { viewModel.onSplashComplete() })
         }
         is MainUiState.OnboardingRequired -> {
-            NavHost(navController = navController, startDestination = "onboarding") {
+            NavHost(
+                navController = navController,
+                startDestination = "onboarding",
+                enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn(animationSpec = tween(300)) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(animationSpec = tween(300)) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn(animationSpec = tween(300)) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut(animationSpec = tween(300)) }
+            ) {
                 composable("onboarding") {
                     OnboardingScreen(onFinishOnboarding = { viewModel.completeOnboarding() })
                 }
             }
         }
         is MainUiState.Unauthenticated -> {
-            NavHost(navController = navController, startDestination = "request_otp") {
+            NavHost(
+                navController = navController,
+                startDestination = "request_otp",
+                enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn(animationSpec = tween(300)) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(animationSpec = tween(300)) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn(animationSpec = tween(300)) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut(animationSpec = tween(300)) }
+            ) {
                 composable("request_otp") {
                     RequestOtpScreen(
                         onNavigateToVerify = { phone ->
@@ -113,7 +132,14 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
             val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
             val reportStats by viewModel.reportStats.collectAsStateWithLifecycle()
             val violationsList by viewModel.violationsList.collectAsStateWithLifecycle()
-            NavHost(navController = navController, startDestination = "dashboard") {
+            NavHost(
+                navController = navController,
+                startDestination = "dashboard",
+                enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn(animationSpec = tween(300)) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(animationSpec = tween(300)) },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn(animationSpec = tween(300)) },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut(animationSpec = tween(300)) }
+            ) {
                 composable("dashboard") {
                     DashboardScreen(
                         navController = navController,

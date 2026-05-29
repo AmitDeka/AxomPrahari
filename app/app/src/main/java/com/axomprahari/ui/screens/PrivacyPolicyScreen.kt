@@ -33,7 +33,7 @@ import com.axomprahari.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacyPolicyScreen(onBack: () -> Unit) {
-    val isDark = isSystemInDarkTheme()
+
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     val LoginBgTop = MaterialTheme.colorScheme.background
     val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -124,8 +124,8 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.4f)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, if (isDark) MaterialTheme.colorScheme.outline.copy(alpha = 0.3f) else Color.White)
+                colors = CardDefaults.cardColors(containerColor = com.axomprahari.ui.theme.LocalCustomColors.current.glassCardBg),
+                border = androidx.compose.foundation.BorderStroke(1.dp, com.axomprahari.ui.theme.LocalCustomColors.current.glassCardBorder)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -295,7 +295,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
 
 @Composable
 fun PrivacySectionHeader(number: String, title: String) {
-    val isDark = isSystemInDarkTheme()
+
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(

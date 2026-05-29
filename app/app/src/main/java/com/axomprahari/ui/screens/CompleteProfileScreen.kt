@@ -50,7 +50,7 @@ fun CompleteProfileScreen(
     onNavigateToPrivacyPolicy: () -> Unit
 ) {
     val context = LocalContext.current
-    val isDark = isSystemInDarkTheme()
+
     val loginDarkGreen = MaterialTheme.colorScheme.primary
     val loginBgTop = MaterialTheme.colorScheme.background
     val loginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -109,7 +109,7 @@ fun CompleteProfileScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.app_logo),
+                    painter = painterResource(id = if (isSystemInDarkTheme()) R.drawable.app_logo_dark else R.drawable.app_logo),
                     contentDescription = "Axom Prahari Logo",
                     modifier = Modifier.size(28.dp),
                     contentScale = ContentScale.Fit
@@ -170,7 +170,7 @@ fun CompleteProfileScreen(
                             Text(
                                 text = stringResource(R.string.comp_profile_smart_city_badge),
                                 style = TextStyle(
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 0.5.sp
@@ -181,7 +181,7 @@ fun CompleteProfileScreen(
                         Text(
                             text = stringResource(R.string.comp_profile_title),
                             style = TextStyle(
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -249,8 +249,8 @@ fun CompleteProfileScreen(
                     .fillMaxWidth()
                     .padding(bottom = 24.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.3f)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.5f))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -307,10 +307,10 @@ fun CompleteProfileScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = loginDarkGreen,
-                    contentColor = Color.White,
-                    disabledContainerColor = loginDarkGreen.copy(alpha = 0.3f),
-                    disabledContentColor = Color.White.copy(alpha = 0.5f)
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                 ),
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 2.dp,
@@ -320,7 +320,7 @@ fun CompleteProfileScreen(
             ) {
                 if (loading) {
                     CircularProgressIndicator(
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.5.dp
                     )
@@ -430,7 +430,7 @@ private fun ProfileInputField(
     leadingIcon: androidx.compose.ui.graphics.vector.ImageVector,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
-    val isDark = isSystemInDarkTheme()
+
     val loginDarkGreen = MaterialTheme.colorScheme.primary
     val loginInputBackground = MaterialTheme.colorScheme.surfaceVariant
 
