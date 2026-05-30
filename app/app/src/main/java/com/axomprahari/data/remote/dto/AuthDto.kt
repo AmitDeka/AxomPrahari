@@ -50,12 +50,10 @@ data class ApiErrorResponse(
     @SerializedName("errors") val errors: List<ApiErrorDetail>? = null
 ) {
     fun readable(): String {
-        val baseMessage = error ?: message ?: "An unexpected error occurred"
         if (!errors.isNullOrEmpty()) {
-            val details = errors.mapNotNull { it.message }.joinToString(", ")
-            return "$baseMessage: $details"
+            return errors.mapNotNull { it.message }.joinToString(", ")
         }
-        return baseMessage
+        return error ?: message ?: "An unexpected error occurred"
     }
 
     companion object {
