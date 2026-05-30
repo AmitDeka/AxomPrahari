@@ -65,6 +65,16 @@ data class ApiErrorResponse(
                 "An unexpected error occurred"
             }
         }
+
+        fun Throwable.toFriendlyMessage(): String {
+            return when (this) {
+                is java.net.UnknownHostException,
+                is java.net.ConnectException,
+                is java.net.SocketTimeoutException,
+                is java.net.SocketException -> "No internet connection. Please check your network and try again."
+                else -> this.message ?: "An unexpected error occurred"
+            }
+        }
     }
 }
 

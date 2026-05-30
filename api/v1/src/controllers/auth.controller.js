@@ -24,7 +24,7 @@ export const citizenRequestOtp = async (req, res) => {
     console.log(`[Twilio SMS] Sending OTP ${mockOtp} to ${phone_number}`);
 
     // DEMO ACCOUNT BYPASS FOR GOOGLE PLAY REVIEW
-    if (phone_number === "+916000026296") {
+    if (phone_number === "6000026296") {
       otpCache.set(phone_number, {
         otp: "123456",
         expiresAt: Date.now() + 5 * 60 * 1000,
@@ -43,12 +43,10 @@ export const citizenRequestOtp = async (req, res) => {
     // Send actual OTP via Twilio WhatsApp Sandbox
     await sendWhatsAppOTP(phone_number, mockOtp);
 
-    res
-      .status(200)
-      .json({
-        status: "success",
-        message: "OTP sent successfully via WhatsApp",
-      });
+    res.status(200).json({
+      status: "success",
+      message: "OTP sent successfully via WhatsApp",
+    });
   } catch (error) {
     console.error("[citizenRequestOtp Error]", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -62,11 +60,9 @@ export const citizenVerifyOtp = async (req, res) => {
     const cached = otpCache.get(phone_number);
 
     if (!cached) {
-      return res
-        .status(400)
-        .json({
-          error: "OTP expired or not requested. Please request a new one.",
-        });
+      return res.status(400).json({
+        error: "OTP expired or not requested. Please request a new one.",
+      });
     }
 
     if (Date.now() > cached.expiresAt) {
@@ -196,12 +192,10 @@ export const policeAdminLogin = async (req, res) => {
     }
 
     if (admin.is_active === false) {
-      return res
-        .status(403)
-        .json({
-          error:
-            "Your account has been disabled. Please contact the administrator.",
-        });
+      return res.status(403).json({
+        error:
+          "Your account has been disabled. Please contact the administrator.",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, admin.password_hash);

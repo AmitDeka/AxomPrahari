@@ -16,7 +16,9 @@ import kotlinx.coroutines.launch
 import com.google.gson.Gson
 import javax.inject.Inject
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
+import com.axomprahari.data.remote.dto.ApiErrorResponse.Companion.toFriendlyMessage
 
 sealed interface MainUiState {
     object Loading : MainUiState
@@ -265,7 +267,7 @@ class MainViewModel @Inject constructor(
                 val presignedResponse = apiService.getPresignedUrl("Bearer $token", extension, folderPath)
                 if (!presignedResponse.isSuccessful) {
                     val errorMsg = com.axomprahari.data.remote.dto.ApiErrorResponse.parse(presignedResponse.errorBody()?.string())
-                    val finalMsg = if (presignedResponse.code() == 401 || presignedResponse.code() == 403) "401: $errorMsg" else errorMsg
+                    val finalMsg = if (presignedResponse.code() == 401 || presignedResponse.code() == 403) "$errorMsg" else errorMsg
                     throw Exception("Failed to get presigned URL: $finalMsg")
                 }
                 
@@ -288,7 +290,7 @@ class MainViewModel @Inject constructor(
                 
                 if (!uploadResponse.isSuccessful) {
                     val errorMsg = com.axomprahari.data.remote.dto.ApiErrorResponse.parse(uploadResponse.errorBody()?.string())
-                    val finalMsg = if (uploadResponse.code() == 401 || uploadResponse.code() == 403) "401: $errorMsg" else errorMsg
+                    val finalMsg = if (uploadResponse.code() == 401 || uploadResponse.code() == 403) "$errorMsg" else errorMsg
                     throw Exception("Failed to upload media: $finalMsg")
                 }
 
@@ -314,12 +316,12 @@ class MainViewModel @Inject constructor(
                     onResult(Result.success("Report submitted successfully"))
                 } else {
                     val errorMsg = com.axomprahari.data.remote.dto.ApiErrorResponse.parse(reportResponse.errorBody()?.string())
-                    val finalMsg = if (reportResponse.code() == 401 || reportResponse.code() == 403) "401: $errorMsg" else errorMsg
+                    val finalMsg = if (reportResponse.code() == 401 || reportResponse.code() == 403) "$errorMsg" else errorMsg
                     throw Exception(finalMsg)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                onResult(Result.failure(e))
+                onResult(Result.failure(Exception(e.toFriendlyMessage())))
             }
         }
     }

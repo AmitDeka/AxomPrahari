@@ -12,6 +12,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.axomprahari.data.remote.dto.ApiErrorResponse.Companion.toFriendlyMessage
 
 @Singleton
 class AuthRepository @Inject constructor(
@@ -23,10 +24,18 @@ class AuthRepository @Inject constructor(
 
     private fun <T> retrofit2.Response<T>.getParsedError(): String {
         val errorMsg = ApiErrorResponse.parse(this.errorBody()?.string())
-        return if (this.code() == 401 || this.code() == 403) "401: $errorMsg" else errorMsg
+        return if (this.code() == 401 || this.code() == 403) "$errorMsg" else errorMsg
     }
 
-    suspend fun requestOtp(phoneNumber: String): Result<String> = runCatching {
+
+
+    private suspend fun <T> safeApiCall(apiCall: suspend () -> T): Result<T> = runCatching {
+        apiCall()
+    }.recoverCatching {
+        throw Exception(it.toFriendlyMessage())
+    }
+
+    suspend fun requestOtp(phoneNumber: String): Result<String> = safeApiCall {
         val response = api.requestOtp(RequestOtpRequest(phoneNumber))
         if (response.isSuccessful) {
             response.body()?.message ?: "OTP sent successfully"
@@ -35,7 +44,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun verifyOtp(phoneNumber: String, otp: String): Result<VerifyOtpResponse> = runCatching {
+    suspend fun verifyOtp(phoneNumber: String, otp: String): Result<VerifyOtpResponse> = safeApiCall {
         val response = api.verifyOtp(VerifyOtpRequest(phoneNumber, otp))
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
@@ -49,7 +58,7 @@ class AuthRepository @Inject constructor(
         fullName: String,
         email: String,
         username: String
-    ): Result<String> = runCatching {
+    ): Result<String> = safeApiCall {
         val response = api.completeProfile(
             bearerToken = "Bearer $token",
             body = CompleteProfileRequest(fullName, email, username)
@@ -61,7 +70,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun getCitizenDashboard(token: String): Result<CitizenDashboardResponse> = runCatching {
+    suspend fun getCitizenDashboard(token: String): Result<CitizenDashboardResponse> = safeApiCall {
         val response = api.getCitizenDashboard("Bearer $token")
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
@@ -70,7 +79,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun getCitizenViolations(token: String): Result<CitizenViolationsResponse> = runCatching {
+    suspend fun getCitizenViolations(token: String): Result<CitizenViolationsResponse> = safeApiCall {
         val response = api.getCitizenViolations("Bearer $token")
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
@@ -79,7 +88,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun getCitizenReports(token: String): Result<CitizenReportsResponse> = runCatching {
+    suspend fun getCitizenReports(token: String): Result<CitizenReportsResponse> = safeApiCall {
         val response = api.getCitizenReports("Bearer $token")
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
@@ -93,7 +102,7 @@ class AuthRepository @Inject constructor(
         fullName: String,
         email: String,
         username: String
-    ): Result<UserProfile> = runCatching {
+    ): Result<UserProfile> = safeApiCall {
         val response = api.updateProfile(
             bearerToken = "Bearer $token",
             body = UpdateProfileRequest(fullName, email, username)
@@ -112,7 +121,7 @@ class AuthRepository @Inject constructor(
         message: String,
         imageKey: String?,
         imageUrl: String?
-    ): Result<String> = runCatching {
+    ): Result<String> = safeApiCall {
         val response = api.submitFeedback(
             bearerToken = "Bearer $token",
             body = FeedbackRequest(
