@@ -643,10 +643,10 @@ fun UserStatsCard(
     reportStats: com.axomprahari.data.remote.dto.ReportStats?
 ) {
     // Card colours: dark slate in both modes (looks premium on light & dark)
-    val cardBg = com.axomprahari.ui.theme.LocalCustomColors.current.dashboardCardBg
+    LocalCustomColors.current.dashboardCardBg
     val accentGreen = MaterialTheme.colorScheme.secondary
-    val subtleWhite = com.axomprahari.ui.theme.LocalCustomColors.current.subtleText
-    val dividerColor = com.axomprahari.ui.theme.LocalCustomColors.current.subtleDivider
+    val subtleWhite = LocalCustomColors.current.subtleText
+    val dividerColor = LocalCustomColors.current.subtleDivider
 
     Box(
         modifier = Modifier

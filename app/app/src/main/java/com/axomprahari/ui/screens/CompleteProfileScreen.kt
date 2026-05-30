@@ -54,7 +54,7 @@ fun CompleteProfileScreen(
     val loginDarkGreen = MaterialTheme.colorScheme.primary
     val loginBgTop = MaterialTheme.colorScheme.background
     val loginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
-    val loginInputBackground = MaterialTheme.colorScheme.surfaceVariant
+    MaterialTheme.colorScheme.surfaceVariant
 
     var fullName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }

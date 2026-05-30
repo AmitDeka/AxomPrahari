@@ -47,7 +47,7 @@ fun ProfileScreen(
     reportStats: com.axomprahari.data.remote.dto.ReportStats?,
     onLogout: () -> Unit,
     onNavigateToFaq: () -> Unit = {},
-    onUpdateProfile: (String, String, String, (Result<com.axomprahari.data.remote.dto.UserProfile>) -> Unit) -> Unit,
+    onUpdateProfile: (String, String, String, (Result<UserProfile>) -> Unit) -> Unit,
     onFeedbackSubmit: (String, String, String?, (Result<String>) -> Unit) -> Unit
 ) {
     val context = LocalContext.current

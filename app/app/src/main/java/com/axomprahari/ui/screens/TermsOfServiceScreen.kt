@@ -36,7 +36,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     val LoginBgTop = MaterialTheme.colorScheme.background
     val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
-    val InputBackground = MaterialTheme.colorScheme.surfaceVariant
+    MaterialTheme.colorScheme.surfaceVariant
 
     Scaffold(
         topBar = {

@@ -11,6 +11,10 @@ plugins {
     kotlin("kapt")
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 android {
     namespace = "com.axomprahari"
     compileSdk = 36

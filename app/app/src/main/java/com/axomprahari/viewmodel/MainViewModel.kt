@@ -264,7 +264,9 @@ class MainViewModel @Inject constructor(
                 // 3. Get Presigned URL
                 val presignedResponse = apiService.getPresignedUrl("Bearer $token", extension, folderPath)
                 if (!presignedResponse.isSuccessful) {
-                    throw Exception("Failed to get presigned URL: ${presignedResponse.message()}")
+                    val errorMsg = com.axomprahari.data.remote.dto.ApiErrorResponse.parse(presignedResponse.errorBody()?.string())
+                    val finalMsg = if (presignedResponse.code() == 401 || presignedResponse.code() == 403) "401: $errorMsg" else errorMsg
+                    throw Exception("Failed to get presigned URL: $finalMsg")
                 }
                 
                 val uploadUrl = presignedResponse.body()?.data?.uploadUrl ?: throw Exception("Missing upload URL")
@@ -285,7 +287,9 @@ class MainViewModel @Inject constructor(
                 val uploadResponse = apiService.uploadFileToR2(uploadUrl, requestBody)
                 
                 if (!uploadResponse.isSuccessful) {
-                    throw Exception("Failed to upload media to R2")
+                    val errorMsg = com.axomprahari.data.remote.dto.ApiErrorResponse.parse(uploadResponse.errorBody()?.string())
+                    val finalMsg = if (uploadResponse.code() == 401 || uploadResponse.code() == 403) "401: $errorMsg" else errorMsg
+                    throw Exception("Failed to upload media: $finalMsg")
                 }
 
                 // 5. Submit the Report to Backend
@@ -309,17 +313,9 @@ class MainViewModel @Inject constructor(
                     refreshReports() // Update local list from server
                     onResult(Result.success("Report submitted successfully"))
                 } else {
-                    val errorBody = reportResponse.errorBody()?.string()
-                    var errorMessage = "Unknown error"
-                    if (!errorBody.isNullOrBlank()) {
-                        try {
-                            val errorResponse = com.google.gson.Gson().fromJson(errorBody, com.axomprahari.data.remote.dto.ApiErrorResponse::class.java)
-                            errorMessage = errorResponse.readable()
-                        } catch (e: Exception) {
-                            errorMessage = errorBody
-                        }
-                    }
-                    throw Exception(errorMessage)
+                    val errorMsg = com.axomprahari.data.remote.dto.ApiErrorResponse.parse(reportResponse.errorBody()?.string())
+                    val finalMsg = if (reportResponse.code() == 401 || reportResponse.code() == 403) "401: $errorMsg" else errorMsg
+                    throw Exception(finalMsg)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -328,7 +324,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun addReport(report: com.axomprahari.data.remote.dto.CitizenReportDto) {
+    fun addReport(report: CitizenReportDto) {
         _reportsList.value = listOf(report) + _reportsList.value
     }
 

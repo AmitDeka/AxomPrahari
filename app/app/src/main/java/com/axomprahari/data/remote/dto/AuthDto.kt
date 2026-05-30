@@ -57,6 +57,17 @@ data class ApiErrorResponse(
         }
         return baseMessage
     }
+
+    companion object {
+        fun parse(errorBody: String?): String {
+            if (errorBody.isNullOrBlank()) return "An unexpected error occurred"
+            return try {
+                com.google.gson.Gson().fromJson(errorBody, ApiErrorResponse::class.java).readable()
+            } catch (e: Exception) {
+                "An unexpected error occurred"
+            }
+        }
+    }
 }
 
 data class UserProfile(

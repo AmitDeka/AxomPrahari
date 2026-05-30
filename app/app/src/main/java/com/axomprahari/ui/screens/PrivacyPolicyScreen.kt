@@ -37,7 +37,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     val LoginBgTop = MaterialTheme.colorScheme.background
     val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
-    val InputBackground = MaterialTheme.colorScheme.surfaceVariant
+    MaterialTheme.colorScheme.surfaceVariant
 
     Scaffold(
         topBar = {
@@ -124,8 +124,8 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = com.axomprahari.ui.theme.LocalCustomColors.current.glassCardBg),
-                border = androidx.compose.foundation.BorderStroke(1.dp, com.axomprahari.ui.theme.LocalCustomColors.current.glassCardBorder)
+                colors = CardDefaults.cardColors(containerColor = LocalCustomColors.current.glassCardBg),
+                border = androidx.compose.foundation.BorderStroke(1.dp, LocalCustomColors.current.glassCardBorder)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(

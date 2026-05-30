@@ -21,14 +21,9 @@ class AuthRepository @Inject constructor(
 
     private val gson = Gson()
 
-    /** Parses raw error body JSON into a readable message */
-    private fun parseError(errorBody: String?): String {
-        if (errorBody.isNullOrBlank()) return "An unexpected error occurred"
-        return try {
-            gson.fromJson(errorBody, ApiErrorResponse::class.java).readable()
-        } catch (e: Exception) {
-            "An unexpected error occurred"
-        }
+    private fun <T> retrofit2.Response<T>.getParsedError(): String {
+        val errorMsg = ApiErrorResponse.parse(this.errorBody()?.string())
+        return if (this.code() == 401 || this.code() == 403) "401: $errorMsg" else errorMsg
     }
 
     suspend fun requestOtp(phoneNumber: String): Result<String> = runCatching {
@@ -36,7 +31,7 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body()?.message ?: "OTP sent successfully"
         } else {
-            throw Exception(parseError(response.errorBody()?.string()))
+            throw Exception(response.getParsedError())
         }
     }
 
@@ -45,7 +40,7 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
         } else {
-            throw Exception(parseError(response.errorBody()?.string()))
+            throw Exception(response.getParsedError())
         }
     }
 
@@ -62,7 +57,7 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body()?.token ?: throw Exception("No token in response")
         } else {
-            throw Exception(parseError(response.errorBody()?.string()))
+            throw Exception(response.getParsedError())
         }
     }
 
@@ -71,8 +66,7 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
         } else {
-            if (response.code() == 401 || response.code() == 403) throw Exception("HTTP 401 Unauthorized")
-            throw Exception(parseError(response.errorBody()?.string()))
+            throw Exception(response.getParsedError())
         }
     }
 
@@ -81,7 +75,7 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
         } else {
-            throw Exception(parseError(response.errorBody()?.string()))
+            throw Exception(response.getParsedError())
         }
     }
 
@@ -90,7 +84,7 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body() ?: throw Exception("Empty response from server")
         } else {
-            throw Exception(parseError(response.errorBody()?.string()))
+            throw Exception(response.getParsedError())
         }
     }
 
@@ -107,7 +101,7 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body()?.data ?: throw Exception("Empty response data from server")
         } else {
-            throw Exception(parseError(response.errorBody()?.string()))
+            throw Exception(response.getParsedError())
         }
     }
 
@@ -132,7 +126,7 @@ class AuthRepository @Inject constructor(
         if (response.isSuccessful) {
             response.body()?.message ?: "Feedback submitted successfully"
         } else {
-            throw Exception(parseError(response.errorBody()?.string()))
+            throw Exception(response.getParsedError())
         }
     }
 
@@ -145,7 +139,7 @@ class AuthRepository @Inject constructor(
             // 1. Get Presigned URL
             val presignedResponse = api.getPresignedUrl("Bearer $token", mimeType, "feedback")
             if (!presignedResponse.isSuccessful || presignedResponse.body()?.data == null) {
-                return Result.failure(Exception(parseError(presignedResponse.errorBody()?.string())))
+                return Result.failure(Exception(presignedResponse.getParsedError()))
             }
             
             val presignedData = presignedResponse.body()!!.data!!
