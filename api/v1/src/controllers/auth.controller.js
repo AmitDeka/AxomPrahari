@@ -22,6 +22,15 @@ export const citizenRequestOtp = async (req, res) => {
     const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
     console.log(`[Twilio SMS] Sending OTP ${mockOtp} to ${phone_number}`);
     
+    // DEMO ACCOUNT BYPASS FOR GOOGLE PLAY REVIEW
+    if (phone_number === '+910000000000') {
+      otpCache.set(phone_number, {
+        otp: '123456',
+        expiresAt: Date.now() + 5 * 60 * 1000
+      });
+      return res.status(200).json({ status: 'success', message: 'Demo OTP bypassed' });
+    }
+    
     // Save to in-memory cache with 5 minutes expiration
     otpCache.set(phone_number, {
       otp: mockOtp,
