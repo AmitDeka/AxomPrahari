@@ -12,12 +12,6 @@ export default function AdminLayout({ children }) {
   const [profile, setProfile] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("admin_token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
     // Fetch real profile from backend
     api.get("/admin/dashboard")
       .then((res) => {

@@ -3,6 +3,7 @@ import axios from "axios";
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "https://axomprahari-api.onrender.com",
   headers: { "Content-Type": "application/json" },
+  withCredentials: true,
 });
 
 // Request Interceptor: Attach the Admin JWT & Prepend /api/v1

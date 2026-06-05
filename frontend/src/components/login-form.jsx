@@ -21,15 +21,14 @@ export function LoginForm({ className, ...props }) {
 
     try {
       const response = await api.post("/auth/admin/login", { email, password });
-      if (response.data?.status === "success" && response.data?.token) {
-        localStorage.setItem("admin_token", response.data.token);
-        toast.success("Login successful! Redirecting to dashboard while checking authorization...");
-        // Wait a short time to show success message and check authority redirecting
+      if (response.data?.status === "success") {
+        toast.success("Login successful! Redirecting to dashboard...");
+        // Wait a short time to show success message
         setTimeout(() => {
           router.push("/admin/dashboard");
         }, 1500);
       } else {
-        toast.error("Login failed. No token received.");
+        toast.error("Login failed.");
         setIsLoading(false);
       }
     } catch (err) {

@@ -10,12 +10,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [systemStatus, setSystemStatus] = useState("checking");
 
-  useEffect(() => {
-    // If already logged in, redirect to dashboard
-    if (localStorage.getItem("admin_token")) {
-      router.push("/admin/dashboard");
-    }
-  }, [router]);
+  // Server-side middleware will handle redirecting authenticated users
 
   useEffect(() => {
     let active = true;

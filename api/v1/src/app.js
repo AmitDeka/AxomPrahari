@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.routes.js';
 import citizenRoutes from './routes/citizen.routes.js';
 import adminRoutes from './routes/admin.routes.js';
@@ -16,6 +17,9 @@ const app = express();
 
 // 1. Global Security Shield - Helmet
 app.use(helmet());
+
+// Cookie Parser Middleware
+app.use(cookieParser());
 
 // 2. Strict CORS Configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS

@@ -212,6 +212,14 @@ export const policeAdminLogin = async (req, res) => {
       { expiresIn: "8h" }, // Shorter lived for admin
     );
 
+    // Set JWT token in an HttpOnly secure cookie
+    res.cookie("admin_token", token, {
+      httpOnly: true,
+      secure: true, // Always secure for HTTPS
+      sameSite: process.env.NODE_ENV === "production" ? "lax" : "none", // lax for production, none for cross-origin testing
+      maxAge: 8 * 60 * 60 * 1000, // 8 hours matching token expiration
+    });
+
     res.status(200).json({
       status: "success",
       message: "Admin login successful",
@@ -248,6 +256,13 @@ export const adminLogout = async (req, res) => {
     const expiresAt = new Date(req.user.exp * 1000);
 
     await UserModel.invalidateToken(token, expiresAt);
+
+    // Clear the HTTP-only cookie
+    res.clearCookie("admin_token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: process.env.NODE_ENV === "production" ? "lax" : "none",
+    });
 
     res.status(200).json({
       status: "success",

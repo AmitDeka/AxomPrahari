@@ -9,3 +9,4 @@ API_DOCS.md
 /api/v1/verifyViolationUpdates.js
 /api/v1/migrateFeedbacks.js
 /api/v1/verifyFeedbacks.js
+/api/v1/verifyCookieAuth.js
