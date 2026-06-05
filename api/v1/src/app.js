@@ -14,6 +14,8 @@ import notificationRoutes from './routes/notification.admin.routes.js';
 
 const app = express();
 
+// Trust reverse proxy for rate limiting (essential for Render/Cloudflare)
+app.set('trust proxy', 1);
 
 // 1. Global Security Shield - Helmet
 app.use(helmet());
