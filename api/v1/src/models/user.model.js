@@ -98,14 +98,33 @@ export const updateAdminStatus = async (id, isActive) => {
   return result.rows[0];
 };
 
-export const getAllAdmins = async () => {
-  const result = await db.query(
-    `SELECT id, email, role, full_name, is_active, rank, jurisdiction_district, created_at 
-     FROM users 
-     WHERE role IN ('police_admin', 'super_admin') 
-     ORDER BY id DESC`
-  );
-  return result.rows;
+export const getAllAdmins = async (role = null, limit = 10, offset = 0) => {
+  let queryText = `
+    SELECT id, email, role, full_name, is_active, rank, jurisdiction_district, created_at 
+    FROM users 
+    WHERE role IN ('police_admin', 'super_admin')
+  `;
+  const params = [];
+
+  if (role) {
+    queryText += ` AND role = $1`;
+    params.push(role);
+  }
+
+  // Get total count
+  const countQueryText = `SELECT COUNT(*) FROM (${queryText}) AS temp`;
+  const countResult = await db.query(countQueryText, params);
+  const totalCount = parseInt(countResult.rows[0].count, 10);
+
+  // Add order and pagination
+  queryText += ` ORDER BY id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+  params.push(limit, offset);
+
+  const result = await db.query(queryText, params);
+  return {
+    admins: result.rows,
+    totalCount
+  };
 };
 
 export const getDashboardStats = async () => {

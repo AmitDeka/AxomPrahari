@@ -1,0 +1,97 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # 1. Job to verify Backend API
+  backend-ci:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    # Only runs if files in api/v1 changed
+    defaults:
+      run:
+        working-directory: ./api/v1
+
+    services:
+      # Spin up a temporary PostgreSQL instance for integration tests
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: axom_prahari_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_password
+        ports:
+          - 5432:5432
+        # Ensure postgres is healthy before starting the job
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: ./api/v1/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Linter (if configured)
+        run: npm run lint --if-present
+
+      - name: Setup Test Environment Variables
+        run: |
+          echo "DATABASE_URL=postgresql://postgres:postgres_password@localhost:5432/axom_prahari_test" >> .env
+          echo "JWT_SECRET=super_secret_test_jwt_key" >> .env
+          echo "NODE_ENV=test" >> .env
+
+      - name: Run Database Migrations
+        # Apply the SQL schemas to the test database
+        run: psql postgresql://postgres:postgres_password@localhost:5432/axom_prahari_test -f database.sql
+
+      - name: Run Integration Tests
+        # Run your verification tests (e.g. verifyAdminPagination.js)
+        run: node verifyAdminPagination.js
+
+  # 2. Job to verify Next.js Frontend
+  frontend-ci:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint --if-present
+
+      - name: Build Next.js Application
+        # This compiles the application and checks for any import or syntax errors
+        run: npm run build
+        env:
+          # Turn off ESLint during build if run in a separate step
+          NEXT_TELEMETRY_DISABLED: 1

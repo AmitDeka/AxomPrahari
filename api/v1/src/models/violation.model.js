@@ -17,12 +17,17 @@ export const createViolation = async (data) => {
   return result.rows[0];
 };
 
-export const getAllViolations = async (forAdmin = false) => {
+export const getAllViolations = async (forAdmin = false, limit = 10, offset = 0) => {
   if (forAdmin) {
     const result = await db.query(
-      "SELECT * FROM violation_master ORDER BY id ASC",
+      "SELECT * FROM violation_master ORDER BY id ASC LIMIT $1 OFFSET $2",
+      [limit, offset]
     );
-    return result.rows;
+    const countResult = await db.query("SELECT COUNT(*) FROM violation_master");
+    return {
+      violations: result.rows,
+      totalCount: parseInt(countResult.rows[0].count, 10)
+    };
   } else {
     // For citizens: Exclude fine_amount and only return active violations
     const result = await db.query(

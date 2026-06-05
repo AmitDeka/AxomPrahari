@@ -38,7 +38,9 @@ import {
   MessageSquareIcon,
   ShieldCheckIcon,
   CameraIcon,
-  VideoIcon
+  VideoIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import api from "@/lib/axios";
@@ -53,15 +55,26 @@ export default function SuccessReportsPage() {
   const [loading, setLoading] = useState(true);
   const [reports, setReports] = useState([]);
 
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   // Dialog State
   const [selectedReport, setSelectedReport] = useState(null);
 
-  const fetchReports = async (showLoading = true) => {
+  const fetchReports = async (targetPage, showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
-      const res = await api.get("/admin/reports?status=accepted");
+      const res = await api.get(`/admin/reports?status=accepted&page=${targetPage}&limit=${limit}`);
       if (res.data?.status === "success") {
         setReports(res.data.data.reports || []);
+        const pagination = res.data.data.pagination;
+        if (pagination) {
+          setTotal(pagination.total || 0);
+          setTotalPages(pagination.totalPages || 1);
+        }
       }
     } catch (err) {
       console.error("Error loading success reports", err);
@@ -72,9 +85,25 @@ export default function SuccessReportsPage() {
 
   useEffect(() => {
     setTimeout(() => {
-      fetchReports(false);
+      fetchReports(1, false);
     }, 0);
   }, []);
+
+  const handlePrevPage = () => {
+    if (page > 1) {
+      const prev = page - 1;
+      setPage(prev);
+      fetchReports(prev, true);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      const next = page + 1;
+      setPage(next);
+      fetchReports(next, true);
+    }
+  };
 
   return (
     <>
@@ -184,6 +213,37 @@ export default function SuccessReportsPage() {
             </Table>
           )}
         </div>
+
+        {/* Pagination Section */}
+        {!loading && reports.length > 0 && (
+          <div className="flex items-center justify-between border rounded-xl p-4 bg-background shadow-2xs mt-4">
+            <span className="text-xs text-muted-foreground font-semibold">
+              Showing page {page} of {totalPages} (Total reports: {total})
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handlePrevPage}
+                disabled={page === 1 || loading}
+                variant="outline"
+                size="sm"
+                className="h-8 border-border text-foreground text-xs font-medium cursor-pointer"
+              >
+                <ChevronLeftIcon className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <Button
+                onClick={handleNextPage}
+                disabled={page === totalPages || loading}
+                variant="outline"
+                size="sm"
+                className="h-8 border-border text-foreground text-xs font-medium cursor-pointer"
+              >
+                Next
+                <ChevronRightIcon className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Incident Details Dialog Modal */}

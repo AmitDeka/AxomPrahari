@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { z } from 'zod';
 import * as UserModel from '../models/user.model.js';
 import { createNotification } from '../models/notification.model.js';
 
@@ -31,10 +32,43 @@ export const getAdminDashboard = async (req, res) => {
 
 export const getAllAdminsList = async (req, res) => {
   try {
-    const admins = await UserModel.getAllAdmins();
+    // 1. Define query validation schema
+    const listQuerySchema = z.object({
+      page: z.coerce.number().int().positive().default(1),
+      limit: z.coerce.number().int().positive().default(10),
+      role: z.enum(['super_admin', 'police_admin']).optional()
+    });
+
+    // 2. Validate query parameters
+    const parsedQuery = listQuerySchema.safeParse(req.query);
+    if (!parsedQuery.success) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid query parameters',
+        errors: parsedQuery.error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    const { page, limit, role } = parsedQuery.data;
+    const offset = (page - 1) * limit;
+
+    const { admins, totalCount } = await UserModel.getAllAdmins(role, limit, offset);
+    const totalPages = Math.ceil(totalCount / limit);
+
     res.status(200).json({
       status: 'success',
-      data: admins || []
+      data: {
+        admins: admins || [],
+        pagination: {
+          total: totalCount,
+          page,
+          limit,
+          totalPages
+        }
+      }
     });
   } catch (error) {
     console.error('[getAllAdminsList Error]', error);

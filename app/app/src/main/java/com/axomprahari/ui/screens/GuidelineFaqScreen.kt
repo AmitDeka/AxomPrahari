@@ -2,11 +2,9 @@ package com.axomprahari.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -17,27 +15,24 @@ import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.isSystemInDarkTheme
-import com.axomprahari.ui.theme.*
 import androidx.compose.ui.res.stringResource
 import com.axomprahari.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuidelineFaqScreen(onBack: () -> Unit) {
-
+    val isDark = isSystemInDarkTheme()
     val LoginDarkGreen = MaterialTheme.colorScheme.primary
     val LoginBgTop = MaterialTheme.colorScheme.background
     val LoginBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -53,7 +48,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                         text = stringResource(R.string.faq_screen_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     )
                 },
@@ -90,37 +85,11 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // ── Mock Search Bar ──
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(InputBackground)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = LoginDarkGreen.copy(alpha = 0.4f),
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(R.string.faq_search_placeholder),
-                    color = LoginDarkGreen.copy(alpha = 0.4f),
-                    fontSize = 15.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ── Green Sentinel Promo Card ──
+            // ── Citizen Promo Card ──
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = LoginDarkGreen)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp)
@@ -128,14 +97,14 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.HelpOutline,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = if (isDark) Color.White else Color.Black.copy(alpha = 0.7f),
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = stringResource(R.string.faq_be_a_sentinel_title),
                         style = TextStyle(
-                            color = Color.White,
+                            color = if (isDark) Color.White else Color.Black.copy(alpha = 0.7f),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -144,27 +113,11 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                     Text(
                         text = stringResource(R.string.faq_be_a_sentinel_desc),
                         style = TextStyle(
-                            color = Color.White.copy(alpha = 0.8f),
+                            color = if (isDark) Color.White.copy(alpha = 0.6f) else Color.Black.copy(alpha = 0.6f),
                             fontSize = 14.sp,
                             lineHeight = 20.sp
                         )
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = { /* Placeholder click */ },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = LoginDarkGreen
-                        ),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.height(40.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.faq_download_manual_btn),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
-                        )
-                    }
                 }
             }
 
@@ -188,7 +141,11 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                         .clickable { expandedIndex = if (isExpanded) -1 else index },
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (isExpanded) Color.White.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f)
+                        containerColor = if (isDark){
+                            if (isExpanded) Color.Black.copy(alpha = 0.6f) else Color.Black.copy(alpha = 0.9f)
+                        } else {
+                            if (isExpanded) Color.White.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.9f)
+                        }
                     ),
                     border = borderStroke(isExpanded)
                 ) {
@@ -203,7 +160,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                             Text(
                                 text = question,
                                 style = TextStyle(
-                                    color = LoginDarkGreen,
+                                    color =  MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold
                                 ),
@@ -212,7 +169,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                             Icon(
                                 imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                                 contentDescription = null,
-                                tint = LoginDarkGreen.copy(alpha = 0.7f),
+                                tint =  MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -223,7 +180,7 @@ fun GuidelineFaqScreen(onBack: () -> Unit) {
                                 Text(
                                     text = answer,
                                     style = TextStyle(
-                                        color = LoginDarkGreen.copy(alpha = 0.8f),
+                                        color =  MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                                         fontSize = 14.sp,
                                         lineHeight = 20.sp
                                     )

@@ -1,6 +1,5 @@
 package com.axomprahari.ui.screens
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +20,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -36,7 +34,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
 import com.axomprahari.R
-import com.axomprahari.ui.theme.*
 import kotlinx.coroutines.launch
 
 @Composable
@@ -265,8 +262,8 @@ fun RequestOtpScreen(
                         scope.launch {
                             val result = onRequestOtp(phoneNumber)
                             loading = false
-                            result.onSuccess {
-                                Toast.makeText(context, context.getString(R.string.req_otp_toast_otp_sent), Toast.LENGTH_SHORT).show()
+                            result.onSuccess { message ->
+                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                                 onNavigateToVerify(phoneNumber)
                             }.onFailure { error ->
                                 Toast.makeText(context, error.message ?: context.getString(R.string.req_otp_toast_otp_failed), Toast.LENGTH_LONG).show()

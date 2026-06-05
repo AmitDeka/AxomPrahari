@@ -35,6 +35,8 @@ import {
   Trash2Icon,
   AlertTriangleIcon,
   AwardIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import api from "@/lib/axios";
@@ -45,19 +47,32 @@ export default function CitizenTablePage() {
   const [citizens, setCitizens] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   // Modal State
   const [dialogOpen, setDialogOpen] = useState(false);
   const [targetCitizen, setTargetCitizen] = useState(null);
   const [actionType, setActionType] = useState(null); // 'disable' | 'delete' | 'enable'
 
-  const fetchCitizens = async () => {
+  const fetchCitizens = async (targetPage, showLoader = false) => {
     try {
-      const res = await api.get("/admin/citizens");
+      if (showLoader) setLoading(true);
+      const res = await api.get(`/admin/citizens?page=${targetPage}&limit=${limit}`);
       if (res.data?.status === "success") {
         setCitizens(res.data.data.citizens || []);
+        const pagination = res.data.data.pagination;
+        if (pagination) {
+          setTotal(pagination.total || 0);
+          setTotalPages(pagination.totalPages || 1);
+        }
       }
     } catch (err) {
       console.error("Error loading citizens", err);
+      toast.error("Failed to load citizens.");
     } finally {
       setLoading(false);
     }
@@ -76,9 +91,25 @@ export default function CitizenTablePage() {
     };
     setTimeout(() => {
       fetchProfile();
-      fetchCitizens();
+      fetchCitizens(1, false);
     }, 0);
   }, []);
+
+  const handlePrevPage = () => {
+    if (page > 1) {
+      const prev = page - 1;
+      setPage(prev);
+      fetchCitizens(prev, true);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      const next = page + 1;
+      setPage(next);
+      fetchCitizens(next, true);
+    }
+  };
 
   const openConfirmation = (citizen, type) => {
     setTargetCitizen(citizen);
@@ -328,6 +359,37 @@ export default function CitizenTablePage() {
             </Table>
           )}
         </div>
+
+        {/* Pagination Section */}
+        {!loading && citizens.length > 0 && (
+          <div className="flex items-center justify-between border rounded-xl p-4 bg-background shadow-2xs mt-4">
+            <span className="text-xs text-muted-foreground font-semibold">
+              Showing page {page} of {totalPages} (Total citizens: {total})
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handlePrevPage}
+                disabled={page === 1 || loading}
+                variant="outline"
+                size="sm"
+                className="h-8 border-border text-foreground text-xs font-medium cursor-pointer"
+              >
+                <ChevronLeftIcon className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <Button
+                onClick={handleNextPage}
+                disabled={page === totalPages || loading}
+                variant="outline"
+                size="sm"
+                className="h-8 border-border text-foreground text-xs font-medium cursor-pointer"
+              >
+                Next
+                <ChevronRightIcon className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Shadcn UI Modal Dialog Confirmation */}

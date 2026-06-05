@@ -1,8 +1,6 @@
 package com.axomprahari.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,9 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axomprahari.R
-import com.axomprahari.ui.theme.*
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +41,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
                         text = stringResource(R.string.tos_screen_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     )
                 },
@@ -86,8 +81,8 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
                 Text(
                     text = stringResource(R.string.tos_official_documentation),
                     style = TextStyle(
-                        color = LoginDarkGreen.copy(alpha = 0.5f),
-                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.5.sp
                     )
@@ -99,7 +94,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.tos_welcome_desc, appName),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
                     fontWeight = FontWeight.Normal
@@ -114,7 +109,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.tos_section_1_desc),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )
@@ -128,7 +123,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.tos_section_2_desc),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )
@@ -172,7 +167,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.tos_section_3_desc),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )
@@ -186,7 +181,7 @@ fun TermsOfServiceScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.tos_section_4_desc),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )

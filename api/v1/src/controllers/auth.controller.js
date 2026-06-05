@@ -29,9 +29,11 @@ export const citizenRequestOtp = async (req, res) => {
         otp: "123456",
         expiresAt: Date.now() + 5 * 60 * 1000,
       });
-      return res
-        .status(200)
-        .json({ status: "success", message: "Demo OTP bypassed" });
+      return res.status(200).json({
+        status: "success",
+        message:
+          "Demo account activated. Please enter Demo account OTP to login.",
+      });
     }
 
     // Save to in-memory cache with 5 minutes expiration

@@ -36,6 +36,8 @@ import {
   UserXIcon,
   UserCheckIcon,
   AlertTriangleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import api from "@/lib/axios";
@@ -47,6 +49,12 @@ export default function PoliceAdminPage() {
   const [loading, setLoading] = useState(true);
   const [officers, setOfficers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Dialog States
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -60,19 +68,39 @@ export default function PoliceAdminPage() {
   const [jurisdictionDistrict, setJurisdictionDistrict] = useState("");
   const [password, setPassword] = useState("");
 
-  const fetchOfficers = async () => {
+  const fetchOfficers = async (targetPage = 1, showLoader = false) => {
     try {
-      const res = await api.get("/admin/list");
+      if (showLoader) setLoading(true);
+      const res = await api.get(`/admin/list?role=police_admin&page=${targetPage}&limit=${limit}`);
       if (res.data?.status === "success") {
-        const policeAdmins = res.data.data.filter(
-          (a) => a.role === "police_admin",
-        );
-        setOfficers(policeAdmins);
+        setOfficers(res.data.data.admins || []);
+        const pagination = res.data.data.pagination;
+        if (pagination) {
+          setTotal(pagination.total || 0);
+          setTotalPages(pagination.totalPages || 1);
+        }
       }
     } catch (err) {
       console.error("Error fetching officers list", err);
+      toast.error("Failed to load police administrators.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (page > 1) {
+      const prev = page - 1;
+      setPage(prev);
+      fetchOfficers(prev, true);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      const next = page + 1;
+      setPage(next);
+      fetchOfficers(next, true);
     }
   };
 
@@ -88,7 +116,7 @@ export default function PoliceAdminPage() {
       .catch((err) => console.error("Error fetching current user", err));
 
     setTimeout(() => {
-      fetchOfficers();
+      fetchOfficers(1, false);
     }, 0);
   }, []);
 
@@ -167,7 +195,7 @@ export default function PoliceAdminPage() {
         setIsFormOpen(false);
         setTargetOfficer(null);
         setLoading(true);
-        fetchOfficers();
+        fetchOfficers(page, true);
       }
     } catch (err) {
       console.error("Error saving officer", err);
@@ -202,7 +230,7 @@ export default function PoliceAdminPage() {
         setIsStatusOpen(false);
         setTargetOfficer(null);
         setLoading(true);
-        fetchOfficers();
+        fetchOfficers(page, true);
       }
     } catch (err) {
       console.error("Error toggling status", err);
@@ -235,7 +263,12 @@ export default function PoliceAdminPage() {
         setIsConfirmOpen(false);
         setTargetOfficer(null);
         setLoading(true);
-        fetchOfficers();
+        const isLastItem = officers.length === 1;
+        const targetPage = isLastItem && page > 1 ? page - 1 : page;
+        if (isLastItem && page > 1) {
+          setPage(targetPage);
+        }
+        fetchOfficers(targetPage, true);
       }
     } catch (err) {
       console.error("Error deleting officer", err);
@@ -438,6 +471,37 @@ export default function PoliceAdminPage() {
             </Table>
           )}
         </div>
+
+        {/* Pagination Section */}
+        {!loading && officers.length > 0 && (
+          <div className="flex items-center justify-between border rounded-xl p-4 bg-background shadow-2xs mt-4">
+            <span className="text-xs text-muted-foreground font-semibold">
+              Showing page {page} of {totalPages} (Total police admins: {total})
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handlePrevPage}
+                disabled={page === 1 || loading}
+                variant="outline"
+                size="sm"
+                className="h-8 border-border text-foreground text-xs font-medium cursor-pointer"
+              >
+                <ChevronLeftIcon className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <Button
+                onClick={handleNextPage}
+                disabled={page === totalPages || loading}
+                variant="outline"
+                size="sm"
+                className="h-8 border-border text-foreground text-xs font-medium cursor-pointer"
+              >
+                Next
+                <ChevronRightIcon className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Edit Form Dialog */}

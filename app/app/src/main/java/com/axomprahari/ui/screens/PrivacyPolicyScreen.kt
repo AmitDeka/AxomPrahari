@@ -1,8 +1,6 @@
 package com.axomprahari.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,7 +8,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -26,8 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axomprahari.ui.theme.*
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.ui.res.stringResource
 import com.axomprahari.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +82,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
                 Text(
                     text = stringResource(R.string.privacy_official_documentation),
                     style = TextStyle(
-                        color = LoginDarkGreen.copy(alpha = 0.5f),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.5.sp
@@ -100,7 +95,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.privacy_welcome_desc, appName),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
                     fontWeight = FontWeight.Normal
@@ -115,7 +110,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.privacy_section_1_desc),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )
@@ -157,7 +152,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.privacy_section_2_desc),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )
@@ -201,7 +196,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.privacy_section_3_desc),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )
@@ -215,7 +210,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.privacy_section_4_desc),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     lineHeight = 20.sp
                 )
@@ -232,7 +227,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
                     Text(
                         text = stringResource(R.string.privacy_detailed_policy_doc_title),
                         style = TextStyle(
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.surface,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -241,7 +236,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
                     Text(
                         text = stringResource(R.string.privacy_detailed_policy_doc_desc),
                         style = TextStyle(
-                            color = Color.White.copy(alpha = 0.8f),
+                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
                             fontSize = 13.sp,
                             lineHeight = 18.sp
                         )
@@ -279,7 +274,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.privacy_footer_copyright),
                 style = TextStyle(
-                    color = LoginDarkGreen.copy(alpha = 0.4f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                     fontSize = 11.sp,
                     lineHeight = 16.sp,
                     textAlign = TextAlign.Center

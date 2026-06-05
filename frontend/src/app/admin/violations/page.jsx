@@ -38,6 +38,8 @@ import {
   IndianRupeeIcon,
   AwardIcon,
   AlertTriangleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import api from "@/lib/axios";
@@ -47,6 +49,12 @@ export default function ViolationsPage() {
   const [loading, setLoading] = useState(true);
   const [violations, setViolations] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Dialog states
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -66,16 +74,39 @@ export default function ViolationsPage() {
   const [description, setDescription] = useState("");
   const [evidenceRequirement, setEvidenceRequirement] = useState("");
 
-  const fetchViolations = async () => {
+  const fetchViolations = async (targetPage = 1, showLoader = false) => {
     try {
-      const res = await api.get("/admin/violations");
+      if (showLoader) setLoading(true);
+      const res = await api.get(`/admin/violations?page=${targetPage}&limit=${limit}`);
       if (res.data?.status === "success") {
-        setViolations(res.data.data || []);
+        setViolations(res.data.data.violations || []);
+        const pagination = res.data.data.pagination;
+        if (pagination) {
+          setTotal(pagination.total || 0);
+          setTotalPages(pagination.totalPages || 1);
+        }
       }
     } catch (err) {
       console.error("Error loading violations", err);
+      toast.error("Failed to load violations.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (page > 1) {
+      const prev = page - 1;
+      setPage(prev);
+      fetchViolations(prev, true);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      const next = page + 1;
+      setPage(next);
+      fetchViolations(next, true);
     }
   };
 
@@ -92,7 +123,7 @@ export default function ViolationsPage() {
     };
     setTimeout(() => {
       fetchProfile();
-      fetchViolations();
+      fetchViolations(1, false);
     }, 0);
   }, []);
 
@@ -216,7 +247,8 @@ export default function ViolationsPage() {
         if (res.data?.status === "success") {
           toast.success("Violation definition created successfully.");
           setLoading(true);
-          await fetchViolations();
+          setPage(1);
+          await fetchViolations(1, true);
         }
       } else {
         const res = await api.put(
@@ -226,7 +258,7 @@ export default function ViolationsPage() {
         if (res.data?.status === "success") {
           toast.success("Violation definition updated successfully.");
           setLoading(true);
-          await fetchViolations();
+          await fetchViolations(page, true);
         }
       }
       setIsFormOpen(false);
@@ -263,7 +295,7 @@ export default function ViolationsPage() {
           `Violation status updated: ${newStatus ? "Activated" : "Deactivated"}`,
         );
         setLoading(true);
-        await fetchViolations();
+        await fetchViolations(page, true);
       }
       setIsStatusConfirmOpen(false);
       setStatusTargetViolation(null);
@@ -280,7 +312,12 @@ export default function ViolationsPage() {
       if (res.data?.status === "success") {
         toast.success("Violation definition deleted successfully.");
         setLoading(true);
-        await fetchViolations();
+        const isLastItem = violations.length === 1;
+        const targetPage = isLastItem && page > 1 ? page - 1 : page;
+        if (isLastItem && page > 1) {
+          setPage(targetPage);
+        }
+        await fetchViolations(targetPage, true);
       }
       setIsConfirmOpen(false);
       setTargetViolation(null);
@@ -505,6 +542,37 @@ export default function ViolationsPage() {
             </Table>
           )}
         </div>
+
+        {/* Pagination Section */}
+        {!loading && violations.length > 0 && (
+          <div className="flex items-center justify-between border rounded-xl p-4 bg-background shadow-2xs mt-4">
+            <span className="text-xs text-muted-foreground font-semibold">
+              Showing page {page} of {totalPages} (Total violations: {total})
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handlePrevPage}
+                disabled={page === 1 || loading}
+                variant="outline"
+                size="sm"
+                className="h-8 border-border text-foreground text-xs font-medium cursor-pointer"
+              >
+                <ChevronLeftIcon className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <Button
+                onClick={handleNextPage}
+                disabled={page === totalPages || loading}
+                variant="outline"
+                size="sm"
+                className="h-8 border-border text-foreground text-xs font-medium cursor-pointer"
+              >
+                Next
+                <ChevronRightIcon className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Creation/Edition Dialog Form */}

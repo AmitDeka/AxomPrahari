@@ -32,7 +32,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 @Composable
 fun SplashScreen(onAnimationComplete: () -> Unit) {
     val isDark = isSystemInDarkTheme()
-    val SplashDarkGreen = MaterialTheme.colorScheme.primary
+    val primaryColor = MaterialTheme.colorScheme.primary
     val SplashBgTop = MaterialTheme.colorScheme.background
     val SplashBgBottom = MaterialTheme.colorScheme.surfaceContainerLowest
     // Animations
@@ -121,7 +121,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
             Text(
                 text = stringResource(R.string.splash_app_name),
                 style = MaterialTheme.typography.headlineLarge.copy(
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 2.sp,
                     fontSize = 30.sp
@@ -151,7 +151,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
                     .fillMaxWidth()
                     .height(4.dp)
                     .clip(RoundedCornerShape(2.dp))
-                    .background(SplashDarkGreen.copy(alpha = 0.1f))
+                    .background(primaryColor.copy(alpha = 0.1f))
                     .alpha(textAlpha.value)
             ) {
                 Box(
@@ -159,7 +159,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
                         .fillMaxHeight()
                         .fillMaxWidth(fraction = progressAnim.value)
                         .clip(RoundedCornerShape(2.dp))
-                        .background(SplashDarkGreen)
+                        .background(primaryColor)
                 )
             }
 
@@ -181,7 +181,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
                 modifier = Modifier
                     .width(24.dp)
                     .height(1.dp)
-                    .background(SplashDarkGreen.copy(alpha = 0.2f))
+                    .background(primaryColor.copy(alpha = 0.2f))
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -204,7 +204,7 @@ fun SplashScreen(onAnimationComplete: () -> Unit) {
                 modifier = Modifier
                     .width(24.dp)
                     .height(1.dp)
-                    .background(SplashDarkGreen.copy(alpha = 0.2f))
+                    .background(primaryColor.copy(alpha = 0.2f))
             )
         }
     }

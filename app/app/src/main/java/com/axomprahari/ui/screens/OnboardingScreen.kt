@@ -26,7 +26,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.axomprahari.R
-import com.axomprahari.ui.theme.*
 import kotlinx.coroutines.launch
 
 data class OnboardingSlide(

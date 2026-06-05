@@ -3,8 +3,25 @@ import { createNotification } from '../models/notification.model.js';
 
 export const getAdminViolations = async (req, res) => {
   try {
-    const violations = await ViolationModel.getAllViolations(true);
-    res.status(200).json({ status: 'success', data: violations });
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    const { violations, totalCount } = await ViolationModel.getAllViolations(true, limit, offset);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        violations,
+        pagination: {
+          total: totalCount,
+          page,
+          limit,
+          totalPages
+        }
+      }
+    });
   } catch (error) {
     console.error('[getAdminViolations Error]', error);
     res.status(500).json({ error: 'Internal Server Error' });
