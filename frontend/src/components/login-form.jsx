@@ -21,7 +21,11 @@ export function LoginForm({ className, ...props }) {
 
     try {
       const response = await api.post("/auth/admin/login", { email, password });
-      if (response.data?.status === "success") {
+      if (response.data?.status === "success" && response.data?.token) {
+        // Set the token cookie on the frontend domain so Next.js middleware can read it
+        const token = response.data.token;
+        document.cookie = `admin_token=${token}; path=/; max-age=28800; SameSite=Lax; Secure`;
+
         toast.success("Login successful! Redirecting to dashboard...");
         // Wait a short time to show success message
         setTimeout(() => {

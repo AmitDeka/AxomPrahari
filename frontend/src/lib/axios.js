@@ -6,10 +6,18 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// Helper to get cookie value
+const getCookie = (name) => {
+  if (typeof document === "undefined") return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+};
+
 // Request Interceptor: Attach the Admin JWT & Prepend /api/v1
 api.interceptors.request.use((config) => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+  const token = getCookie("admin_token") || (typeof window !== "undefined" ? localStorage.getItem("admin_token") : null);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -33,6 +41,7 @@ api.interceptors.response.use(
       );
       if (!isLoginRequest && typeof window !== "undefined") {
         localStorage.removeItem("admin_token");
+        document.cookie = "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax; Secure";
         window.location.href = "/login";
       }
     }

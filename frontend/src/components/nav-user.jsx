@@ -56,6 +56,7 @@ export function NavUser({ user }) {
       console.error("Logout error", error);
     } finally {
       localStorage.removeItem("admin_token");
+      document.cookie = "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax; Secure";
       window.location.href = "/login";
     }
   };
