@@ -38,7 +38,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/axios";
 import { toast } from "sonner";
 
@@ -58,7 +58,7 @@ export default function CitizenTablePage() {
   const [targetCitizen, setTargetCitizen] = useState(null);
   const [actionType, setActionType] = useState(null); // 'disable' | 'delete' | 'enable'
 
-  const fetchCitizens = async (targetPage, showLoader = false) => {
+  const fetchCitizens = useCallback(async (targetPage, showLoader = false) => {
     try {
       if (showLoader) setLoading(true);
       const res = await api.get(`/admin/citizens?page=${targetPage}&limit=${limit}`);
@@ -76,7 +76,7 @@ export default function CitizenTablePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -93,7 +93,7 @@ export default function CitizenTablePage() {
       fetchProfile();
       fetchCitizens(1, false);
     }, 0);
-  }, []);
+  }, [fetchCitizens]);
 
   const handlePrevPage = () => {
     if (page > 1) {

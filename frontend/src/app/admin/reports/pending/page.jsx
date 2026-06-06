@@ -46,7 +46,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/axios";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -76,7 +76,7 @@ export default function PendingReportsPage() {
   // Rejection inputs
   const [rejectionMessage, setRejectionMessage] = useState("");
 
-  const fetchReports = async (targetPage, showLoader = false) => {
+  const fetchReports = useCallback(async (targetPage, showLoader = false) => {
     try {
       if (showLoader) setLoading(true);
       const res = await api.get(`/admin/reports?status=pending&page=${targetPage}&limit=${limit}`);
@@ -94,13 +94,13 @@ export default function PendingReportsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit]);
 
   useEffect(() => {
     setTimeout(() => {
       fetchReports(1, false);
     }, 0);
-  }, []);
+  }, [fetchReports]);
 
   const handlePrevPage = () => {
     if (page > 1) {

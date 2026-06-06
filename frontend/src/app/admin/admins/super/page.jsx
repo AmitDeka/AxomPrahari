@@ -39,7 +39,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/axios";
 import ComboboxWithStates from "@/components/ui/combobox-with-states";
 import { toast } from "sonner";
@@ -68,7 +68,7 @@ export default function SuperAdminPage() {
   const [jurisdictionDistrict, setJurisdictionDistrict] = useState("");
   const [password, setPassword] = useState("");
 
-  const fetchAdmins = async (targetPage = 1, showLoader = false) => {
+  const fetchAdmins = useCallback(async (targetPage = 1, showLoader = false) => {
     try {
       if (showLoader) setLoading(true);
       const res = await api.get(`/admin/list?role=super_admin&page=${targetPage}&limit=${limit}`);
@@ -86,7 +86,7 @@ export default function SuperAdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit]);
 
   const handlePrevPage = () => {
     if (page > 1) {
@@ -119,7 +119,7 @@ export default function SuperAdminPage() {
     };
 
     initialize();
-  }, []);
+  }, [fetchAdmins]);
 
   const openEditDialog = (adm) => {
     if (currentUser?.role === "police_admin" && adm.role === "super_admin") {

@@ -43,6 +43,7 @@ import {
 import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/axios";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function FeedbackPage() {
   const [loading, setLoading] = useState(true);
@@ -388,11 +389,13 @@ export default function FeedbackPage() {
                         <ExternalLinkIcon className="size-2.5" />
                       </a>
                     </div>
-                    <div className="relative rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center max-h-[220px]">
-                      <img
+                    <div className="relative rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center h-[200px] w-full">
+                      <Image
+                        fill
                         src={selectedFeedback.image_url}
                         alt="Citizen attachment proof"
-                        className="w-full max-h-[200px] object-contain rounded-md"
+                        className="object-contain rounded-md"
+                        unoptimized
                       />
                     </div>
                   </div>

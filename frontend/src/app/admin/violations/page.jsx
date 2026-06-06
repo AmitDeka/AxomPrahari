@@ -41,7 +41,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/axios";
 import { toast } from "sonner";
 
@@ -74,7 +74,7 @@ export default function ViolationsPage() {
   const [description, setDescription] = useState("");
   const [evidenceRequirement, setEvidenceRequirement] = useState("");
 
-  const fetchViolations = async (targetPage = 1, showLoader = false) => {
+  const fetchViolations = useCallback(async (targetPage = 1, showLoader = false) => {
     try {
       if (showLoader) setLoading(true);
       const res = await api.get(`/admin/violations?page=${targetPage}&limit=${limit}`);
@@ -92,7 +92,7 @@ export default function ViolationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit]);
 
   const handlePrevPage = () => {
     if (page > 1) {
@@ -125,7 +125,7 @@ export default function ViolationsPage() {
       fetchProfile();
       fetchViolations(1, false);
     }, 0);
-  }, []);
+  }, [fetchViolations]);
 
   const openCreateDialog = () => {
     setFormMode("create");

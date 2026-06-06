@@ -39,7 +39,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/axios";
 import ComboboxWithStates from "@/components/ui/combobox-with-states";
 // import { ComboboxWithStates } from "@/components/ui/combobox-with-states";
@@ -68,7 +68,7 @@ export default function PoliceAdminPage() {
   const [jurisdictionDistrict, setJurisdictionDistrict] = useState("");
   const [password, setPassword] = useState("");
 
-  const fetchOfficers = async (targetPage = 1, showLoader = false) => {
+  const fetchOfficers = useCallback(async (targetPage = 1, showLoader = false) => {
     try {
       if (showLoader) setLoading(true);
       const res = await api.get(`/admin/list?role=police_admin&page=${targetPage}&limit=${limit}`);
@@ -86,7 +86,7 @@ export default function PoliceAdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit]);
 
   const handlePrevPage = () => {
     if (page > 1) {
@@ -118,7 +118,7 @@ export default function PoliceAdminPage() {
     setTimeout(() => {
       fetchOfficers(1, false);
     }, 0);
-  }, []);
+  }, [fetchOfficers]);
 
   const openEditDialog = (off) => {
     setTargetOfficer(off);

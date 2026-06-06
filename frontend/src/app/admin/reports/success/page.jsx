@@ -42,8 +42,9 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/axios";
+import Image from "next/image";
 
 const isVideoFile = (url) => {
   if (!url) return false;
@@ -64,7 +65,7 @@ export default function SuccessReportsPage() {
   // Dialog State
   const [selectedReport, setSelectedReport] = useState(null);
 
-  const fetchReports = async (targetPage, showLoading = true) => {
+  const fetchReports = useCallback(async (targetPage, showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
       const res = await api.get(`/admin/reports?status=accepted&page=${targetPage}&limit=${limit}`);
@@ -81,13 +82,13 @@ export default function SuccessReportsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit]);
 
   useEffect(() => {
     setTimeout(() => {
       fetchReports(1, false);
     }, 0);
-  }, []);
+  }, [fetchReports]);
 
   const handlePrevPage = () => {
     if (page > 1) {
@@ -272,11 +273,15 @@ export default function SuccessReportsPage() {
                       className="w-full h-[220px] object-contain bg-black"
                     />
                   ) : (
-                    <img
-                      src={selectedReport.media_url || "/incident_mockup.png"}
-                      alt="Citizen submission proof"
-                      className="w-full h-[220px] object-cover"
-                    />
+                    <div className="relative w-full h-[220px]">
+                      <Image
+                        fill
+                        src={selectedReport.media_url || "/incident_mockup.png"}
+                        alt="Citizen submission proof"
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
                   )}
                   <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded flex items-center gap-1.5 font-semibold">
                     {isVideoFile(selectedReport.media_url) ? (
