@@ -165,6 +165,12 @@ export const deleteViolation = async (req, res) => {
     res.status(200).json({ status: 'success', message: 'Violation deleted successfully.' });
   } catch (error) {
     console.error('[deleteViolation Error]', error);
+    if (error.code === '23503') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'This violation type cannot be deleted because it is linked to existing reports. Please deactivate it instead.'
+      });
+    }
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
