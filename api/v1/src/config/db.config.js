@@ -5,12 +5,31 @@ const { Pool } = pg;
 
 const isHosted = !!process.env.DATABASE_URL;
 
+// Determine if SSL is needed:
+// - Disabled if DB_SSL=false, or when connecting to localhost/127.0.0.1 without sslmode=require (e.g. GitHub Actions CI)
+// - Enabled for cloud databases (Neon, Render, Supabase, AWS RDS)
+const getSslConfig = () => {
+  if (process.env.DB_SSL === 'false') return false;
+  if (!process.env.DATABASE_URL) return false;
+
+  const url = process.env.DATABASE_URL;
+  const isLocal = url.includes('localhost') || url.includes('127.0.0.1');
+
+  if (isLocal && !url.includes('sslmode=require')) {
+    return false;
+  }
+
+  return {
+    rejectUnauthorized: process.env.DB_REJECT_UNAUTHORIZED === 'true',
+  };
+};
+
+const sslConfig = getSslConfig();
+
 export const db = isHosted
   ? new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: process.env.DB_REJECT_UNAUTHORIZED === 'true',
-      },
+      ...(sslConfig ? { ssl: sslConfig } : {}),
       max: process.env.DB_POOL_MAX ? parseInt(process.env.DB_POOL_MAX, 10) : 10,
       idleTimeoutMillis: 30000, // Close idle clients after 30s (prevents holding ghost connections when Neon auto-suspends)
       connectionTimeoutMillis: 10000, // 10s connection timeout for cold-start wakeups
@@ -32,4 +51,3 @@ export const db = isHosted
 db.on('error', (err) => {
   console.error('[PostgreSQL Pool Warning] Unexpected idle client error:', err.message);
 });
-
