@@ -77,12 +77,31 @@ export const getFeedbacks = async (req, res) => {
 
     const { feedbacks, total } = await FeedbackModel.getFeedbacksList(limit, offset);
 
+    const isSuperAdmin = req.user.role === 'super_admin';
     // Resolve private/public media links for all feedbacks
     const resolvedFeedbacks = await Promise.all(
       feedbacks.map(async (fb) => {
         const readableUrl = fb.image_url 
           ? await getReadableMediaUrl(fb.image_url) 
           : null;
+
+        let name = fb.citizen_name;
+        let phone = fb.citizen_phone;
+        let email = fb.citizen_email;
+
+        if (!isSuperAdmin) {
+          if (name) {
+            name = name.split(' ').map(p => p.length <= 2 ? p[0] + '*' : p[0] + '*'.repeat(p.length - 2) + p[p.length - 1]).join(' ');
+          }
+          if (phone) {
+            phone = phone.replace(/(\+\d{2})?\d{6}(\d{4})/, (m, country, last) => `${country || ''}******${last}`);
+          }
+          if (email && email.includes('@')) {
+            const [local, domain] = email.split('@');
+            email = local.length <= 2 ? `${local[0] || '*'}*@${domain}` : `${local[0]}${'*'.repeat(local.length - 2)}${local[local.length - 1]}@${domain}`;
+          }
+        }
+
         return {
           id: fb.id,
           feedback_category: fb.feedback_category,
@@ -90,9 +109,9 @@ export const getFeedbacks = async (req, res) => {
           image_url: readableUrl,
           created_at: fb.created_at,
           citizen: {
-            name: fb.citizen_name,
-            phone: fb.citizen_phone,
-            email: fb.citizen_email,
+            name,
+            phone,
+            email,
             code: fb.citizen_code
           }
         };

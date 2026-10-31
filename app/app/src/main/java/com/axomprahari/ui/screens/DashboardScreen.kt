@@ -40,6 +40,7 @@ import com.axomprahari.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
+    initialReportingOffence: Boolean = false,
     navController: NavController,
     reportsList: List<CitizenReportDto>,
     userProfile: com.axomprahari.data.remote.dto.UserProfile?,
@@ -57,7 +58,13 @@ fun DashboardScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var showFeedbackPage by remember { mutableStateOf(false) }
 
-    var isReportingOffence by remember { mutableStateOf(false) }
+    var isReportingOffence by remember { mutableStateOf(initialReportingOffence) }
+
+    LaunchedEffect(initialReportingOffence) {
+        if (initialReportingOffence) {
+            isReportingOffence = true
+        }
+    }
 
 
 

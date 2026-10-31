@@ -18,11 +18,11 @@ router.get(
   getAllCitizensAdmin
 );
 
-// Toggle citizen's active status (Police Admin & Super Admin)
+// Toggle citizen's active status (Super Admin only)
 router.patch(
   '/:id/status',
   verifyToken,
-  requireRole(['police_admin', 'super_admin']),
+  requireRole(['super_admin']),
   validateRequest(toggleCitizenStatusSchema),
   disableCitizenAdmin
 );

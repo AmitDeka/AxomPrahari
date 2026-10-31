@@ -19,6 +19,24 @@ export const otpRateLimiter = rateLimit({
 });
 
 /**
+ * Specific rate limiter for OTP verification endpoints.
+ * Limits to 10 verification requests per 5 minutes per IP.
+ */
+export const verifyOtpRateLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 10, // Limit each IP to 10 verification attempts per 5 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 'error',
+    message: 'Too many OTP verification attempts from this IP. Please try again after 5 minutes.',
+  },
+  handler: (req, res, next, options) => {
+    res.status(options.statusCode).json(options.message);
+  }
+});
+
+/**
  * General API rate limiter (optional but recommended for global protection)
  */
 export const generalApiLimiter = rateLimit({

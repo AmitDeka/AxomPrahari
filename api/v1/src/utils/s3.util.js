@@ -62,18 +62,29 @@ export const generateDownloadUrl = async (fileKey) => {
 export const getReadableMediaUrl = async (mediaUrl) => {
   if (!mediaUrl) return '';
 
-  // Extract key if it's a full URL, preserving folder structure
+  const customDomain = process.env.R2_CUSTOM_DOMAIN || 'pub-r2.axomprahari.in';
   let fileKey = mediaUrl;
-  if (mediaUrl.startsWith('http')) {
+
+  if (mediaUrl.startsWith('http://') || mediaUrl.startsWith('https://')) {
     try {
       const urlObj = new URL(mediaUrl);
-      // Remove the leading slash from the pathname to get the correct S3 key
+      // Security Check: Only allow presigning for files hosted on our own R2 custom domain or R2 storage domain
+      const isAllowedHost = 
+        urlObj.hostname === customDomain || 
+        urlObj.hostname.endsWith('.r2.cloudflarestorage.com');
+
+      if (!isAllowedHost) {
+        // Untrusted external domain - do not generate S3 download presigned URL
+        return mediaUrl;
+      }
       fileKey = urlObj.pathname.substring(1);
     } catch (e) {
-      // Fallback
-      fileKey = mediaUrl.split('/').pop();
+      return mediaUrl;
     }
   }
+
+  // Prevent path traversal
+  fileKey = fileKey.replace(/\.\./g, '');
 
   if (process.env.R2_BUCKET_PRIVATE === 'true') {
     try {

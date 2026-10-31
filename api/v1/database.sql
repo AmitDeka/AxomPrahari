@@ -1,9 +1,7 @@
--- Connect to your database before running this
--- \c axomprahari
+-- Axom Prahari (The Civic Sentinel)
+-- PostgreSQL Unified Schema DDL (Neon Serverless & Self-Hosted Compatible)
 
--- Enable UUID extension (optional, but good if you want UUIDs instead of SERIAL later)
--- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
+-- 1. Users Table (Citizens, Police Admins, Super Admins)
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     citizen_id VARCHAR(50) UNIQUE,
@@ -23,29 +21,33 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Index on phone_number for faster lookups during OTP
-CREATE INDEX idx_users_phone ON users(phone_number);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone_number);
+CREATE INDEX IF NOT EXISTS idx_users_citizen_id ON users(citizen_id);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 
--- Table to store invalidated (logged out) JWT tokens
+-- 2. Invalidated Tokens Table (Logged out JWT tokens)
 CREATE TABLE IF NOT EXISTS invalidated_tokens (
     token TEXT PRIMARY KEY,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Master table for all traffic violations
+-- 3. Master Table for Traffic Violations
 CREATE TABLE IF NOT EXISTS violation_master (
     id SERIAL PRIMARY KEY,
     offence_name VARCHAR(255) NOT NULL,
     mv_act_code VARCHAR(100) NOT NULL UNIQUE,
     fine_amount DECIMAL(10, 2) NOT NULL,
     reward_points INT DEFAULT 0,
+    penalty TEXT NULL,
+    description TEXT NULL,
+    evidence_requirement TEXT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table to store citizen violation reports
+-- 4. Citizen Violation Reports Table
 CREATE TABLE IF NOT EXISTS violation_reports (
     id SERIAL PRIMARY KEY,
     report_id VARCHAR(50) UNIQUE,
@@ -65,7 +67,12 @@ CREATE TABLE IF NOT EXISTS violation_reports (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table to store administrative notifications
+CREATE INDEX IF NOT EXISTS idx_reports_status ON violation_reports(status);
+CREATE INDEX IF NOT EXISTS idx_reports_citizen ON violation_reports(citizen_id);
+CREATE INDEX IF NOT EXISTS idx_reports_created ON violation_reports(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reports_coords ON violation_reports(latitude, longitude);
+
+-- 5. Admin Notifications Table
 CREATE TABLE IF NOT EXISTS admin_notifications (
     id SERIAL PRIMARY KEY,
     recipient_role VARCHAR(50) NOT NULL DEFAULT 'police_admin' CHECK (recipient_role IN ('police_admin', 'super_admin', 'all')),
@@ -80,7 +87,7 @@ CREATE TABLE IF NOT EXISTS admin_notifications (
 
 CREATE INDEX IF NOT EXISTS idx_admin_notifications_read ON admin_notifications(is_read, recipient_role);
 
--- Table to store citizen feedback
+-- 6. Citizen Feedback Table
 CREATE TABLE IF NOT EXISTS feedbacks (
     id SERIAL PRIMARY KEY,
     citizen_id INT REFERENCES users(id) ON DELETE CASCADE,
@@ -89,3 +96,5 @@ CREATE TABLE IF NOT EXISTS feedbacks (
     image_url VARCHAR(500),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_feedbacks_citizen ON feedbacks(citizen_id);

@@ -120,6 +120,11 @@ export const getAdminReports = async (statusFilter = null, limit = 20, offset = 
   };
 };
 
+export const getReportById = async (id) => {
+  const result = await db.query('SELECT * FROM violation_reports WHERE id = $1', [id]);
+  return result.rows[0];
+};
+
 export const updateReportStatus = async (reportId, status, adminMessage) => {
   const result = await db.query(
     `UPDATE violation_reports 

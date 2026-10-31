@@ -37,12 +37,12 @@ export const submitReport = async (req, res) => {
 
     const { violation_id } = req.body;
 
-    // 2. Validate that the violation ID exists in violation master
+    // 2. Validate that the violation ID exists and is active in violation master
     const violation = await ViolationModel.getViolationById(violation_id);
-    if (!violation) {
+    if (!violation || violation.is_active === false) {
       return res.status(400).json({
         status: 'error',
-        message: 'Invalid violation type.'
+        message: 'This violation type is inactive or no longer accepted.'
       });
     }
 
@@ -140,12 +140,29 @@ export const getAdminReportsList = async (req, res) => {
       offset
     );
 
+    const isSuperAdmin = req.user.role === 'super_admin';
     const { getReadableMediaUrl } = await import('../utils/s3.util.js');
     const resolvedReports = await Promise.all(
-      reports.map(async (r) => ({
-        ...r,
-        media_url: await getReadableMediaUrl(r.media_url)
-      }))
+      reports.map(async (r) => {
+        let citizenName = r.citizen_name;
+        let phoneNumber = r.phone_number;
+
+        if (!isSuperAdmin) {
+          if (citizenName) {
+            citizenName = citizenName.split(' ').map(p => p.length <= 2 ? p[0] + '*' : p[0] + '*'.repeat(p.length - 2) + p[p.length - 1]).join(' ');
+          }
+          if (phoneNumber) {
+            phoneNumber = phoneNumber.replace(/(\+\d{2})?\d{6}(\d{4})/, (m, country, last) => `${country || ''}******${last}`);
+          }
+        }
+
+        return {
+          ...r,
+          citizen_name: citizenName,
+          phone_number: phoneNumber,
+          media_url: await getReadableMediaUrl(r.media_url)
+        };
+      })
     );
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -173,21 +190,38 @@ export const reviewReport = async (req, res) => {
     const reportId = req.params.id;
     const { status, admin_message } = req.body;
 
-    const updatedReport = await ReportModel.updateReportStatus(
-      reportId,
-      status,
-      admin_message
-    );
-
-    if (!updatedReport) {
+    // Check existing report status first
+    const existingReport = await ReportModel.getReportById(reportId);
+    if (!existingReport) {
       return res.status(404).json({
         status: 'error',
         message: 'Violation report not found.'
       });
     }
 
-    // Grant reward points if report is accepted
-    if (status === 'accepted') {
+    // SEC-18: District Jurisdiction check for Police Admins
+    if (req.user.role === 'police_admin') {
+      const reportDistrict = getDistrictFromLocation(existingReport.location_name);
+      if (
+        reportDistrict &&
+        req.user.jurisdiction_district &&
+        reportDistrict.toLowerCase() !== req.user.jurisdiction_district.toLowerCase()
+      ) {
+        return res.status(403).json({
+          status: 'error',
+          message: `Access denied. You can only review reports filed in ${req.user.jurisdiction_district}.`
+        });
+      }
+    }
+
+    const updatedReport = await ReportModel.updateReportStatus(
+      reportId,
+      status,
+      admin_message
+    );
+
+    // Grant reward points ONLY if transitioned to 'accepted' from a non-accepted status
+    if (status === 'accepted' && existingReport.status !== 'accepted') {
       const violation = await ViolationModel.getViolationById(updatedReport.violation_id);
       if (violation && violation.reward_points > 0) {
         const UserModel = await import('../models/user.model.js');

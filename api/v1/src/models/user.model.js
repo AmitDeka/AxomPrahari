@@ -269,10 +269,19 @@ export const invalidateToken = async (token, expiresAt) => {
     'INSERT INTO invalidated_tokens (token, expires_at) VALUES ($1, $2) ON CONFLICT (token) DO NOTHING',
     [token, expiresAt]
   );
+  // SEC-17: Opportunistically purge expired tokens to maintain table size and performance
+  try {
+    await db.query('DELETE FROM invalidated_tokens WHERE expires_at < NOW()');
+  } catch {
+    // Non-blocking background purge
+  }
 };
 
 export const isTokenInvalidated = async (token) => {
-  const result = await db.query('SELECT token FROM invalidated_tokens WHERE token = $1', [token]);
+  const result = await db.query(
+    'SELECT token FROM invalidated_tokens WHERE token = $1 AND expires_at > NOW()',
+    [token]
+  );
   return result.rows.length > 0;
 };
 

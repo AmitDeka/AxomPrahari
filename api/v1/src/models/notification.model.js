@@ -82,13 +82,20 @@ export const getUnreadNotificationsCount = async (role, jurisdictionDistrict = n
 };
 
 /**
- * Mark a specific notification as read
+ * Mark a specific notification as read, scoped to admin's role and jurisdiction
  */
-export const markNotificationAsRead = async (id) => {
-  const result = await db.query(
-    'UPDATE admin_notifications SET is_read = true WHERE id = $1 RETURNING id, is_read',
-    [id]
-  );
+export const markNotificationAsRead = async (id, role, jurisdictionDistrict = null) => {
+  let query = 'UPDATE admin_notifications SET is_read = true WHERE id = $1';
+  const params = [id];
+
+  if (role !== 'super_admin') {
+    query += ` AND (recipient_role = 'police_admin' OR recipient_role = 'all')
+               AND (jurisdiction_district IS NULL OR jurisdiction_district = $2)`;
+    params.push(jurisdictionDistrict);
+  }
+
+  query += ' RETURNING id, is_read';
+  const result = await db.query(query, params);
   return result.rows[0];
 };
 
