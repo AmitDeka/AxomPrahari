@@ -1,16 +1,32 @@
-*.iml
-.agents
-.gradle
+# Android SDK & Local properties
+local.properties
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
+
+# Gradle & Build artifacts
+.gradle/
 /build
-/captures
+build/
+app/build/
+captures/
 .externalNativeBuild
 .cxx
-local.properties
+
+# Packages
+*.apk
+*.aab
+
+# Kotlin compiler logs & caches
+.kotlin/
+*.log
+
+# IDE & Editor files
+*.iml
+.idea/
+.vscode/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Agent metadata
+.agents/

@@ -19,3 +19,7 @@ export const updateViolationSchema = z.object({
   description: z.string().min(5, 'Description must be at least 5 characters').optional(),
   evidence_requirement: z.string().min(5, 'Evidence requirement must be at least 5 characters').optional(),
 }).strict().refine(data => Object.keys(data).length > 0, "At least one field must be provided to update");
+
+export const toggleViolationStatusSchema = z.object({
+  is_active: z.boolean({ required_error: 'is_active is required' }),
+}).strict();

@@ -1,4 +1,21 @@
+# Environment variables
 .env
-.agents
+.env.*
+!.env.example
+
+# Dependencies
 node_modules/
-/database.sql
+
+# Logs
+*.log
+npm-debug.log*
+
+# One-off verification, scratch, and manual migration scripts
+verify*.js
+inspect*.js
+migrateFeedbacks.js
+migrateNotifications.js
+seedSuperAdmin.js
+
+# Local agent metadata
+.agents/

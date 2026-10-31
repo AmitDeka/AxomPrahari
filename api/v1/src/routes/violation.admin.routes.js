@@ -12,25 +12,31 @@ import * as ViolationValidator from '../middlewares/validators/violation.validat
 
 const router = Router();
 
-// Protect all routes
-router.use(verifyToken, requireRole(['police_admin', 'super_admin']));
+// Protect all routes with authentication
+router.use(verifyToken);
 
-router.get('/', getAdminViolations);
+// View violations (accessible by both Police Admin and Super Admin)
+router.get('/', requireRole(['police_admin', 'super_admin']), getAdminViolations);
 
+// Statutory Master definition write actions (strictly restricted to Super Admin)
 router.post(
   '/',
+  requireRole(['super_admin']),
   validateRequest(ViolationValidator.createViolationSchema),
   addViolation
 );
 
 router.put(
   '/:id',
+  requireRole(['super_admin']),
   validateRequest(ViolationValidator.updateViolationSchema),
   updateViolation
 );
 
 router.patch(
   '/:id/status',
+  requireRole(['super_admin']),
+  validateRequest(ViolationValidator.toggleViolationStatusSchema),
   toggleViolation
 );
 

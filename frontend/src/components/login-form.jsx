@@ -5,15 +5,36 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import api from "@/lib/axios";
 import { toast } from "sonner";
+import { SparklesIcon, ArrowRightIcon } from "lucide-react";
 
 export function LoginForm({ className, ...props }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [setupRequired, setSetupRequired] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const checkSetup = async () => {
+      try {
+        const res = await api.get("/auth/admin/setup-status");
+        if (isMounted && res.data?.data?.setupRequired) {
+          setSetupRequired(true);
+        }
+      } catch (err) {
+        // Fail gracefully
+      }
+    };
+    checkSetup();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,6 +81,24 @@ export function LoginForm({ className, ...props }) {
             Enter your credentials to access the admin panel
           </p>
         </div>
+
+        {setupRequired && (
+          <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 flex flex-col gap-2 text-left">
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400">
+              <SparklesIcon className="size-4" />
+              <span>Initial Setup Required</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              No administrator account exists yet. Initialize the master Super Admin profile to activate the platform.
+            </p>
+            <Button asChild size="sm" variant="outline" className="w-full mt-1 border-amber-500/40 hover:bg-amber-500/20 text-xs font-semibold">
+              <Link href="/setup" className="flex items-center justify-center gap-1.5">
+                Run Setup Wizard
+                <ArrowRightIcon className="size-3.5" />
+              </Link>
+            </Button>
+          </div>
+        )}
 
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>

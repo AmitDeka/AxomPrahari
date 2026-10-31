@@ -33,15 +33,17 @@ router.post(
   createNewAdmin
 );
 
-// Delete a police admin
+// Delete an admin (Super Admin only)
 router.delete(
   '/:id',
+  requireRole(['super_admin']),
   deleteAdmin
 );
 
-// Toggle is_active status
+// Toggle is_active status (Super Admin only)
 router.patch(
   '/:id/status',
+  requireRole(['super_admin']),
   toggleAdminStatus
 );
 

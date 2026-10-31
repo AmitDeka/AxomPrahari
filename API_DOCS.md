@@ -10,14 +10,16 @@ This document outlines all currently available API endpoints in the Node.js back
 
 ## 2. Authentication Endpoints
 
-| HTTP Method | Endpoint Path                           | Privilege / Role    | Description                                                      |
-| :---------- | :-------------------------------------- | :------------------ | :--------------------------------------------------------------- |
-| **POST**    | `/api/v1/auth/citizen/request-otp`      | Public              | Initiates OTP-based login or registration for a citizen.         |
-| **POST**    | `/api/v1/auth/citizen/verify-otp`       | Public              | Verifies the OTP and issues a Citizen JWT.                       |
-| **POST**    | `/api/v1/auth/citizen/complete-profile` | Authenticated (Any) | Allows a new citizen to complete their profile setup.            |
-| **POST**    | `/api/v1/auth/citizen/logout`           | Authenticated (Any) | Logs out the citizen by blacklisting their current JWT.          |
-| **POST**    | `/api/v1/auth/admin/login`              | Public              | Authenticates an admin (Police or Super) via email and password. |
-| **POST**    | `/api/v1/auth/admin/logout`             | Police Admin Only   | Logs out the admin by blacklisting their current JWT.            |
+| HTTP Method | Endpoint Path                           | Privilege / Role    | Description                                                                                             |
+| :---------- | :-------------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------ |
+| **GET**     | `/api/v1/auth/admin/setup-status`       | Public              | Checks if system requires first-time Super Admin initialization (`{ setupRequired: boolean }`).         |
+| **POST**    | `/api/v1/auth/admin/setup-initial`      | Public (One-Time)   | First-time onboarding: Creates master Super Admin. Permanently blocked (403) once any admin exists.     |
+| **POST**    | `/api/v1/auth/citizen/request-otp`      | Public              | Initiates OTP-based login or registration for a citizen.                                                |
+| **POST**    | `/api/v1/auth/citizen/verify-otp`       | Public              | Verifies the OTP and issues a Citizen JWT.                                                              |
+| **POST**    | `/api/v1/auth/citizen/complete-profile` | Authenticated (Any) | Allows a new citizen to complete their profile setup.                                                   |
+| **POST**    | `/api/v1/auth/citizen/logout`           | Authenticated (Any) | Logs out the citizen by blacklisting their current JWT.                                                 |
+| **POST**    | `/api/v1/auth/admin/login`              | Public              | Authenticates an admin (Police or Super) via email and password.                                        |
+| **POST**    | `/api/v1/auth/admin/logout`             | Police Admin Only   | Logs out the admin by blacklisting their current JWT.                                                   |
 
 ## 3. Citizen Panel Endpoints
 

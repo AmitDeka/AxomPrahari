@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import * as UserModel from "../models/user.model.js";
@@ -20,13 +21,20 @@ export const citizenRequestOtp = async (req, res) => {
       });
     }
 
-    const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log(`[Twilio SMS] Sending OTP ${mockOtp} to ${phone_number}`);
+    // Cryptographically secure random 6-digit OTP
+    const secureOtp = crypto.randomInt(100000, 1000000).toString();
+    const maskedPhone = phone_number.slice(-4).padStart(10, "*");
+    console.log(`[Twilio SMS] Requesting OTP dispatch for ${maskedPhone}`);
 
-    // DEMO ACCOUNT BYPASS FOR GOOGLE PLAY REVIEW
-    if (phone_number === "6000026296") {
+    // DEMO ACCOUNT BYPASS - strictly disallowed in production and requires explicit env enablement
+    if (
+      process.env.ALLOW_DEMO_ACCOUNT === "true" &&
+      process.env.NODE_ENV !== "production" &&
+      phone_number === "6000026296"
+    ) {
       otpCache.set(phone_number, {
         otp: "123456",
+        attempts: 0,
         expiresAt: Date.now() + 5 * 60 * 1000,
       });
       return res.status(200).json({
@@ -36,14 +44,15 @@ export const citizenRequestOtp = async (req, res) => {
       });
     }
 
-    // Save to in-memory cache with 5 minutes expiration
+    // Save to in-memory cache with 5 minutes expiration and 0 failed attempts
     otpCache.set(phone_number, {
-      otp: mockOtp,
+      otp: secureOtp,
+      attempts: 0,
       expiresAt: Date.now() + 5 * 60 * 1000,
     });
 
     // Send actual OTP via Twilio WhatsApp Sandbox
-    await sendWhatsAppOTP(phone_number, mockOtp);
+    await sendWhatsAppOTP(phone_number, secureOtp);
 
     res.status(200).json({
       status: "success",
@@ -74,8 +83,20 @@ export const citizenVerifyOtp = async (req, res) => {
         .json({ error: "OTP has expired. Please request a new one." });
     }
 
+    // Increment and enforce max attempt limit to prevent brute force
+    cached.attempts = (cached.attempts || 0) + 1;
+
     if (cached.otp !== otp) {
-      return res.status(400).json({ error: "Invalid OTP provided." });
+      const remainingAttempts = 3 - cached.attempts;
+      if (remainingAttempts <= 0) {
+        otpCache.delete(phone_number);
+        return res.status(429).json({
+          error: "Too many failed attempts. This OTP has been invalidated. Please request a new one.",
+        });
+      }
+      return res.status(400).json({
+        error: `Invalid OTP provided. ${remainingAttempts} attempt(s) remaining.`,
+      });
     }
 
     // OTP matched, delete from cache
@@ -146,6 +167,21 @@ export const citizenVerifyOtp = async (req, res) => {
 
 export const citizenCompleteProfile = async (req, res) => {
   try {
+    // SEC-14: Enforce that only citizens with incomplete profiles can access this endpoint
+    if (req.user.role !== "citizen") {
+      return res.status(403).json({
+        status: "error",
+        message: "Access denied. Only citizen accounts can complete profiles.",
+      });
+    }
+
+    if (req.user.status === "complete") {
+      return res.status(400).json({
+        status: "error",
+        message: "Profile is already complete. Please use profile update instead.",
+      });
+    }
+
     const userId = req.user.id; // Extracted from JWT middleware
     const { full_name, email, username } = req.body;
     const normalizedEmail = email?.trim().toLowerCase();
@@ -178,6 +214,13 @@ export const citizenCompleteProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("[citizenCompleteProfile Error]", error);
+    // Handle unique constraint collisions (duplicate email or username)
+    if (error.code === "23505") {
+      return res.status(400).json({
+        status: "error",
+        message: "Email or username is already in use.",
+      });
+    }
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -271,6 +314,87 @@ export const adminLogout = async (req, res) => {
     });
   } catch (error) {
     console.error("[adminLogout Error]", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const getSetupStatus = async (req, res) => {
+  try {
+    const count = await UserModel.countSuperAdmins();
+    res.status(200).json({
+      status: "success",
+      data: {
+        setupRequired: count === 0,
+      },
+    });
+  } catch (error) {
+    console.error("[getSetupStatus Error]", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const setupInitialSuperAdmin = async (req, res) => {
+  try {
+    // 1. Strict security boundary: Check if any super admin already exists
+    const count = await UserModel.countSuperAdmins();
+    if (count > 0) {
+      return res.status(403).json({
+        status: "error",
+        message:
+          "Initial setup has already been completed. This action is permanently disabled.",
+      });
+    }
+
+    const { email, password, full_name } = req.body;
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // 2. Hash password
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    // 3. Create initial master Super Admin
+    const newAdmin = await UserModel.createInitialSuperAdmin(
+      normalizedEmail,
+      passwordHash,
+      full_name.trim()
+    );
+
+    // 4. Generate JWT token
+    const token = jwt.sign(
+      { id: newAdmin.id, role: newAdmin.role, status: "complete" },
+      process.env.JWT_SECRET,
+      { expiresIn: "8h" }
+    );
+
+    // 5. Set HTTP-only cookie
+    res.cookie("admin_token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: process.env.NODE_ENV === "production" ? "lax" : "none",
+      maxAge: 8 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({
+      status: "success",
+      message: "Master Super Admin initialized successfully",
+      token,
+      data: {
+        admin: {
+          id: newAdmin.id,
+          email: newAdmin.email,
+          full_name: newAdmin.full_name,
+          role: newAdmin.role,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("[setupInitialSuperAdmin Error]", error);
+    if (error.code === "23505") {
+      return res.status(400).json({
+        status: "error",
+        message: "An account with this email already exists.",
+      });
+    }
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

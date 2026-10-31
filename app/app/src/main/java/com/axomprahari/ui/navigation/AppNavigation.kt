@@ -10,6 +10,7 @@ import com.axomprahari.viewmodel.MainViewModel
 import com.axomprahari.viewmodel.MainUiState
 import com.axomprahari.ui.screens.*
 import androidx.hilt.navigation.compose.hiltViewModel
+
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -140,7 +141,14 @@ fun RootNavigationGraph(viewModel: MainViewModel = hiltViewModel()) {
                 popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut(animationSpec = tween(300)) }
             ) {
                 composable("dashboard") {
+                    val pendingAction by viewModel.pendingWidgetAction.collectAsStateWithLifecycle()
+                    val initialReporting = pendingAction == "report"
+                    if (initialReporting) {
+                        viewModel.consumePendingWidgetAction()
+                    }
+
                     DashboardScreen(
+                        initialReportingOffence = initialReporting,
                         navController = navController,
                         reportsList = reportsList,
                         userProfile = userProfile,

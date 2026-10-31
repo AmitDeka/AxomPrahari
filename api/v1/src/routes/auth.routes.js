@@ -5,11 +5,13 @@ import {
   citizenCompleteProfile, 
   citizenLogout,
   policeAdminLogin,
-  adminLogout
+  adminLogout,
+  getSetupStatus,
+  setupInitialSuperAdmin
 } from '../controllers/auth.controller.js';
 import { validateRequest } from '../middlewares/validate.middleware.js';
 import { verifyToken, requireRole } from '../middlewares/auth.middleware.js';
-import { otpRateLimiter } from '../middlewares/rateLimit.middleware.js';
+import { otpRateLimiter, verifyOtpRateLimiter } from '../middlewares/rateLimit.middleware.js';
 import * as AuthValidator from '../middlewares/validators/auth.validator.js';
 
 const router = Router();
@@ -24,6 +26,7 @@ router.post(
 
 router.post(
   '/citizen/verify-otp',
+  verifyOtpRateLimiter,
   validateRequest(AuthValidator.verifyOtpSchema),
   citizenVerifyOtp
 );
@@ -42,6 +45,18 @@ router.post(
 );
 
 // Admin Routes
+router.get(
+  '/admin/setup-status',
+  getSetupStatus
+);
+
+router.post(
+  '/admin/setup-initial',
+  otpRateLimiter,
+  validateRequest(AuthValidator.setupInitialAdminSchema),
+  setupInitialSuperAdmin
+);
+
 router.post(
   '/admin/login',
   otpRateLimiter,

@@ -189,6 +189,22 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    // ── Widget / Intent Handling ─────────────────────────────
+    private val _pendingWidgetAction = MutableStateFlow<String?>(null)
+    val pendingWidgetAction: StateFlow<String?> = _pendingWidgetAction.asStateFlow()
+
+    fun handleIntentAction(action: String?) {
+        if (!action.isNullOrBlank()) {
+            _pendingWidgetAction.value = action
+        }
+    }
+
+    fun consumePendingWidgetAction(): String? {
+        val action = _pendingWidgetAction.value
+        _pendingWidgetAction.value = null
+        return action
+    }
+
     // ── Auth API calls ────────────────────────────────────────
 
     suspend fun requestOtp(phoneNumber: String): Result<String> =

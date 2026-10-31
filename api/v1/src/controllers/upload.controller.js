@@ -12,19 +12,31 @@ export const getPresignedUrl = async (req, res) => {
       });
     }
 
-    // Validate that the request is for an image or a video
-    if (!fileType.startsWith('image/') && !fileType.startsWith('video/')) {
+    const ALLOWED_MIME_TYPES = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'video/mp4': 'mp4',
+      'video/quicktime': 'mov'
+    };
+
+    const ALLOWED_FOLDERS = ['reports', 'feedback', 'misc'];
+
+    // SEC-12: Disallow dangerous formats like image/svg+xml to prevent Stored XSS
+    if (!ALLOWED_MIME_TYPES[fileType]) {
       return res.status(400).json({
         status: 'error',
-        message: 'Invalid file type. Only images and videos are allowed.'
+        message: 'Invalid or unsupported file type. Allowed formats: JPEG, PNG, WEBP, MP4, MOV.'
       });
     }
 
-    // Determine file extension
-    const extension = fileType.split('/')[1] || 'bin';
-    // Sanitize folder to prevent path traversal (allow alphanumeric, hyphens, underscores, and forward slashes)
-    const safeFolder = folder.replace(/[^a-zA-Z0-9-_/]/g, '').replace(/\/+/g, '/').replace(/^\/|\/$/g, '');
-    const uniqueFileName = `${safeFolder ? safeFolder + '/' : ''}${crypto.randomUUID()}.${extension}`;
+    // Validate folder against allowed list
+    const requestedFolder = folder ? folder.toLowerCase().trim() : 'misc';
+    const safeFolder = ALLOWED_FOLDERS.includes(requestedFolder) ? requestedFolder : 'misc';
+
+    // Determine safe file extension
+    const extension = ALLOWED_MIME_TYPES[fileType];
+    const uniqueFileName = `${safeFolder}/${crypto.randomUUID()}.${extension}`;
 
     // Generate R2 presigned URL
     const uploadUrl = await generateUploadUrl(uniqueFileName, fileType);

@@ -52,11 +52,16 @@ export const markRead = async (req, res) => {
       });
     }
 
-    const updated = await NotificationModel.markNotificationAsRead(notificationId);
+    const { role, jurisdiction_district } = req.user;
+    const updated = await NotificationModel.markNotificationAsRead(
+      notificationId,
+      role,
+      jurisdiction_district
+    );
     if (!updated) {
       return res.status(404).json({
         status: 'error',
-        message: 'Notification not found.'
+        message: 'Notification not found or access denied.'
       });
     }
 

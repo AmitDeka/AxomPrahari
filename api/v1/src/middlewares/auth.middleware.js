@@ -22,7 +22,10 @@ export const verifyToken = async (req, res, next) => {
   }
 
   try {
-    // 1. Check if token is in the PostgreSQL Blacklist (Invalidated)
+    // 1. Verify token signature and expiration in memory first (prevents DoS on DB)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 2. Check if token is in the PostgreSQL Blacklist (Invalidated)
     const isBlacklisted = await isTokenInvalidated(token);
     if (isBlacklisted) {
       return res.status(401).json({
@@ -31,18 +34,21 @@ export const verifyToken = async (req, res, next) => {
       });
     }
 
-    // 2. Verify token signature and expiration
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // 3. Check if password was changed after token issuance (for admins)
+    // 3. Real-time active status and password change check for administrators
     if (decoded.role === 'police_admin' || decoded.role === 'super_admin') {
-      // Dynamic import to avoid circular dependencies if any
-      const { getAdminPasswordChangedAt } = await import('../models/user.model.js');
-      const dbUser = await getAdminPasswordChangedAt(decoded.id);
-      
-      if (dbUser && dbUser.password_changed_at) {
-        // Convert to Unix timestamp (seconds) to match JWT iat
-        const pwdChangedTime = new Date(dbUser.password_changed_at).getTime() / 1000;
+      const { findAdminById, getAdminPasswordChangedAt } = await import('../models/user.model.js');
+      const dbAdmin = await findAdminById(decoded.id);
+
+      if (!dbAdmin || dbAdmin.is_active === false) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Admin account has been disabled or does not exist.',
+        });
+      }
+
+      const dbPwd = await getAdminPasswordChangedAt(decoded.id);
+      if (dbPwd && dbPwd.password_changed_at) {
+        const pwdChangedTime = new Date(dbPwd.password_changed_at).getTime() / 1000;
         if (decoded.iat < pwdChangedTime) {
           return res.status(401).json({
             status: 'error',
@@ -50,13 +56,12 @@ export const verifyToken = async (req, res, next) => {
           });
         }
       }
+
+      // Attach current district jurisdiction to decoded user context
+      decoded.jurisdiction_district = dbAdmin.jurisdiction_district;
     }
 
-    // 4. Attach user and raw token to request
-    req.user = decoded; 
-    req.token = token;
-    
-    // Real-time active status check for citizens
+    // 4. Real-time active status check for citizens
     if (decoded.role === 'citizen') {
       const { getUserProfileById } = await import('../models/user.model.js');
       const dbUser = await getUserProfileById(decoded.id);
@@ -67,6 +72,10 @@ export const verifyToken = async (req, res, next) => {
         });
       }
     }
+
+    // Attach user and raw token to request
+    req.user = decoded; 
+    req.token = token;
     
     next();
   } catch (error) {

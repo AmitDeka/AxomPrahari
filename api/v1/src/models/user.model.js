@@ -269,10 +269,19 @@ export const invalidateToken = async (token, expiresAt) => {
     'INSERT INTO invalidated_tokens (token, expires_at) VALUES ($1, $2) ON CONFLICT (token) DO NOTHING',
     [token, expiresAt]
   );
+  // SEC-17: Opportunistically purge expired tokens to maintain table size and performance
+  try {
+    await db.query('DELETE FROM invalidated_tokens WHERE expires_at < NOW()');
+  } catch {
+    // Non-blocking background purge
+  }
 };
 
 export const isTokenInvalidated = async (token) => {
-  const result = await db.query('SELECT token FROM invalidated_tokens WHERE token = $1', [token]);
+  const result = await db.query(
+    'SELECT token FROM invalidated_tokens WHERE token = $1 AND expires_at > NOW()',
+    [token]
+  );
   return result.rows.length > 0;
 };
 
@@ -356,4 +365,21 @@ export const getCitizensListWithStats = async (limit = 10, offset = 0) => {
     citizens: result.rows,
     totalCount
   };
+};
+
+export const countSuperAdmins = async () => {
+  const result = await db.query(
+    "SELECT COUNT(*) FROM users WHERE role = 'super_admin'"
+  );
+  return parseInt(result.rows[0].count, 10);
+};
+
+export const createInitialSuperAdmin = async (email, passwordHash, fullName) => {
+  const result = await db.query(
+    `INSERT INTO users (email, password_hash, role, full_name, profile_status, is_active) 
+     VALUES ($1, $2, 'super_admin', $3, 'complete', TRUE) 
+     RETURNING id, email, full_name, role, created_at`,
+    [email, passwordHash, fullName]
+  );
+  return result.rows[0];
 };

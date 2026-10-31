@@ -306,20 +306,16 @@ export const updateAdmin = async (req, res) => {
 
     // Security checks if logged-in user is a police_admin
     if (req.user.role === 'police_admin') {
-      // Cannot modify a super admin
-      if (targetAdmin.role === 'super_admin') {
+      if (adminId !== loggedInUserId) {
         return res.status(403).json({
           status: 'error',
-          message: 'Police Admins cannot modify Super Admins.'
+          message: 'Police Admins can only update their own profile.'
         });
       }
-      // Cannot promote anyone to super admin
-      if (updateData.role === 'super_admin') {
-        return res.status(403).json({
-          status: 'error',
-          message: 'Police Admins cannot promote anyone to Super Admin.'
-        });
-      }
+      // Officers cannot alter administrative permissions, rank, or district assignment
+      delete updateData.role;
+      delete updateData.rank;
+      delete updateData.jurisdiction_district;
     }
 
     if (updateData.password) {
