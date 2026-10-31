@@ -4,6 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import api from "@/lib/axios";
 import {
   Sidebar,
   SidebarContent,
@@ -122,7 +125,55 @@ const data = {
 };
 
 
+const getEnvBadgeVariant = (environment) => {
+  const envLower = (environment || "").toLowerCase();
+  if (envLower.includes("prod")) return "success";
+  if (envLower.includes("stag")) return "warning";
+  if (envLower.includes("dev") || envLower.includes("local")) return "info";
+  return "secondary";
+};
+
+const formatEnvLabel = (environment) => {
+  if (!environment) return "";
+  const envLower = environment.toLowerCase();
+  if (envLower === "development") return "DEV";
+  if (envLower === "production") return "PROD";
+  if (envLower === "staging") return "STAGING";
+  return environment.toUpperCase();
+};
+
 export function AppSidebar({ profile, ...props }) {
+  const [fetchedEnv, setFetchedEnv] = React.useState(null);
+  const env = profile?.env || fetchedEnv;
+
+  React.useEffect(() => {
+    let isMounted = true;
+    api
+      .get("/system/env")
+      .then((res) => {
+        if (isMounted) {
+          const apiEnv = res.data?.data?.env || res.data?.env;
+          if (apiEnv) {
+            setFetchedEnv(apiEnv);
+          }
+        }
+      })
+      .catch(() => {
+        api
+          .get("/health")
+          .then((res) => {
+            if (isMounted && res.data?.env) {
+              setFetchedEnv(res.data.env);
+            }
+          })
+          .catch(() => {});
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const user = {
     name: profile?.full_name || "Admin",
     email: profile?.email || "",
@@ -160,11 +211,34 @@ export function AppSidebar({ profile, ...props }) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/admin/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="relative flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <ShieldAlertIcon className="size-4" />
+                  {env && (
+                    <span
+                      title={`Environment: ${env}`}
+                      className={cn(
+                        "absolute -top-1 -right-1 size-2 rounded-full border border-sidebar group-data-[collapsible=icon]:block hidden",
+                        env.toLowerCase().includes("prod") && "bg-emerald-500",
+                        env.toLowerCase().includes("stag") && "bg-amber-500",
+                        (env.toLowerCase().includes("dev") || env.toLowerCase().includes("local")) && "bg-blue-500",
+                        !env.toLowerCase().includes("prod") && !env.toLowerCase().includes("stag") && !env.toLowerCase().includes("dev") && !env.toLowerCase().includes("local") && "bg-zinc-400"
+                      )}
+                    />
+                  )}
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-bold text-base text-foreground">Axom Prahari</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="truncate font-bold text-base text-foreground">Axom Prahari</span>
+                    {env && (
+                      <Badge
+                        variant={getEnvBadgeVariant(env)}
+                        title={`Environment: ${env}`}
+                        className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0 h-4.5 shrink-0"
+                      >
+                        {formatEnvLabel(env)}
+                      </Badge>
+                    )}
+                  </div>
                   <span className="truncate text-xs text-muted-foreground font-medium">
                     {user.role === 'super_admin' ? 'Super Admin Portal' : 'Police Admin Portal'}
                   </span>

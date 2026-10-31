@@ -11,6 +11,7 @@ import reportCitizenRoutes from './routes/report.citizen.routes.js';
 import reportAdminRoutes from './routes/report.admin.routes.js';
 import citizenAdminRoutes from './routes/citizen.admin.routes.js';
 import notificationRoutes from './routes/notification.admin.routes.js';
+import systemRoutes from './routes/system.routes.js';
 
 const app = express();
 
@@ -55,11 +56,32 @@ app.use('/api/v1/admin/reports', reportAdminRoutes);
 app.use('/api/v1/admin/citizens', citizenAdminRoutes);
 app.use('/api/v1/admin/notifications', notificationRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/system', systemRoutes);
 // app.use('/api/v1/reports', reportRoutes);
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Axom Prahari API is running' });
+// Direct environment endpoint
+app.get('/api/v1/env', (req, res) => {
+  const env = process.env.APP_ENV || process.env.NODE_ENV || 'development';
+  res.status(200).json({
+    status: 'success',
+    data: {
+      env,
+      environment: env,
+    },
+    env,
+    environment: env,
+  });
+});
+
+// Health check and environment endpoint
+app.get(['/health', '/api/v1/health'], (req, res) => {
+  const env = process.env.APP_ENV || process.env.NODE_ENV || 'development';
+  res.status(200).json({ 
+    status: 'ok', 
+    env,
+    environment: env,
+    message: 'Axom Prahari API is running' 
+  });
 });
 
 // 404 Handler

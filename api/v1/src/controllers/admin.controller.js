@@ -21,7 +21,8 @@ export const getAdminDashboard = async (req, res) => {
       status: 'success',
       data: {
         ...adminProfile,
-        stats
+        stats,
+        env: process.env.APP_ENV || process.env.NODE_ENV || 'developmentTest'
       }
     });
   } catch (error) {
