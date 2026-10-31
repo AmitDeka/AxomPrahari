@@ -1,7 +1,11 @@
 import axios from "axios";
 
+const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || "https://axomprahari-api.onrender.com";
+// Normalize base URL so trailing /api/v1 or slashes do not duplicate with request interceptor
+const normalizedBaseUrl = rawBaseUrl.replace(/\/api\/v1\/?$/, "").replace(/\/$/, "");
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "https://axomprahari-api.onrender.com",
+  baseURL: normalizedBaseUrl || "https://axomprahari-api.onrender.com",
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
@@ -22,9 +26,11 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Prepend /api/v1/ to the URL if it doesn't already have it
+  // Prepend /api/v1/ to the URL if it doesn't already have it and is not a root-level endpoint
   if (config.url && !config.url.startsWith("/api/v1") && !config.url.startsWith("http")) {
-    config.url = `/api/v1${config.url.startsWith("/") ? "" : "/"}${config.url}`;
+    if (config.url !== "/health") {
+      config.url = `/api/v1${config.url.startsWith("/") ? "" : "/"}${config.url}`;
+    }
   }
 
   return config;

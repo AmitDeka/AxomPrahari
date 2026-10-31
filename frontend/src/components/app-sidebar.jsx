@@ -136,15 +136,28 @@ const getEnvBadgeVariant = (environment) => {
 const formatEnvLabel = (environment) => {
   if (!environment) return "";
   const envLower = environment.toLowerCase();
-  if (envLower === "development") return "DEV";
-  if (envLower === "production") return "PROD";
-  if (envLower === "staging") return "STAGING";
+  if (envLower === "development" || envLower === "developmenttest" || envLower === "dev") return "DEV";
+  if (envLower === "production" || envLower === "prod") return "PROD";
+  if (envLower === "staging" || envLower === "stage") return "STAGING";
   return environment.toUpperCase();
+};
+
+const getDetectedEnv = () => {
+  if (typeof process !== "undefined" && process.env.NEXT_PUBLIC_APP_ENV) {
+    return process.env.NEXT_PUBLIC_APP_ENV;
+  }
+  const apiUrl = (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_URL) || "";
+  if (apiUrl.includes("localhost") || apiUrl.includes("127.0.0.1")) return "development";
+  if (apiUrl.includes("staging") || apiUrl.includes("stage") || apiUrl.includes("test")) return "staging";
+  if (apiUrl.includes("onrender.com") || apiUrl.includes("gov.in") || apiUrl.includes("prod")) return "production";
+  if (typeof process !== "undefined" && process.env.NODE_ENV) return process.env.NODE_ENV;
+  return "development";
 };
 
 export function AppSidebar({ profile, ...props }) {
   const [fetchedEnv, setFetchedEnv] = React.useState(null);
-  const env = profile?.env || fetchedEnv;
+  const detectedEnv = React.useMemo(() => getDetectedEnv(), []);
+  const env = profile?.env || fetchedEnv || detectedEnv;
 
   React.useEffect(() => {
     let isMounted = true;
@@ -160,13 +173,25 @@ export function AppSidebar({ profile, ...props }) {
       })
       .catch(() => {
         api
-          .get("/health")
+          .get("/env")
           .then((res) => {
-            if (isMounted && res.data?.env) {
-              setFetchedEnv(res.data.env);
+            if (isMounted) {
+              const apiEnv = res.data?.data?.env || res.data?.env;
+              if (apiEnv) {
+                setFetchedEnv(apiEnv);
+              }
             }
           })
-          .catch(() => {});
+          .catch(() => {
+            api
+              .get("/health")
+              .then((res) => {
+                if (isMounted && res.data?.env) {
+                  setFetchedEnv(res.data.env);
+                }
+              })
+              .catch(() => {});
+          });
       });
 
     return () => {
