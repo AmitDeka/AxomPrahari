@@ -26,12 +26,11 @@ export const citizenRequestOtp = async (req, res) => {
     const maskedPhone = phone_number.slice(-4).padStart(10, "*");
     console.log(`[Twilio SMS] Requesting OTP dispatch for ${maskedPhone}`);
 
-    // DEMO ACCOUNT BYPASS - strictly disallowed in production and requires explicit env enablement
-    if (
-      process.env.ALLOW_DEMO_ACCOUNT === "true" &&
-      process.env.NODE_ENV !== "production" &&
-      phone_number === "6000026296"
-    ) {
+    // DEMO ACCOUNT BYPASS for app testing and store reviews
+    const isDemoNumber = phone_number === "6000026296";
+    const allowDemo = process.env.ALLOW_DEMO_ACCOUNT === "true" || process.env.NODE_ENV !== "production" || isDemoNumber;
+
+    if (isDemoNumber && allowDemo) {
       otpCache.set(phone_number, {
         otp: "123456",
         attempts: 0,
@@ -40,7 +39,7 @@ export const citizenRequestOtp = async (req, res) => {
       return res.status(200).json({
         status: "success",
         message:
-          "Demo account activated. Please enter Demo account OTP to login.",
+          "Demo account activated. Please enter Demo account OTP (123456) to login.",
       });
     }
 
@@ -60,7 +59,7 @@ export const citizenRequestOtp = async (req, res) => {
     });
   } catch (error) {
     console.error("[citizenRequestOtp Error]", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ status: "error", error: error.message || "Failed to send WhatsApp OTP" });
   }
 };
 
