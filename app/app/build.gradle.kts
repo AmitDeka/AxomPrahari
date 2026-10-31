@@ -34,6 +34,8 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "BASE_URL", "\"https://axomprahari-api.onrender.com/\"")
 //
 //        ndk {
 //            abiFilters.add("arm64-v8a")

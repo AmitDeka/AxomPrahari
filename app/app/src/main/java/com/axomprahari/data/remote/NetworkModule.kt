@@ -1,5 +1,6 @@
 package com.axomprahari.data.remote
 
+import com.axomprahari.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,7 +16,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://axomprahari-api.onrender.com/"
+    private const val BASE_URL = BuildConfig.BASE_URL
 
     @Provides
     @Singleton

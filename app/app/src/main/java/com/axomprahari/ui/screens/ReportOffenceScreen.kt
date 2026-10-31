@@ -358,6 +358,43 @@ fun ReportOffenceScreen(
                 }
             }
 
+            val currentViolation = remember(selectedOffence, violations) {
+                violations.find { it.offenceName == selectedOffence }
+            }
+            if (currentViolation != null && (!currentViolation.evidenceRequirement.isNullOrBlank() || !currentViolation.penalty.isNullOrBlank())) {
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                ) {
+                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        if (!currentViolation.mvActCode.isNullOrBlank()) {
+                            Text(
+                                text = currentViolation.mvActCode,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        if (!currentViolation.evidenceRequirement.isNullOrBlank()) {
+                            Text(
+                                text = "Evidence Needed: ${currentViolation.evidenceRequirement}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        if (!currentViolation.penalty.isNullOrBlank()) {
+                            Text(
+                                text = "Statutory Penalty: ${currentViolation.penalty}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // 3. Vehicle Registration field
