@@ -4,6 +4,13 @@ import { getReadableMediaUrl } from '../utils/s3.util.js';
 
 export const submitFeedback = async (req, res) => {
   try {
+    if (req.user?.is_demo || req.user?.phone_number === '6000026296') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Feedback submission is disabled for the demo account to prevent test data submission.'
+      });
+    }
+
     const userId = req.user.id;
     const { citizen_id, feedback_category, message, image_key, image_url } = req.body;
 

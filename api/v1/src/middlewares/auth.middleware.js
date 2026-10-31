@@ -61,7 +61,7 @@ export const verifyToken = async (req, res, next) => {
       decoded.jurisdiction_district = dbAdmin.jurisdiction_district;
     }
 
-    // 4. Real-time active status check for citizens
+    // 4. Real-time active status check for citizens & demo account identification
     if (decoded.role === 'citizen') {
       const { getUserProfileById } = await import('../models/user.model.js');
       const dbUser = await getUserProfileById(decoded.id);
@@ -71,6 +71,8 @@ export const verifyToken = async (req, res, next) => {
           message: 'Your account has been deactivated or does not exist.',
         });
       }
+      decoded.phone_number = dbUser.phone_number;
+      decoded.is_demo = dbUser.phone_number === '6000026296' || decoded.is_demo === true;
     }
 
     // Attach user and raw token to request
@@ -105,6 +107,23 @@ export const requireRole = (roles) => {
       return res.status(403).json({
         status: 'error',
         message: 'Access denied. Insufficient privileges.',
+      });
+    }
+    next();
+  };
+};
+
+/**
+ * Middleware to restrict mutating actions for the demo account (e.g. posting reports, feedback, profile editing)
+ * in both production and development environments to prevent spam or test data pollution.
+ * Must be used AFTER verifyToken.
+ */
+export const restrictDemoAccount = (actionName = 'This action') => {
+  return (req, res, next) => {
+    if (req.user?.is_demo || req.user?.phone_number === '6000026296') {
+      return res.status(403).json({
+        status: 'error',
+        message: `${actionName} is disabled for the demo account to prevent test data submission.`,
       });
     }
     next();

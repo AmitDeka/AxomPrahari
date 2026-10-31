@@ -57,6 +57,38 @@ export const completeCitizenProfile = async (id, fullName, email, username) => {
   return result.rows[0];
 };
 
+
+export const getOrCreateDemoCitizen = async (phone = '6000026296') => {
+  let user = await findUserByPhone(phone);
+  if (!user) {
+    const citizenId = await generateUniqueCitizenId();
+    const result = await db.query(
+      `INSERT INTO users (citizen_id, phone_number, role, full_name, email, username, profile_status, is_active, reward_points)
+       VALUES ($1, $2, 'citizen', 'Demo Citizen', 'demo.citizen@axomprahari.in', 'democitizen', 'complete', TRUE, 100)
+       RETURNING *`,
+      [citizenId, phone]
+    );
+    return result.rows[0];
+  }
+
+  // Ensure demo account is complete and active
+  if (user.profile_status !== 'complete' || user.is_active === false) {
+    const result = await db.query(
+      `UPDATE users 
+       SET full_name = COALESCE(full_name, 'Demo Citizen'),
+           email = COALESCE(email, 'demo.citizen@axomprahari.in'),
+           username = COALESCE(username, 'democitizen'),
+           profile_status = 'complete',
+           is_active = TRUE
+       WHERE id = $1 RETURNING *`,
+      [user.id]
+    );
+    return result.rows[0];
+  }
+
+  return user;
+};
+
 export const addRewardPoints = async (id, points) => {
   const result = await db.query(
     'UPDATE users SET reward_points = reward_points + $1 WHERE id = $2 RETURNING reward_points',

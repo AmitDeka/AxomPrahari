@@ -26,11 +26,9 @@ export const citizenRequestOtp = async (req, res) => {
     const maskedPhone = phone_number.slice(-4).padStart(10, "*");
     console.log(`[Twilio SMS] Requesting OTP dispatch for ${maskedPhone}`);
 
-    // DEMO ACCOUNT BYPASS for app testing and store reviews
+    // DEMO ACCOUNT BYPASS for app testing and store reviews (always enabled in both prod and dev)
     const isDemoNumber = phone_number === "6000026296";
-    const allowDemo = process.env.ALLOW_DEMO_ACCOUNT === "true" || process.env.NODE_ENV !== "production" || isDemoNumber;
-
-    if (isDemoNumber && allowDemo) {
+    if (isDemoNumber) {
       otpCache.set(phone_number, {
         otp: "123456",
         attempts: 0,
@@ -101,6 +99,22 @@ export const citizenVerifyOtp = async (req, res) => {
     // OTP matched, delete from cache
     otpCache.delete(phone_number);
 
+    // DEMO ACCOUNT AUTO-PROVISIONING & FULL ACCESS
+    if (phone_number === "6000026296") {
+      const demoUser = await UserModel.getOrCreateDemoCitizen(phone_number);
+      const token = jwt.sign(
+        { id: demoUser.id, role: demoUser.role, status: demoUser.profile_status, is_demo: true },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      return res.status(200).json({
+        status: "success",
+        message: "Login successful (Demo Mode)",
+        token,
+        isNewUser: false,
+      });
+    }
+
     let user = await UserModel.findUserByPhone(phone_number);
 
     if (user && user.is_active === false) {
@@ -166,6 +180,14 @@ export const citizenVerifyOtp = async (req, res) => {
 
 export const citizenCompleteProfile = async (req, res) => {
   try {
+    // Enforce demo account restriction
+    if (req.user?.is_demo || req.user?.phone_number === "6000026296") {
+      return res.status(403).json({
+        status: "error",
+        message: "Profile modification is disabled for the demo account.",
+      });
+    }
+
     // SEC-14: Enforce that only citizens with incomplete profiles can access this endpoint
     if (req.user.role !== "citizen") {
       return res.status(403).json({

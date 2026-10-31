@@ -27,6 +27,14 @@ const getDistrictFromLocation = (locationName) => {
 
 export const submitReport = async (req, res) => {
   try {
+    // Defense-in-depth demo restriction
+    if (req.user?.is_demo || req.user?.phone_number === '6000026296') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Violation reporting is disabled for the demo account to prevent test data submission.'
+      });
+    }
+
     // 1. Ensure profile is complete
     if (req.user.status !== 'complete') {
       return res.status(403).json({

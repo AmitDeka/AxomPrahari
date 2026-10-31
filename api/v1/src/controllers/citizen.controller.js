@@ -81,6 +81,13 @@ export const getCitizenDashboard = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
+    if (req.user?.is_demo || req.user?.phone_number === '6000026296') {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Profile updating is disabled for the demo account to prevent test data submission.'
+      });
+    }
+
     const citizenId = req.user.id;
     const { full_name, email, username } = req.body;
 
