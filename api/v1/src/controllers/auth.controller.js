@@ -317,3 +317,84 @@ export const adminLogout = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export const getSetupStatus = async (req, res) => {
+  try {
+    const count = await UserModel.countSuperAdmins();
+    res.status(200).json({
+      status: "success",
+      data: {
+        setupRequired: count === 0,
+      },
+    });
+  } catch (error) {
+    console.error("[getSetupStatus Error]", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const setupInitialSuperAdmin = async (req, res) => {
+  try {
+    // 1. Strict security boundary: Check if any super admin already exists
+    const count = await UserModel.countSuperAdmins();
+    if (count > 0) {
+      return res.status(403).json({
+        status: "error",
+        message:
+          "Initial setup has already been completed. This action is permanently disabled.",
+      });
+    }
+
+    const { email, password, full_name } = req.body;
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // 2. Hash password
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    // 3. Create initial master Super Admin
+    const newAdmin = await UserModel.createInitialSuperAdmin(
+      normalizedEmail,
+      passwordHash,
+      full_name.trim()
+    );
+
+    // 4. Generate JWT token
+    const token = jwt.sign(
+      { id: newAdmin.id, role: newAdmin.role, status: "complete" },
+      process.env.JWT_SECRET,
+      { expiresIn: "8h" }
+    );
+
+    // 5. Set HTTP-only cookie
+    res.cookie("admin_token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: process.env.NODE_ENV === "production" ? "lax" : "none",
+      maxAge: 8 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({
+      status: "success",
+      message: "Master Super Admin initialized successfully",
+      token,
+      data: {
+        admin: {
+          id: newAdmin.id,
+          email: newAdmin.email,
+          full_name: newAdmin.full_name,
+          role: newAdmin.role,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("[setupInitialSuperAdmin Error]", error);
+    if (error.code === "23505") {
+      return res.status(400).json({
+        status: "error",
+        message: "An account with this email already exists.",
+      });
+    }
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

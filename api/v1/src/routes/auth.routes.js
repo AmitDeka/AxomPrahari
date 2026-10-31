@@ -5,7 +5,9 @@ import {
   citizenCompleteProfile, 
   citizenLogout,
   policeAdminLogin,
-  adminLogout
+  adminLogout,
+  getSetupStatus,
+  setupInitialSuperAdmin
 } from '../controllers/auth.controller.js';
 import { validateRequest } from '../middlewares/validate.middleware.js';
 import { verifyToken, requireRole } from '../middlewares/auth.middleware.js';
@@ -43,6 +45,18 @@ router.post(
 );
 
 // Admin Routes
+router.get(
+  '/admin/setup-status',
+  getSetupStatus
+);
+
+router.post(
+  '/admin/setup-initial',
+  otpRateLimiter,
+  validateRequest(AuthValidator.setupInitialAdminSchema),
+  setupInitialSuperAdmin
+);
+
 router.post(
   '/admin/login',
   otpRateLimiter,

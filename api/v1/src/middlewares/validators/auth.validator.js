@@ -26,6 +26,12 @@ export const adminLoginSchema = z.object({
 // 8 char min, 1 uppercase, 1 lowercase, 1 number
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
 
+export const setupInitialAdminSchema = z.object({
+  full_name: z.string().min(2, 'Full name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().regex(passwordRegex, 'Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number'),
+}).strict();
+
 export const ASSAM_DISTRICTS = [
   'Bajali', 'Baksa', 'Barpeta', 'Biswanath', 'Bongaigaon', 'Cachar', 'Charaideo',
   'Chirang', 'Darrang', 'Dhemaji', 'Dhubri', 'Dibrugarh', 'Dima Hasao', 'Goalpara',

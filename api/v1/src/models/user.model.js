@@ -366,3 +366,20 @@ export const getCitizensListWithStats = async (limit = 10, offset = 0) => {
     totalCount
   };
 };
+
+export const countSuperAdmins = async () => {
+  const result = await db.query(
+    "SELECT COUNT(*) FROM users WHERE role = 'super_admin'"
+  );
+  return parseInt(result.rows[0].count, 10);
+};
+
+export const createInitialSuperAdmin = async (email, passwordHash, fullName) => {
+  const result = await db.query(
+    `INSERT INTO users (email, password_hash, role, full_name, profile_status, is_active) 
+     VALUES ($1, $2, 'super_admin', $3, 'complete', TRUE) 
+     RETURNING id, email, full_name, role, created_at`,
+    [email, passwordHash, fullName]
+  );
+  return result.rows[0];
+};
