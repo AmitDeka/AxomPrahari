@@ -31,6 +31,7 @@ out/
 
 # --- Backend Ad-Hoc / Scratch / Verification Scripts ---
 api/v1/verify*.js
+!api/v1/verifyAdminPagination.js
 api/v1/inspect*.js
 api/v1/migrateFeedbacks.js
 api/v1/migrateNotifications.js

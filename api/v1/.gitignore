@@ -12,6 +12,7 @@ npm-debug.log*
 
 # One-off verification, scratch, and manual migration scripts
 verify*.js
+!verifyAdminPagination.js
 inspect*.js
 migrateFeedbacks.js
 migrateNotifications.js
