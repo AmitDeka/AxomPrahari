@@ -2,7 +2,6 @@
 
 import { LoginForm } from "@/components/login-form";
 import { ModeToggle } from "@/components/mode-toggle";
-import { GalleryVerticalEndIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -75,11 +74,16 @@ export default function LoginPage() {
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex items-center justify-between">
-          <a href="#" className="flex items-center gap-2 font-medium">
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <GalleryVerticalEndIcon className="size-5" />
-            </div>
-            <span className="font-bold text-foreground">Axom Prahari</span>
+          <a href="#" className="flex items-center gap-2.5 font-medium">
+            <Image
+              src="/adm_panel_logo.png"
+              alt="Axom Prahari Logo"
+              width={36}
+              height={36}
+              className="size-9 object-contain"
+              priority
+            />
+            <span className="font-bold text-lg text-foreground">Axom Prahari</span>
           </a>
           <ModeToggle />
         </div>

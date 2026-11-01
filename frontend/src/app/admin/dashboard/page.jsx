@@ -132,7 +132,7 @@ export default function DashboardPage() {
 
       <main className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Welcome Banner */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm relative overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm relative overflow-hidden flex items-center justify-between">
           <div className="relative z-10 space-y-2">
             <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               Axom Prahari Dashboard
@@ -140,6 +140,16 @@ export default function DashboardPage() {
             <p className="text-muted-foreground max-w-xl">
               Welcome to the Police Admin Portal. Manage public reports, monitor live heatmap alerts, and administer user roles and permissions.
             </p>
+          </div>
+          <div className="relative z-10 hidden sm:block shrink-0 ml-4 opacity-95">
+            <Image
+              src="/adm_panel_logo.png"
+              alt="Axom Prahari Logo"
+              width={72}
+              height={72}
+              className="size-16 md:size-20 object-contain drop-shadow-sm"
+              priority
+            />
           </div>
           <div className="absolute top-0 right-0 h-full w-1/3 bg-linear-to-l from-primary/10 to-transparent pointer-events-none" />
         </div>

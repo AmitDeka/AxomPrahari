@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { Badge } from "@/components/ui/badge";
@@ -236,8 +237,15 @@ export function AppSidebar({ profile, ...props }) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/admin/dashboard">
-                <div className="relative flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <ShieldAlertIcon className="size-4" />
+                <div className="relative flex aspect-square size-8 items-center justify-center rounded-lg shrink-0 overflow-visible">
+                  <Image
+                    src="/adm_panel_logo.png"
+                    alt="Axom Prahari Logo"
+                    width={32}
+                    height={32}
+                    className="size-8 object-contain"
+                    priority
+                  />
                   {env && (
                     <span
                       title={`Environment: ${env}`}

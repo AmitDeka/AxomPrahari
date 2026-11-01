@@ -20,6 +20,11 @@ export const metadata = {
   title: "Axom Prahari - Admin Portal",
   description:
     "Administrative console for Axom Prahari police reporting network",
+  icons: {
+    icon: "/adm_panel_logo.png",
+    shortcut: "/adm_panel_logo.png",
+    apple: "/adm_panel_logo.png",
+  },
 };
 
 export default function RootLayout({ children }) {
