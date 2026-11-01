@@ -11,6 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminHeader } from "@/components/admin-header";
 import { 
   FileTextIcon, 
   CheckCircle2Icon, 
@@ -107,11 +108,11 @@ export default function DashboardPage() {
     // Dynamic colors & icon direction based on metric type
     let colorClass = "text-muted-foreground";
     if (type === "pending") {
-      colorClass = isPositive ? "text-amber-500" : "text-emerald-500";
+      colorClass = isPositive ? "text-traffic-amber" : "text-traffic-green";
     } else if (type === "accepted") {
-      colorClass = isPositive ? "text-emerald-500" : "text-rose-500";
+      colorClass = isPositive ? "text-traffic-green" : "text-traffic-red";
     } else if (type === "rejected") {
-      colorClass = isPositive ? "text-rose-500" : "text-emerald-500";
+      colorClass = isPositive ? "text-traffic-red" : "text-traffic-green";
     } else if (type === "active_citizens") {
       colorClass = isPositive ? "text-blue-500" : "text-rose-500";
     }
@@ -127,26 +128,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/30 bg-background/50 backdrop-blur px-4">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-vertical:h-4 data-vertical:self-auto"
-          />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <span className="text-muted-foreground">Overview</span>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Dashboard</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <AdminHeader category="Overview" title="Dashboard" />
 
       <main className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Welcome Banner */}
@@ -189,7 +171,7 @@ export default function DashboardPage() {
                     {renderTrend(stats.pending.trend, "pending")}
                   </div>
                 </div>
-                <div className="size-12 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                <div className="size-12 rounded-lg bg-traffic-amber/10 flex items-center justify-center text-traffic-amber">
                   <FileTextIcon className="size-6" />
                 </div>
               </div>
@@ -205,7 +187,7 @@ export default function DashboardPage() {
                     {renderTrend(stats.accepted.trend, "accepted")}
                   </div>
                 </div>
-                <div className="size-12 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                <div className="size-12 rounded-lg bg-traffic-green/10 flex items-center justify-center text-traffic-green">
                   <CheckCircle2Icon className="size-6" />
                 </div>
               </div>
@@ -221,7 +203,7 @@ export default function DashboardPage() {
                     {renderTrend(stats.rejected.trend, "rejected")}
                   </div>
                 </div>
-                <div className="size-12 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500">
+                <div className="size-12 rounded-lg bg-traffic-red/10 flex items-center justify-center text-traffic-red">
                   <XCircleIcon className="size-6" />
                 </div>
               </div>
@@ -407,7 +389,7 @@ export default function DashboardPage() {
                       className="w-full h-55 object-cover"
                     />
                   )}
-                  <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded flex items-center gap-1.5 font-semibold">
+                  <div className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-xs text-foreground border border-border/40 text-[10px] px-2 py-1 rounded flex items-center gap-1.5 font-semibold">
                     {isVideoFile(selectedReport.media_url) ? (
                       <>
                         <VideoIcon className="size-3" />

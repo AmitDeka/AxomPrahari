@@ -12,6 +12,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminHeader } from "@/components/admin-header";
 import {
   Table,
   TableBody,
@@ -329,26 +330,7 @@ export default function ViolationsPage() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/30 bg-background/50 backdrop-blur px-4">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-vertical:h-4 data-vertical:self-auto"
-          />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <span className="text-muted-foreground">Violations</span>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Violation Types</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <AdminHeader category="Violations" title="Violation Types" />
 
       <main className="flex-1 overflow-y-auto p-6 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -514,7 +496,7 @@ export default function ViolationsPage() {
                         variant="outline"
                         className={`size-8 cursor-pointer ${
                           vio.is_active
-                            ? "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50"
+                            ? "text-traffic-green hover:bg-traffic-green/10 border-traffic-green/30"
                             : "text-muted-foreground hover:bg-muted/50"
                         }`}
                         title={vio.is_active ? "Set Inactive" : "Set Active"}
@@ -529,7 +511,7 @@ export default function ViolationsPage() {
                         <Button
                           size="icon"
                           variant="outline"
-                          className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
+                          className="size-8 text-traffic-red hover:bg-traffic-red/10 border-traffic-red/30 cursor-pointer"
                           title="Delete Definition"
                           onClick={() => openDeleteConfirm(vio)}>
                           <Trash2Icon className="size-4" />

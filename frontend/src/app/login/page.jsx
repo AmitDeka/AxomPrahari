@@ -1,6 +1,7 @@
 "use client";
 
 import { LoginForm } from "@/components/login-form";
+import { ModeToggle } from "@/components/mode-toggle";
 import { GalleryVerticalEndIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -73,13 +74,14 @@ export default function LoginPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
+        <div className="flex items-center justify-between">
           <a href="#" className="flex items-center gap-2 font-medium">
             <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <GalleryVerticalEndIcon className="size-5" />
             </div>
-            Axom Prahari
+            <span className="font-bold text-foreground">Axom Prahari</span>
           </a>
+          <ModeToggle />
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
@@ -88,44 +90,44 @@ export default function LoginPage() {
         </div>
         <div className="flex justify-center md:justify-start mt-auto pt-4">
           {systemStatus === "checking" && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800/40 backdrop-blur-md shadow-sm transition-all duration-300">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/80 border border-border backdrop-blur-md shadow-sm transition-all duration-300">
               <span className="relative flex h-2 w-2">
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-500 animate-pulse"></span>
               </span>
-              <span className="text-[11px] tracking-wide font-medium text-zinc-600 dark:text-zinc-400 uppercase select-none">
+              <span className="text-[11px] tracking-wide font-medium text-muted-foreground uppercase select-none">
                 Checking system status...
               </span>
             </div>
           )}
           {systemStatus === "online" && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/10 border border-emerald-200 dark:border-emerald-900/30 backdrop-blur-md shadow-sm transition-all duration-300 hover:border-emerald-500/20">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-traffic-green/10 border border-traffic-green/30 backdrop-blur-md shadow-sm transition-all duration-300">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-traffic-green opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-traffic-green"></span>
               </span>
-              <span className="text-[11px] tracking-wide font-medium text-emerald-700 dark:text-emerald-400 uppercase select-none">
+              <span className="text-[11px] tracking-wide font-medium text-traffic-green uppercase select-none">
                 All Systems Operational
               </span>
             </div>
           )}
           {systemStatus === "offline" && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/10 border border-rose-200 dark:border-rose-900/30 backdrop-blur-md shadow-sm transition-all duration-300 hover:border-rose-500/20">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-traffic-red/10 border border-traffic-red/30 backdrop-blur-md shadow-sm transition-all duration-300">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-traffic-red opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-traffic-red"></span>
               </span>
-              <span className="text-[11px] tracking-wide font-medium text-rose-700 dark:text-rose-400 uppercase select-none">
+              <span className="text-[11px] tracking-wide font-medium text-traffic-red uppercase select-none">
                 Systems Offline
               </span>
             </div>
           )}
           {systemStatus === "no-internet" && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/10 border border-amber-200 dark:border-amber-900/30 backdrop-blur-md shadow-sm transition-all duration-300 hover:border-amber-500/20">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-traffic-amber/10 border border-traffic-amber/30 backdrop-blur-md shadow-sm transition-all duration-300">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-traffic-amber opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-traffic-amber"></span>
               </span>
-              <span className="text-[11px] tracking-wide font-medium text-amber-700 dark:text-amber-400 uppercase select-none">
+              <span className="text-[11px] tracking-wide font-medium text-traffic-amber uppercase select-none">
                 No Internet Connection
               </span>
             </div>

@@ -12,6 +12,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminHeader } from "@/components/admin-header";
 import {
   Table,
   TableBody,
@@ -285,26 +286,7 @@ export default function PoliceAdminPage() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/30 bg-background/50 backdrop-blur px-4">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-vertical:h-4 data-vertical:self-auto"
-          />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <span className="text-muted-foreground">Admins</span>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Police Admin</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <AdminHeader category="Admins" title="Police Admins" />
 
       <main className="flex-1 overflow-y-auto p-6 space-y-6">
         <div>
@@ -430,7 +412,7 @@ export default function PoliceAdminPage() {
                         <Button
                           size="icon"
                           variant="outline"
-                          className="size-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50/50 cursor-pointer"
+                          className="size-8 text-primary-gold hover:bg-primary-gold/10 border-primary-gold/30 cursor-pointer"
                           title="Edit Officer Profile"
                           onClick={() => openEditDialog(off)}>
                           <EditIcon className="size-4" />
@@ -440,8 +422,8 @@ export default function PoliceAdminPage() {
                           variant="outline"
                           className={`size-8 cursor-pointer ${
                             off.is_active
-                              ? "text-amber-500 hover:text-amber-600 hover:bg-amber-50/50"
-                              : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50"
+                              ? "text-traffic-amber hover:bg-traffic-amber/10 border-traffic-amber/30"
+                              : "text-traffic-green hover:bg-traffic-green/10 border-traffic-green/30"
                           }`}
                           title={
                             off.is_active
@@ -458,7 +440,7 @@ export default function PoliceAdminPage() {
                         <Button
                           size="icon"
                           variant="outline"
-                          className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
+                          className="size-8 text-traffic-red hover:bg-traffic-red/10 border-traffic-red/30 cursor-pointer"
                           title="Delete Officer"
                           onClick={() => openDeleteConfirm(off)}>
                           <Trash2Icon className="size-4" />

@@ -23,13 +23,18 @@ import {
   CreditCardIcon,
   BellIcon,
   LogOutIcon,
+  SunIcon,
+  MoonIcon,
+  LaptopIcon,
 } from "lucide-react";
 import api from "@/lib/axios";
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
   const [unreadCount, setUnreadCount] = useState(0);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -82,7 +87,7 @@ export function NavUser({ user }) {
                 </span>
               </div>
               {unreadCount > 0 && (
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white mr-1 animate-pulse">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-traffic-amber text-[10px] font-bold text-primary-foreground mr-1 animate-pulse">
                   {unreadCount}
                 </span>
               )}
@@ -128,12 +133,59 @@ export function NavUser({ user }) {
                     Notifications
                   </div>
                   {unreadCount > 0 && (
-                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1.5 text-[10px] font-bold text-white">
+                    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-traffic-amber px-1.5 text-[10px] font-bold text-primary-foreground">
                       {unreadCount}
                     </span>
                   )}
                 </a>
               </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                Theme Preference
+              </DropdownMenuLabel>
+              <div className="grid grid-cols-3 gap-1 px-1 py-1">
+                <button
+                  type="button"
+                  onClick={() => setTheme("light")}
+                  className={`flex flex-col items-center justify-center gap-1 rounded-md p-1.5 text-xs transition-colors cursor-pointer ${
+                    theme === "light"
+                      ? "bg-accent text-accent-foreground font-medium ring-1 ring-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                  title="Light mode"
+                >
+                  <SunIcon className="size-4 text-traffic-amber" />
+                  <span>Light</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTheme("dark")}
+                  className={`flex flex-col items-center justify-center gap-1 rounded-md p-1.5 text-xs transition-colors cursor-pointer ${
+                    theme === "dark"
+                      ? "bg-accent text-accent-foreground font-medium ring-1 ring-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                  title="Dark mode"
+                >
+                  <MoonIcon className="size-4 text-primary" />
+                  <span>Dark</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTheme("system")}
+                  className={`flex flex-col items-center justify-center gap-1 rounded-md p-1.5 text-xs transition-colors cursor-pointer ${
+                    theme === "system"
+                      ? "bg-accent text-accent-foreground font-medium ring-1 ring-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  }`}
+                  title="System mode"
+                >
+                  <LaptopIcon className="size-4 text-muted-foreground" />
+                  <span>System</span>
+                </button>
+              </div>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem 

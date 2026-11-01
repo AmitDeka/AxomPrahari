@@ -12,6 +12,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminHeader } from "@/components/admin-header";
 import {
   Table,
   TableBody,
@@ -160,26 +161,7 @@ export default function CitizenTablePage() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/30 bg-background/50 backdrop-blur px-4">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-vertical:h-4 data-vertical:self-auto"
-          />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <span className="text-muted-foreground">Users</span>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Citizen Table</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <AdminHeader category="Users" title="Citizen Table" />
 
       <main className="flex-1 overflow-y-auto p-6 space-y-6">
         <div>
@@ -326,7 +308,7 @@ export default function CitizenTablePage() {
                           <Button
                             size="icon"
                             variant="outline"
-                            className="size-8 text-amber-500 hover:text-amber-600 hover:bg-amber-50/50 cursor-pointer"
+                            className="size-8 text-traffic-amber hover:bg-traffic-amber/10 border-traffic-amber/30 cursor-pointer"
                             title="Disable Account"
                             onClick={() => openConfirmation(cit, "disable")}>
                             <UserXIcon className="size-4" />
@@ -335,7 +317,7 @@ export default function CitizenTablePage() {
                           <Button
                             size="icon"
                             variant="outline"
-                            className="size-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50/50 cursor-pointer"
+                            className="size-8 text-traffic-green hover:bg-traffic-green/10 border-traffic-green/30 cursor-pointer"
                             title="Enable Account"
                             onClick={() => openConfirmation(cit, "enable")}>
                             <CheckCircle2Icon className="size-4" />
@@ -345,7 +327,7 @@ export default function CitizenTablePage() {
                           <Button
                             size="icon"
                             variant="outline"
-                            className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
+                            className="size-8 text-traffic-red hover:bg-traffic-red/10 border-traffic-red/30 cursor-pointer"
                             title="Delete Account"
                             onClick={() => openConfirmation(cit, "delete")}>
                             <Trash2Icon className="size-4" />

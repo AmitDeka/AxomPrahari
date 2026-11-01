@@ -12,6 +12,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminHeader } from "@/components/admin-header";
 import {
   Table,
   TableBody,
@@ -108,23 +109,7 @@ export default function RejectedReportsPage() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/30 bg-background/50 backdrop-blur px-4">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 data-vertical:h-4 data-vertical:self-auto" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <span className="text-muted-foreground">Reports</span>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>All Rejected</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <AdminHeader category="Reports" title="All Rejected" />
 
       <main className="flex-1 overflow-y-auto p-6 space-y-6">
         <div>
@@ -285,7 +270,7 @@ export default function RejectedReportsPage() {
                       />
                     </div>
                   )}
-                  <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded flex items-center gap-1.5 font-semibold">
+                  <div className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-xs text-foreground border border-border/40 text-[10px] px-2 py-1 rounded flex items-center gap-1.5 font-semibold">
                     {isVideoFile(selectedReport.media_url) ? (
                       <>
                         <VideoIcon className="size-3" />

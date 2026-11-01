@@ -12,6 +12,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminHeader } from "@/components/admin-header";
 import {
   Table,
   TableBody,
@@ -182,26 +183,7 @@ export default function PendingReportsPage() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/30 bg-background/50 backdrop-blur px-4">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-vertical:h-4 data-vertical:self-auto"
-          />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <span className="text-muted-foreground">Reports</span>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>All Pending</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <AdminHeader category="Reports" title="All Pending" />
 
       <main className="flex-1 overflow-y-auto p-6 space-y-6">
         <div>
@@ -322,7 +304,7 @@ export default function PendingReportsPage() {
                       <Button
                         size="icon"
                         variant="outline"
-                        className="size-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 cursor-pointer"
+                        className="size-8 text-traffic-red hover:text-traffic-red hover:bg-traffic-red/10 border-traffic-red/30 cursor-pointer"
                         title="Reject Report"
                         onClick={() => triggerRejectFlow(report)}>
                         <XIcon className="size-4" />
@@ -412,7 +394,7 @@ export default function PendingReportsPage() {
                       className="w-full h-55 object-cover"
                     />
                   )}
-                  <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[10px] px-2 py-1 rounded flex items-center gap-1.5 font-semibold">
+                  <div className="absolute bottom-2 right-2 bg-background/80 backdrop-blur-xs text-foreground border border-border/40 text-[10px] px-2 py-1 rounded flex items-center gap-1.5 font-semibold">
                     {isVideoFile(selectedReport.media_url) ? (
                       <>
                         <VideoIcon className="size-3" />
@@ -516,7 +498,7 @@ export default function PendingReportsPage() {
                       Reject
                     </Button>
                     <Button
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer gap-1.5"
+                      className="bg-traffic-green hover:bg-traffic-green/90 text-primary-foreground cursor-pointer gap-1.5"
                       onClick={() => triggerAcceptFlow(selectedReport)}>
                       <CheckIcon className="size-4" />
                       Approve
@@ -533,7 +515,7 @@ export default function PendingReportsPage() {
       <Dialog open={confirmAcceptOpen} onOpenChange={setConfirmAcceptOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader className="flex flex-col items-center sm:items-start">
-            <div className="flex size-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 mb-3">
+            <div className="flex size-12 items-center justify-center rounded-full bg-traffic-green/15 text-traffic-green mb-3">
               <ShieldCheckIcon className="size-6 animate-bounce" />
             </div>
             <DialogTitle>Approve Incident Report?</DialogTitle>
@@ -573,7 +555,7 @@ export default function PendingReportsPage() {
             </Button>
             <Button
               onClick={handleConfirmAccept}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer">
+              className="bg-traffic-green hover:bg-traffic-green/90 text-primary-foreground cursor-pointer">
               Confirm Approval
             </Button>
           </DialogFooter>
@@ -584,7 +566,7 @@ export default function PendingReportsPage() {
       <Dialog open={confirmRejectOpen} onOpenChange={setConfirmRejectOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader className="flex flex-col items-center sm:items-start">
-            <div className="flex size-12 items-center justify-center rounded-full bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 mb-3">
+            <div className="flex size-12 items-center justify-center rounded-full bg-traffic-red/15 text-traffic-red mb-3">
               <XCircleIcon className="size-6 animate-pulse" />
             </div>
             <DialogTitle>Reject Incident Report?</DialogTitle>

@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminHeader } from "@/components/admin-header";
 import { MapPinIcon, FlameIcon, RefreshCwIcon, AlertTriangleIcon } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import api from "@/lib/axios";
@@ -131,13 +132,13 @@ export default function HeatmapPage() {
       .filter(zone => zone.count > 0)
       .map(zone => {
         let threat = "Low";
-        let color = "text-blue-500 bg-blue-500/10";
+        let color = "text-primary bg-primary/10";
         if (zone.count >= 10) {
           threat = "High";
-          color = "text-red-500 bg-red-500/10";
+          color = "text-traffic-red bg-traffic-red/10";
         } else if (zone.count >= 4) {
           threat = "Medium";
-          color = "text-amber-500 bg-amber-500/10";
+          color = "text-traffic-amber bg-traffic-amber/10";
         }
 
         return {
@@ -160,23 +161,7 @@ export default function HeatmapPage() {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/30 bg-background/50 backdrop-blur px-4">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 data-vertical:h-4 data-vertical:self-auto" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <span className="text-muted-foreground">Overview</span>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Live Heatmap</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <AdminHeader category="Overview" title="Live Heatmap" />
 
       <main className="flex-1 overflow-y-auto p-6 space-y-6">
         <div className="flex justify-between items-center">

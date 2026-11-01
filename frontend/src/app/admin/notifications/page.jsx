@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { AdminHeader } from "@/components/admin-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -114,11 +115,11 @@ export default function NotificationsPage() {
   const getNotificationIcon = (type) => {
     switch (type) {
       case "new_report":
-        return <ShieldAlertIcon className="h-5 w-5 text-emerald-500" />;
+        return <ShieldAlertIcon className="h-5 w-5 text-traffic-green" />;
       case "settings_change":
-        return <SettingsIcon className="h-5 w-5 text-blue-500" />;
+        return <SettingsIcon className="h-5 w-5 text-primary" />;
       case "system_alert":
-        return <AlertTriangleIcon className="h-5 w-5 text-amber-500" />;
+        return <AlertTriangleIcon className="h-5 w-5 text-traffic-amber" />;
       default:
         return <InfoIcon className="h-5 w-5 text-muted-foreground" />;
     }
@@ -130,11 +131,11 @@ export default function NotificationsPage() {
     }
     switch (n.type) {
       case "new_report":
-        return "bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10 shadow-xs";
+        return "bg-traffic-green/5 border-traffic-green/20 hover:bg-traffic-green/10 shadow-xs";
       case "settings_change":
-        return "bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10 shadow-xs";
+        return "bg-primary/5 border-primary/20 hover:bg-primary/10 shadow-xs";
       case "system_alert":
-        return "bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10 shadow-xs";
+        return "bg-traffic-amber/5 border-traffic-amber/20 hover:bg-traffic-amber/10 shadow-xs";
       default:
         return "bg-muted/10 border-muted hover:bg-muted/20 shadow-xs";
     }
@@ -183,23 +184,7 @@ export default function NotificationsPage() {
   return (
     <div className="flex flex-col h-full bg-background/50">
       {/* Top Header Panel */}
-      <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-6 bg-background">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <span className="text-muted-foreground font-medium">Console</span>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="font-semibold text-foreground">Notifications</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <AdminHeader category="Console" title="Notifications" />
 
       {/* Main Container */}
       <main className="flex-1 p-6 md:p-8 space-y-6 max-w-5xl mx-auto w-full">

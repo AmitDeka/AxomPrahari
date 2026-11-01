@@ -7,6 +7,7 @@ import Link from "next/link";
 import api from "@/lib/axios";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/mode-toggle";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { 
@@ -139,7 +140,7 @@ export default function SetupPage() {
               </div>
             ) : !setupRequired ? (
               <div className="flex flex-col items-center text-center p-8 rounded-2xl border bg-card shadow-sm gap-4">
-                <div className="p-3 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                <div className="p-3 rounded-full bg-traffic-green/10 text-traffic-green border border-traffic-green/20">
                   <ShieldCheckIcon className="size-10" />
                 </div>
                 <h2 className="text-xl font-bold">System Already Initialized</h2>
@@ -234,25 +235,25 @@ export default function SetupPage() {
                   <div className="p-3.5 rounded-xl border bg-muted/40 text-xs space-y-1.5">
                     <span className="font-semibold text-muted-foreground block mb-1">Security Standards:</span>
                     <div className="grid grid-cols-2 gap-1.5">
-                      <div className={`flex items-center gap-1.5 ${hasMinLength ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+                      <div className={`flex items-center gap-1.5 ${hasMinLength ? "text-traffic-green" : "text-muted-foreground"}`}>
                         {hasMinLength ? <CheckCircle2Icon className="size-3.5" /> : <XCircleIcon className="size-3.5" />}
                         <span>8+ Characters</span>
                       </div>
-                      <div className={`flex items-center gap-1.5 ${hasUppercase ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+                      <div className={`flex items-center gap-1.5 ${hasUppercase ? "text-traffic-green" : "text-muted-foreground"}`}>
                         {hasUppercase ? <CheckCircle2Icon className="size-3.5" /> : <XCircleIcon className="size-3.5" />}
                         <span>Uppercase Letter</span>
                       </div>
-                      <div className={`flex items-center gap-1.5 ${hasLowercase ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+                      <div className={`flex items-center gap-1.5 ${hasLowercase ? "text-traffic-green" : "text-muted-foreground"}`}>
                         {hasLowercase ? <CheckCircle2Icon className="size-3.5" /> : <XCircleIcon className="size-3.5" />}
                         <span>Lowercase Letter</span>
                       </div>
-                      <div className={`flex items-center gap-1.5 ${hasNumber ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+                      <div className={`flex items-center gap-1.5 ${hasNumber ? "text-traffic-green" : "text-muted-foreground"}`}>
                         {hasNumber ? <CheckCircle2Icon className="size-3.5" /> : <XCircleIcon className="size-3.5" />}
                         <span>At Least 1 Number</span>
                       </div>
                     </div>
                     {confirmPassword.length > 0 && (
-                      <div className={`pt-1.5 border-t flex items-center gap-1.5 ${passwordsMatch ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`}>
+                      <div className={`pt-1.5 border-t flex items-center gap-1.5 ${passwordsMatch ? "text-traffic-green" : "text-destructive"}`}>
                         {passwordsMatch ? <CheckCircle2Icon className="size-3.5" /> : <XCircleIcon className="size-3.5" />}
                         <span>{passwordsMatch ? "Passwords match" : "Passwords do not match"}</span>
                       </div>
